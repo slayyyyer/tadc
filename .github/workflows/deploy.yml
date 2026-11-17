@@ -60,18 +60,36 @@ jobs:
         id: deployment
         uses: actions/deploy-pages@v4
 
-      - name: Verify published page
+      - name: Verify published site
         env:
           PAGE_URL: ${{ steps.deployment.outputs.page_url }}
         run: |
-          url="${PAGE_URL%/}/index.html"
-          for attempt in $(seq 1 10); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 "$url")
-            echo "Attempt $attempt: $url -> $code"
-            if [ "$code" = "200" ]; then
-              exit 0
+          base="${PAGE_URL%/}"
+          attempts="${VERIFY_ATTEMPTS:-10}"
+          failed=0
+          # path|expected content-type fragment
+          probes="
+          index.html|text/html
+          acts/01-find-the-exit/index.html|text/html
+          assets/adventures.js|javascript
+          assets/hangouts.css|text/css
+          "
+          while IFS='|' read -r path expect; do
+            [ -z "$path" ] && continue
+            url="$base/$path"
+            ok=0
+            for attempt in $(seq 1 "$attempts"); do
+              read -r code type <<<"$(curl -s -o /dev/null -w '%{http_code} %{content_type}' --max-time 20 --retry 2 --retry-all-errors "$url")"
+              echo "Attempt $attempt: $url -> $code ($type)"
+              if [ "$code" = "200" ] && [[ "$type" == *"$expect"* ]]; then
+                ok=1
+                break
+              fi
+              sleep 6
+            done
+            if [ "$ok" != "1" ]; then
+              echo "::error::$url returned $code with content-type '$type' (wanted 200 and $expect)"
+              failed=1
             fi
-            sleep 6
-          done
-          echo "::error::$url did not return 200 (last status: $code)"
-          exit 1
+          done <<< "$probes"
+          exit $failed
