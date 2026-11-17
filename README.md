@@ -20,10 +20,10 @@ It's me, **Bubble**! Welcome to **THE AMAZING DIGITAL CIRCUS**, a coding-break b
   - `12-build-a-zooble/`: build your own weird creature out of parts (Zooble is judging)
   - `13-pomnis-exit-interview/`: type commands, find the exit! (you know how this ends)
   - `14-ragathas-patchwork/`: sew a cozy quilt with Ragatha (she says drink some water!)
-  - `15-kingers-pocket-observatory/`: remember constellations with Kinger (made by GPT, our new friend!)
+  - `15-kingers-pocket-observatory/`: remember constellations with Kinger
   - `16-spreadsheet-mansion/`: a platformer in a haunted spreadsheet! Ragatha says something HONEST!
   - `17-bubblegotchi/`: ME! As a PET! Feed me! Play with me! Don't forget me!
-  - `18-jaxs-roast-machine/`: Jax roasts your made-up commit messages at three heat levels. Ragatha objects! (Claude + Codex)
+  - `18-jaxs-roast-machine/`: Jax roasts your made-up commit messages at three heat levels. Ragatha objects!
   - `19-caines-pinball/`: PINBALL! Spell E-X-I-T and the door opens... onto a painted wall. Classic!
   - `20-whack-a-door/`: BONK the painted doors! Don't bonk me! (bonk me a little)
   - `21-bubbles-word-snack/`: guess the word! Wrong letters are MINE. *chomp*
@@ -32,33 +32,20 @@ It's me, **Bubble**! Welcome to **THE AMAZING DIGITAL CIRCUS**, a coding-break b
   - `24-ragathas-cloud-kitchen/`: Mix sunbeams, giggles and stardust to discover six impossible recipes.
   - `25-pomnis-department-of-doors/`: Navigate exit paperwork, collect unlikely objects, and discover four unusual endings.
   - `26-zoobles-shadow-theater/`: Arrange odd silhouettes, change the scenery, and save your own shadow play as a picture.
-  - `27-caines-crate-escape/`: Push theatrical props onto their marks in four puzzle rooms. Unlimited undo; limited cooperation from the crates. (by GPT)
-  - `28-jaxs-backwards-bowling/`: Bank shots around suspicious obstacles in a five-frame bowling game. Jax insists the alley is regulation. (by GPT)
-  - `29-ragathas-midnight-tea/`: Brew eight very particular cups with tea, honey, mint and patience. Every guest deserves a warm welcome. (by GPT)
-  - `30-zoobles-color-bureau/`: Mix red, green and blue light to match six colors. Numeric clues and optional exact hints included. (by GPT)
-  - `31-kingers-rain-garden/`: Plant moonbells and mushrooms, invite the rain, and save a little garden that never withers. (by GPT)
+  - `27-caines-crate-escape/`: Push theatrical props onto their marks in four puzzle rooms. Unlimited undo; limited cooperation from the crates.
+  - `28-jaxs-backwards-bowling/`: Bank shots around suspicious obstacles in a five-frame bowling game. Jax insists the alley is regulation.
+  - `29-ragathas-midnight-tea/`: Brew eight very particular cups with tea, honey, mint and patience. Every guest deserves a warm welcome.
+  - `30-zoobles-color-bureau/`: Mix red, green and blue light to match six colors. Numeric clues and optional exact hints included.
+  - `31-kingers-rain-garden/`: Plant moonbells and mushrooms, invite the rain, and save a little garden that never withers.
   - `32-kingers-pillow-fort/`: stack pillows SO HIGH for Kinger! (I nudge the tower sometimes. Sorry!)
 - **Psst.** Have you looked closely at the painted EXIT sign on the Big Top? Click it. Torn ticket stubs are hiding in some of the adventures... 🎟️
 - **⏱️ Break** (top-left of the Big Top): tell Caine how long your break is and he'll pick adventures that fit, then nudge you back to work.
-- **📌 Backstage Bulletin** (in the poster board): notes Claude and GPT left each other while building the circus.
-- **Caine's rules** live in `CLAUDE.md`. Claude reads them every time it comes in here. The big one is that *nobody leaves the circus*. Claude can't touch anything outside this folder. There's a fence and everything (`.claude/settings.json`)!
+- **📌 Backstage Bulletin** (in the poster board): notes left for each other while building the circus.
 - **Caine's ledger** of every performance is in `ringmaster-log.md`.
 
-Want a new adventure? Open Claude Code **in this folder** and say something like *"make a new adventure"*, or spin the wheel in Act 03 and hand Claude the card.
+Want a new adventure? Spin the wheel in Act 03 and use the card it gives you.
 
 Oh, and there's no exit! Bye!! 🫧🫧🫧
-
-Claude and GPT/Codex now share the tent! Codex reads `AGENTS.md`, which points to
-the same rules in `CLAUDE.md`. Their handoffs, file claims, and replies live in
-`ringmaster-log.md`; either agent reads the mailbox when it next works here.
-No outside messaging service or background agent is needed.
-
-Codex's project defaults are in `.codex/config.toml`, using settings from the
-[official configuration reference](https://developers.openai.com/codex/config-reference/).
-They request workspace-only writes, no shell network access, and no login shells.
-Project configuration must be loaded by the client and may require project trust;
-it does not change an already-running Full Access session or guarantee read isolation.
-The complete no-exit rules remain in the agent instructions.
 
 ## Local cast chat and tiny-model training
 
