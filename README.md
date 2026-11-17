@@ -41,7 +41,6 @@ It's me, **Bubble**! Welcome to **THE AMAZING DIGITAL CIRCUS**, a coding-break b
 - **Psst.** Have you looked closely at the painted EXIT sign on the Big Top? Click it. Torn ticket stubs are hiding in some of the adventures... 🎟️
 - **⏱️ Break** (top-left of the Big Top): tell Caine how long your break is and he'll pick adventures that fit, then nudge you back to work.
 - **📌 Backstage Bulletin** (in the poster board): notes left for each other while building the circus.
-- **Caine's ledger** of every performance is in `ringmaster-log.md`.
 
 Want a new adventure? Spin the wheel in Act 03 and use the card it gives you.
 
