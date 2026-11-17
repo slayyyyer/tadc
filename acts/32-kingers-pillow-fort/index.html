@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Kinger's Pillow Fort Stacker</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--void:#0b0718;--purple:#8a5fd1}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--void);color:#fff;font-family:'Fredoka',system-ui,sans-serif;user-select:none;-webkit-user-select:none}
+  body{display:flex;flex-direction:column;height:100dvh}
+  #top{display:flex;align-items:center;gap:8px;padding:8px 10px 4px;flex-wrap:wrap;justify-content:space-between;position:relative;z-index:20}
+  #top .left{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+  #top h1{font:400 clamp(15px,2.4vw,24px) 'Rye';margin:0;color:var(--gold);text-shadow:0 2px 0 #4b2c80,0 4px 0 var(--ink);white-space:nowrap}
+  #hud{display:flex;gap:10px;align-items:center;background:var(--ink);border:3px solid var(--gold);border-radius:12px;padding:4px 10px;font-weight:700;font-size:15px;white-space:nowrap}
+  #hud b{color:var(--gold)}
+  #hearts{letter-spacing:1px}
+  #hearts.hit{animation:hit .5s}
+  @keyframes hit{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}}
+  .btn{font:700 15px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block}
+  .btn.red{background:var(--red);color:#fff}
+  .btn.small{font-size:13px;padding:4px 10px}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn:focus-visible{outline:3px dashed var(--gold);outline-offset:2px}
+  #stage{flex:1;min-height:0;position:relative;overflow:hidden;cursor:pointer;touch-action:none}
+  #fort{position:absolute;inset:0;width:100%;height:100%;display:block}
+  #hint{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);font-size:12px;color:#d9cfff;background:rgba(27,27,47,.75);border:2px solid #4b2c80;border-radius:999px;padding:3px 10px;white-space:nowrap;pointer-events:none;z-index:5}
+  #nextTag{position:absolute;right:8px;top:8px;font-size:12px;font-weight:700;color:var(--ink);background:var(--cream);border:3px solid var(--ink);border-radius:10px;padding:3px 8px;box-shadow:2px 2px 0 var(--ink);pointer-events:none;z-index:5}
+  #banner{position:absolute;left:50%;top:44px;transform:translateX(-50%) scale(.9);max-width:calc(100% - 24px);text-align:center;font:400 clamp(13px,3.6vw,18px) 'Rye';color:var(--ink);background:var(--gold);border:4px solid var(--ink);border-radius:14px;padding:6px 14px;box-shadow:4px 4px 0 var(--red);opacity:0;transition:opacity .2s,transform .2s;pointer-events:none;z-index:6}
+  #banner.show{opacity:1;transform:translateX(-50%) scale(1);animation:blink .5s steps(2) infinite alternate}
+  @keyframes blink{to{background:#fff7d6}}
+  #kinger{position:absolute;left:0;top:0;width:60px;height:102px;z-index:4;pointer-events:none;transition:opacity .3s}
+  #kinger svg{width:100%;height:100%;display:block;filter:drop-shadow(0 4px 4px rgba(0,0,0,.6))}
+  #kinger.happy svg{animation:hop .45s ease-out 2}
+  #kinger.panic svg{animation:shake .12s linear infinite}
+  #kinger.infort{width:44px;height:44px}
+  #kinger.infort svg{display:none}
+  @keyframes hop{50%{transform:translateY(-12px)}}
+  @keyframes shake{25%{transform:translateX(-3px) rotate(-4deg)}75%{transform:translateX(3px) rotate(4deg)}}
+  #caine{position:absolute;right:6px;top:40px;width:52px;height:70px;z-index:4;pointer-events:none;opacity:0;transform:translateY(-20px);transition:opacity .3s,transform .3s}
+  #caine.show{opacity:1;transform:none}
+  #caine svg{width:100%;height:100%}
+  .panel{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:50;background:rgba(11,7,24,.72);backdrop-filter:blur(3px);padding:16px}
+  .panel.hidden{display:none}
+  .card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 #4b2c80;padding:20px 22px;max-width:min(460px,100%);text-align:center;max-height:100%;overflow:auto}
+  .card h2{font:400 clamp(22px,6vw,34px) 'Rye';margin:0 0 6px;color:var(--purple);text-shadow:0 2px 0 var(--gold)}
+  .card p{margin:6px 0;line-height:1.4}
+  .card .keys{font-size:14px;color:#4b2c80;margin-top:8px}
+  .card .big{font:700 48px/1 'Fredoka';color:var(--red)}
+  .card .rank{font:400 20px 'Rye';color:var(--blue);margin:8px 0}
+  .card .btn{margin-top:12px}
+  .tadc-speech{max-width:min(250px,72vw);font-size:13px;padding:9px 12px}
+  .tadc-speech.caine{font-size:14px}
+  @media (max-width:560px){ #top h1{display:none} #hud{font-size:13px;gap:7px;padding:3px 8px} #hint{font-size:11px} #kinger{width:48px;height:82px} }
+</style>
+</head>
+<body>
+<div id="top">
+  <div class="left">
+    <a class="btn small" id="back" href="../../index.html">← back to the Big Top</a>
+    <h1>Kinger's Pillow Fort</h1>
+  </div>
+  <div id="hud" aria-live="polite">
+    <span>⬆ <b id="height">0.0</b> m</span>
+    <span>🏆 <b id="best">0.0</b></span>
+    <span id="hearts" title="Fort integrity">❤️❤️❤️</span>
+  </div>
+</div>
+<div id="stage" aria-label="Pillow fort stacking game. Click, tap, Space or Enter drops the pillow. P pauses.">
+  <canvas id="fort"></canvas>
+  <div id="nextTag">next: …</div>
+  <div id="banner" role="status"></div>
+  <div id="kinger" title="Kinger"></div>
+  <div id="caine" title="Caine"></div>
+  <div id="hint">click / tap / Space to drop · P to pause</div>
+</div>
+
+<div class="panel" id="startPanel">
+  <div class="card">
+    <h2>Pillow Fort Stacker</h2>
+    <p>Kinger needs the <b>tallest, coziest pillow fort in the void</b>. Pillows swing on Caine's crane. Drop them onto the mattress and stack as high as you dare.</p>
+    <p>Anything that tumbles off costs one of three <b>fort integrity</b> hearts. Watch for Bubble drifting by and the occasional <b>ventilation feature</b>. You'll get a warning first.</p>
+    <div class="keys">👆 click or tap anywhere to drop · ⌨️ Space / Enter to drop · P to pause</div>
+    <button class="btn red" id="startBtn" type="button">BUILD THE FORT ▶</button>
+  </div>
+</div>
+<div class="panel hidden" id="pausePanel">
+  <div class="card">
+    <h2>Paused</h2>
+    <p>Kinger is holding very, very still.</p>
+    <button class="btn" id="resumeBtn" type="button">Resume (P)</button>
+  </div>
+</div>
+<div class="panel hidden" id="overPanel">
+  <div class="card">
+    <h2>The Fort Has Fallen!</h2>
+    <div class="big" id="finalHeight">0.0 m</div>
+    <p id="bestLine"></p>
+    <div class="rank" id="rankLine"></div>
+    <p id="overQuote" style="font-style:italic"></p>
+    <button class="btn red" id="againBtn" type="button">BUILD AGAIN ▶</button>
+  </div>
+</div>
+<div class="panel hidden" id="errorPanel">
+  <div class="card">
+    <h2>The Physics Got Lost</h2>
+    <p>The pillow physics engine (matter-js, from a public CDN) didn't load. The fort needs it to stay squishy.</p>
+    <p>Check your internet connection and try again.</p>
+    <button class="btn red" type="button" onclick="location.reload()">Try again</button>
+  </div>
+</div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const T = window.TADC || {};
+  const pick = T.pick || ((a) => a[Math.floor(Math.random() * a.length)]);
+  const sfx = (k) => { try { T.sfx && T.sfx(k); } catch (e) { /* sound is optional */ } };
+  const confetti = (...a) => { try { T.confetti && T.confetti(...a); } catch (e) { /* optional */ } };
+  const $ = (id) => document.getElementById(id);
+  const DEBUG = /[?&]debug\b/.test(location.search);
+
+  // Load matter-js from a public CDN, with a second CDN as backup, and an error card if both fail.
+  const SOURCES = [
+    'https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js',
+    'https://cdn.jsdelivr.net/npm/matter-js@0.19.0/build/matter.min.js',
+  ];
+  function loadMatter(i) {
+    if (window.Matter) return boot();
+    if (i >= SOURCES.length) { $('startPanel').classList.add('hidden'); $('errorPanel').classList.remove('hidden'); return; }
+    const s = document.createElement('script');
+    s.src = SOURCES[i];
+    s.onload = () => (window.Matter ? boot() : loadMatter(i + 1));
+    s.onerror = () => loadMatter(i + 1);
+    document.head.appendChild(s);
+  }
+  loadMatter(0);
+
+  function boot() {
+  const { Engine, Bodies, Body, Composite, Events, Sleeping } = window.Matter;
+
+  // ═══ original lines ═══
+  const LINES = {
+    start: ["A fort! A grand fort! Every king deserves a soft castle.", "Today we build upward. Toward the ceiling. If there is one.",
+      "Pillows, assemble! Gently, please. They bruise emotionally."],
+    land: ["Ooh, squishy! Ten out of ten.", "That one's going in the brochure!", "A pillow upon a pillow. Revolutionary architecture!",
+      "Perfect. I'm giving that one a tiny medal. In my heart.", "Soft AND structural. My favorite combination!",
+      "Snug as a rook in a corner!", "Lovely placement! The fort approves. I asked it."],
+    chicken: ["A chicken?! Structural poultry! Bold!", "Ah yes, the rubber chicken. Every fort needs a mascot.",
+      "Don't squeeze it. It makes a noise that haunts me."],
+    teacup: ["Careful, that teacup is load-bearing now.", "A teacup! For when the fort gets thirsty.",
+      "Fine china in a pillow fort. Very fancy. Very brave."],
+    wobble: ["It's leaning! Is it leaning? I'M leaning!", "Nobody breathe! Especially the pillows!",
+      "Wobble wobble, no thank you, wobble!", "Steady, steady... I'm holding my crown so it doesn't hear me panic.",
+      "Hold still, fort! Think flat thoughts!"],
+    fall: ["Pillow overboard!", "It's fine. It just wanted to see the floor.", "We'll hold a small ceremony for that one later.",
+      "Gravity, you scoundrel!", "Oh no, a deserter! Come back, we have snacks!"],
+    milestone: ["We've passed the ottoman line! Historic!", "I can see my old bed from here! Hello, old bed!",
+      "Higher than a bishop's hat! Higher than two!", "The air is softer up here. Is that the pillows or my imagination?",
+      "Write this down! Somebody! Anybody with a quill!"],
+    secure: ["THE FORT IS SECURE! I'm going in!", "THE FORT IS SECURE! Nobody knock. Unless you have cocoa.",
+      "THE FORT IS SECURE! Kinger has entered the keep!"],
+    tumble: ["Whoa! I'm out! The floor caught me. Thank you, floor!", "My room fell off! I'm okay! My dignity is pending."],
+    bubble: ["Is that Bubble? Bubble, do NOT touch the fort!", "Bubble incoming! Shield the cushions!"],
+    gust: ["A breeze?! Hold onto the tassels!", "Wind! Indoors! In the void! Who approved this?"],
+    gustEnd: ["Phew. Everybody still fluffy? Good.", "The wind has left the building. Rude, but gone.", "Still standing! The fort and me both!"],
+    over: ["The fort has achieved... floor.", "It was a beautiful fort. It was a beautiful three minutes.",
+      "We'll rebuild. Softer. Taller. With more chicken."],
+  };
+  const CAINE_GUST = ["Testing my brand-new VENTILATION FEATURE! Hold onto your upholstery!",
+    "Breeze incoming! Fresh air is very important in a dimension with no windows!",
+    "Ahem! Scheduled air circulation! It's for your health! Probably!"];
+
+  // ═══ DOM / cast ═══
+  const stage = $('stage'), canvas = $('fort'), ctx = canvas.getContext('2d');
+  const kingerEl = $('kinger'), caineEl = $('caine'), banner = $('banner');
+  if (T.CAST) { kingerEl.innerHTML = T.CAST.kinger; caineEl.innerHTML = T.CAST.caine; }
+  let caine = null;
+  try { caine = T.wireCaine ? T.wireCaine(caineEl) : null; } catch (e) { caine = null; }
+  const kingerSay = (text, ms = 3200) => { try { T.say && T.say(kingerEl, text, ms); } catch (e) { /* optional */ } };
+  const kingerMood = (cls, ms = 1200) => {
+    kingerEl.classList.remove('happy', 'panic'); void kingerEl.offsetWidth; kingerEl.classList.add(cls);
+    clearTimeout(kingerEl._m); kingerEl._m = setTimeout(() => kingerEl.classList.remove(cls), ms);
+  };
+  const svgImg = (svg, w, h) => {
+    const img = new Image();
+    if (svg) img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.trim().replace('<svg ', `<svg width="${w}" height="${h}" `));
+    return img;
+  };
+  const kingerImg = svgImg(T.CAST && T.CAST.kinger, 100, 170);
+  const bubbleImg = svgImg(T.CAST && T.CAST.bubble, 60, 60);
+  const imgOk = (i) => i.complete && i.naturalWidth > 0;
+
+  // ═══ items ═══
+  const KINDS = {
+    pillow:  { w: 120, h: 40, r: 16, w8: 3,   name: 'striped pillow' },
+    cushion: { w: 82,  h: 56, r: 14, w8: 3,   name: 'tufted cushion' },
+    beanbag: { w: 104, h: 50, r: 22, w8: 2,   name: 'beanbag' },
+    blanket: { w: 132, h: 32, r: 15, w8: 2,   name: 'rolled blanket' },
+    bolster: { w: 150, h: 34, r: 16, w8: 1.5, name: 'royal bolster' },
+    floor:   { w: 104, h: 30, r: 10, w8: 2,   name: 'floor cushion' },
+    chicken: { w: 80,  h: 26, r: 11, w8: 0.7, name: 'rubber chicken', silly: true },
+    teacup:  { w: 52,  h: 38, r: 6,  w8: 0.7, name: 'teacup', silly: true },
+  };
+  const KIND_KEYS = Object.keys(KINDS);
+  let forcedKind = null, lastSilly = false;
+  function rollKind() {
+    if (forcedKind) return forcedKind;
+    const pool = KIND_KEYS.filter((k) => !(lastSilly && KINDS[k].silly));
+    let total = pool.reduce((s, k) => s + KINDS[k].w8, 0), r = Math.random() * total;
+    for (const k of pool) { r -= KINDS[k].w8; if (r <= 0) { lastSilly = !!KINDS[k].silly; return k; } }
+    return 'pillow';
+  }
+  const PALETTES = [['#e3243b', '#fff7d6'], ['#2f5bd8', '#ffd34d'], ['#8a5fd1', '#ffd34d'], ['#ff7eb6', '#fff7d6'], ['#5fd38d', '#fff7d6'], ['#ffd34d', '#8a5fd1']];
+
+  // ═══ physics world ═══ (world units: base top is y = 0, up is negative)
+  let SUBSTEPS = 3, GUST = 0.03, BOOP = 1.4;
+  const BASE_W = 300, BASE_H = 44, KILL_Y = 900;
+  const engine = Engine.create({ enableSleeping: true, positionIterations: 20, velocityIterations: 14 });
+  engine.gravity.y = 1;
+  const base = Bodies.rectangle(0, BASE_H / 2, BASE_W, BASE_H, { isStatic: true, friction: 1, frictionStatic: 1.2, chamfer: { radius: 10 }, label: 'base' });
+  Composite.add(engine.world, base);
+
+  // ═══ game state ═══
+  const S = {
+    mode: 'title', // title | play | paused | over
+    t: 0, hearts: 3, height: 0, best: 0, drops: 0,
+    hook: { x: 0, phase: 0, item: null, cool: 0, frozen: null },
+    next: null, current: null, currentAge: 0,
+    camY: 0, camTarget: 0, towerTop: 0, milestone: 0, secure: 0,
+    kingerBody: null, eventIn: 30 * 60, event: null, eventsOn: true,
+    wobbleCd: 0, landSay: 0, lastSound: 0, squish: 0,
+  };
+  const items = []; // { body, kind, w, h, pal, settled, still, lost, id }
+  let nextId = 1;
+
+  function readBest() { try { return parseFloat(localStorage.getItem('tadc-pillowfort-best')) || 0; } catch (e) { return 0; } }
+  function saveBest(v) { try { localStorage.setItem('tadc-pillowfort-best', v.toFixed(2)); } catch (e) { /* storage blocked */ } }
+  S.best = readBest();
+
+  function newHookItem() {
+    const kind = S.next || rollKind();
+    S.next = rollKind();
+    S.hook.item = { kind, pal: pick(PALETTES), ...KINDS[kind] };
+    $('nextTag').textContent = 'next: ' + KINDS[S.next].name;
+  }
+
+  function reset() {
+    items.splice(0).forEach((it) => Composite.remove(engine.world, it.body));
+    Object.assign(S, { t: 0, hearts: 3, height: 0, peak: 0, lastLoss: -999, towerTop: 0, drops: 0, current: null, currentAge: 0, camY: 0, camTarget: 0, milestone: 0, secure: 0,
+      kingerBody: null, eventIn: 28 * 60, event: null, wobbleCd: 0, landSay: 0, squish: 0 });
+    S.hook = { x: 0, phase: Math.random() * 6, item: null, cool: 0, frozen: S.hook.frozen };
+    S.next = null; lastSilly = false;
+    newHookItem();
+    kingerEl.classList.remove('infort');
+    hideBanner(); caineEl.classList.remove('show');
+    renderHud();
+  }
+
+  // ═══ view / camera ═══
+  let W = 0, H = 0, DPR = 1, scale = 1, viewW = 480, viewH = 720;
+  function resize() {
+    const r = stage.getBoundingClientRect();
+    W = Math.max(1, r.width); H = Math.max(1, r.height); DPR = Math.min(2, window.devicePixelRatio || 1);
+    canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+    scale = Math.min(W / 480, H / 700);
+    viewW = W / scale; viewH = H / scale;
+  }
+  addEventListener('resize', resize);
+  // camTop: world y at top of screen
+  const camTopFor = (towerTop) => Math.min(-viewH + 150, towerTop - viewH * 0.47);
+  const toScreen = (x, y) => ({ x: (x + viewW / 2) * scale, y: (y - S.camY) * scale });
+  const hookY = () => Math.min(S.camY + 64, -S.towerTop - 230);
+
+  // ═══ actions ═══
+  function drop() {
+    if (S.mode !== 'play' || !S.hook.item || S.hook.cool > 0) return false;
+    const it = S.hook.item, x = S.hook.x, y = hookY() + 34 + it.h / 2;
+    const body = Bodies.rectangle(x, y, it.w, it.h, {
+      chamfer: { radius: it.r }, friction: 0.9, frictionStatic: 1.3, restitution: 0.03, frictionAir: 0.012,
+      density: it.kind === 'chicken' ? 0.0011 : 0.0016, sleepThreshold: 50, slop: 0.02,
+    });
+    const vx = S.hook.frozen != null ? 0 : Math.cos(S.hook.phase) * hookSpeed() * hookAmp() * 0.3;
+    Body.setVelocity(body, { x: vx, y: 1 });
+    Composite.add(engine.world, body);
+    const rec = { body, kind: it.kind, w: it.w, h: it.h, pal: it.pal, settled: false, still: 0, lost: false, landed: false, id: nextId++ };
+    body.plugin.rec = rec;
+    items.push(rec);
+    S.current = rec; S.currentAge = 0;
+    S.hook.item = null; S.hook.cool = 36;
+    S.drops++;
+    sfx('tick');
+    return true;
+  }
+  const hookAmp = () => Math.min(175, 120 + S.drops * 2.5);
+  const hookSpeed = () => Math.min(0.05, 0.026 + S.drops * 0.0009);
+
+  Events.on(engine, 'collisionStart', (e) => {
+    for (const p of e.pairs) {
+      for (const [a, b] of [[p.bodyA, p.bodyB], [p.bodyB, p.bodyA]]) {
+        const rec = a.plugin && a.plugin.rec;
+        if (!rec || rec.landed || rec.lost) continue;
+        rec.landed = true;
+        if (S.t - S.lastSound > 8) { S.lastSound = S.t; sfx(rec.kind === 'chicken' ? 'honk' : (rec.kind === 'teacup' ? 'ding' : 'boing')); }
+        if (b === base) S.squish = 1;
+        onLand(rec);
+      }
+    }
+  });
+
+  function onLand(rec) {
+    if (S.mode !== 'play') return;
+    if (rec.kind === 'chicken') { kingerSay(pick(LINES.chicken)); kingerMood('happy'); S.landSay = S.t; return; }
+    if (rec.kind === 'teacup') { kingerSay(pick(LINES.teacup)); kingerMood('happy'); S.landSay = S.t; return; }
+    if (S.t - S.landSay > 60 * 6 && Math.random() < 0.45) { S.landSay = S.t; kingerSay(pick(LINES.land)); kingerMood('happy'); }
+  }
+
+  function loseHeart(rec) {
+    rec.lost = true;
+    if (S.mode !== 'play') return;
+    const wasKinger = S.kingerBody === rec.body;
+    if (wasKinger) { S.kingerBody = null; kingerEl.classList.remove('infort'); }
+    if (S.t - (S.lastLoss || -999) < 100) return; // one collapse = one heart
+    S.lastLoss = S.t;
+    S.hearts = Math.max(0, S.hearts - 1);
+    sfx('glitch');
+    const h = $('hearts'); h.classList.remove('hit'); void h.offsetWidth; h.classList.add('hit');
+    if (wasKinger) { kingerSay(pick(LINES.tumble), 3400); kingerMood('panic', 1500); }
+    else { kingerSay(pick(LINES.fall)); kingerMood('panic', 1200); }
+    renderHud();
+    if (S.hearts <= 0) setTimeout(gameOver, 900);
+  }
+
+  function rank(h) {
+    if (h < 1) return 'Pawn of Pillows';
+    if (h < 2) return 'Cushion Squire';
+    if (h < 3.5) return 'Knight of the Duvet';
+    if (h < 5) return 'Bishop of Bolsters';
+    if (h < 7) return 'Rook of Repose';
+    if (h < 9.5) return 'Queen of Quilts';
+    return 'Grand King of the Comfy Keep';
+  }
+
+  function gameOver() {
+    if (S.mode !== 'play') return;
+    S.mode = 'over';
+    const peak = S.peak || S.height;
+    const newBest = peak > readBest() + 0.001;
+    if (newBest) saveBest(peak);
+    S.best = Math.max(S.best, peak);
+    $('finalHeight').textContent = peak.toFixed(1) + ' m';
+    $('bestLine').textContent = newBest ? '🏆 New best fort!' : 'Best: ' + S.best.toFixed(1) + ' m';
+    $('rankLine').textContent = '♔ ' + rank(peak);
+    $('overQuote').textContent = '"' + pick(LINES.over) + '" — Kinger';
+    $('overPanel').classList.remove('hidden');
+    hideBanner(); caineEl.classList.remove('show');
+    sfx(newBest ? 'fanfare' : 'honk');
+    if (newBest) confetti(innerWidth / 2, innerHeight / 3, 90, 1.1);
+    renderHud();
+    setTimeout(() => $('againBtn').focus(), 50);
+  }
+
+  // ═══ events: Bubble drift-by and Caine's ventilation feature ═══
+  function showBanner(text) { banner.textContent = text; banner.classList.add('show'); }
+  function hideBanner() { banner.classList.remove('show'); }
+  function startEvent(type) {
+    const dir = Math.random() < 0.5 ? 1 : -1;
+    if (type ? type === 'bubble' : Math.random() < 0.5) {
+      S.event = { type: 'bubble', dir, warn: 150, t: 0, hit: new Set(), x: -dir * (viewW / 2 + 60), y: -S.height * 100 - 20 };
+      showBanner((dir > 0 ? '⬅ ' : '') + 'Bubble drifting in from the ' + (dir > 0 ? 'left' : 'right') + '!' + (dir < 0 ? ' ➡' : ''));
+      kingerSay(pick(LINES.bubble)); kingerMood('panic', 1200);
+    } else {
+      S.event = { type: 'gust', dir, warn: 160, t: 0, dur: 100 };
+      showBanner('🌬 Ventilation feature: wind blowing ' + (dir > 0 ? 'RIGHT ➡' : '⬅ LEFT'));
+      caineEl.classList.add('show');
+      try { caine && caine.talk(pick(CAINE_GUST), 3800); } catch (e) { /* optional */ }
+    }
+    sfx('honk');
+  }
+  function stepEvent() {
+    const ev = S.event;
+    if (!ev) {
+      if (S.eventsOn && S.drops >= 7 && --S.eventIn <= 0) { S.eventIn = (25 + Math.random() * 15) * 60; startEvent(); }
+      return;
+    }
+    if (ev.warn > 0) { ev.warn--; if (ev.type === 'bubble') ev.y = -S.height * 100 - 10; if (ev.warn === 0) hideBanner(); return; }
+    ev.t++;
+    if (ev.type === 'bubble') {
+      ev.x += ev.dir * 2.6;
+      const bob = Math.sin(ev.t * 0.08) * 8;
+      for (const it of items) {
+        if (it.lost) continue;
+        const b = it.body, dx = b.position.x - ev.x, dy = b.position.y - (ev.y + bob);
+        const reach = 30 + Math.max(it.w, it.h) / 2;
+        if (dx * dx + dy * dy < reach * reach && !ev.hit.has(it.id)) {
+          ev.hit.add(it.id); // one gentle boop per item
+          Sleeping.set(b, false);
+          const v = Body.getVelocity(b);
+          Body.setVelocity(b, { x: v.x + ev.dir * BOOP, y: v.y - 0.5 });
+          Body.setAngularVelocity(b, Body.getAngularVelocity(b) + ev.dir * 0.012);
+          sfx('pop'); kingerMood('panic', 900);
+        }
+      }
+      if (Math.abs(ev.x) > viewW / 2 + 80) { S.event = null; }
+    } else {
+      const k = Math.sin(Math.min(1, ev.t / ev.dur) * Math.PI);
+      for (const it of items) {
+        if (it.lost) continue;
+        const b = it.body, v = Body.getVelocity(b);
+        Sleeping.set(b, false);
+        if (!it.landed) { Body.setVelocity(b, { x: v.x + ev.dir * 0.07 * k, y: v.y }); continue; } // airborne pillows drift
+        const hfac = 0.4 + Math.min(1, -b.position.y / 900) * 0.8;
+        Body.setVelocity(b, { x: v.x + ev.dir * GUST * hfac * k, y: v.y });
+        if (ev.t % 24 === 0) Body.setAngularVelocity(b, Body.getAngularVelocity(b) + ev.dir * 0.002 * hfac);
+      }
+      if (ev.t >= ev.dur) { S.event = null; caineEl.classList.remove('show'); kingerSay(pick(LINES.gustEnd)); }
+      else if (ev.t === 20) kingerSay(pick(LINES.gust));
+    }
+  }
+
+  // ═══ simulation step (fixed 60 Hz) ═══
+  function step() {
+    if (S.mode !== 'play') return;
+    S.t++;
+    // crane hook
+    const hk = S.hook;
+    if (hk.frozen != null) hk.x = hk.frozen;
+    else { hk.phase += hookSpeed(); hk.x = Math.sin(hk.phase) * hookAmp(); }
+    if (hk.cool > 0) hk.cool--;
+    if (!hk.item && hk.cool <= 0) {
+      const c = S.current;
+      if (!c || c.landed || c.lost || S.currentAge > 100) newHookItem();
+    }
+    if (S.current) S.currentAge++;
+
+    for (let k = 0; k < SUBSTEPS; k++) Engine.update(engine, 1000 / 60 / SUBSTEPS);
+    stepEvent();
+
+    // settle tracking, fall detection, wobble
+    let top = 0, wobble = false;
+    for (let i = items.length - 1; i >= 0; i--) {
+      const it = items[i], b = it.body, p = b.position;
+      if (!it.lost && (p.y > KILL_Y || (p.y > 60 && Math.abs(p.x) > BASE_W / 2 + 10) || Math.abs(p.x) > 1600)) loseHeart(it);
+      if (it.lost) {
+        if (p.y > KILL_Y + 1200 || Math.abs(p.x) > 3000) { Composite.remove(engine.world, b); items.splice(i, 1); }
+        continue;
+      }
+      const spd = Body.getSpeed(b), aspd = Body.getAngularSpeed(b);
+      const moving = spd > 0.35 || aspd > 0.01;
+      if (b.isSleeping || !moving) it.still++; else it.still = 0;
+      if (it.still > 20 && it.landed) it.settled = true;
+      if (it.settled && it !== S.current && (spd > 2.2 || aspd > 0.045)) wobble = true;
+      if (it.settled) top = Math.max(top, -b.bounds.min.y);
+    }
+    S.height = top / 100;
+    S.peak = Math.max(S.peak || 0, S.height);
+    if (S.height > S.best) { S.best = S.height; }
+
+    if (S.wobbleCd > 0) S.wobbleCd--;
+    if (wobble && S.wobbleCd <= 0) { S.wobbleCd = 60 * 5; kingerSay(pick(LINES.wobble), 2600); kingerMood('panic', 1400); sfx('tick'); }
+
+    // milestones (every full meter); climb into the fort at 3 m, 6 m, 9 m ...
+    const m = Math.floor(S.height);
+    if (m > S.milestone) {
+      S.milestone = m;
+      if (m % 3 === 0) climbIn();
+      else { kingerSay(pick(LINES.milestone)); kingerMood('happy'); sfx('ding'); }
+      if (S.best > readBest()) saveBest(S.best);
+    }
+
+    S.towerTop = top;
+    S.camTarget = camTopFor(-top);
+    S.camY += (S.camTarget - S.camY) * 0.06;
+    if (S.squish > 0) S.squish = Math.max(0, S.squish - 0.04);
+  }
+
+  function climbIn() {
+    // pick the highest settled item as Kinger's new room
+    let best = null;
+    for (const it of items) if (it.settled && !it.lost && (!best || it.body.position.y < best.body.position.y)) best = it;
+    if (!best) return;
+    S.kingerBody = best.body; S.secure++;
+    kingerEl.classList.add('infort');
+    kingerSay(pick(LINES.secure), 3800);
+    sfx('fanfare');
+    const p = toScreen(best.body.position.x, best.body.position.y), r = stage.getBoundingClientRect();
+    confetti(r.left + p.x, r.top + p.y, 70, 1);
+  }
+
+  // ═══ drawing ═══
+  function rr(x, y, w, h, r) {
+    ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+  }
+  const INK = '#1b1b2f';
+  function tassel(x, y, dx, dy) {
+    ctx.save(); ctx.fillStyle = '#ffd34d'; ctx.strokeStyle = INK; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + dx * 11 - dy * 5, y + dy * 11 + dx * 5); ctx.lineTo(x + dx * 11 + dy * 5, y + dy * 11 - dx * 5); ctx.closePath();
+    ctx.fill(); ctx.stroke(); ctx.restore();
+  }
+  function drawItem(it) {
+    const { w, h, kind } = it, [c1, c2] = it.pal, r = KINDS[kind].r, x = -w / 2, y = -h / 2;
+    ctx.lineJoin = 'round';
+    if (kind === 'chicken') {
+      ctx.fillStyle = '#ffe14d'; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.ellipse(-6, 2, w / 2 - 6, h / 2 - 1, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w / 2 - 12, -4, 10, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#e3243b'; ctx.beginPath(); ctx.arc(w / 2 - 15, -14, 4, 0, 7); ctx.arc(w / 2 - 9, -15, 4, 0, 7); ctx.fill();
+      ctx.fillStyle = '#ff9a3c'; ctx.beginPath(); ctx.moveTo(w / 2 - 3, -6); ctx.lineTo(w / 2 + 7, -2); ctx.lineTo(w / 2 - 3, 1); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(w / 2 - 10, -6, 2, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#d9a400'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(-24, -2); ctx.quadraticCurveTo(-10, -10, 2, -2); ctx.stroke();
+      ctx.strokeStyle = '#ff9a3c'; ctx.lineWidth = 3; ctx.beginPath(); ctx.moveTo(-14, h / 2 - 2); ctx.lineTo(-18, h / 2 + 3); ctx.moveTo(0, h / 2 - 2); ctx.lineTo(4, h / 2 + 3); ctx.stroke();
+      return;
+    }
+    if (kind === 'teacup') {
+      ctx.strokeStyle = INK; ctx.lineWidth = 3;
+      ctx.fillStyle = '#fff7d6'; ctx.beginPath(); ctx.ellipse(0, h / 2 - 4, w / 2, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.arc(w / 2 - 6, -2, 9, -Math.PI / 2, Math.PI / 2); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.moveTo(-w / 2 + 2, -h / 2); ctx.lineTo(w / 2 - 6, -h / 2); ctx.lineTo(w / 2 - 12, h / 2 - 8); ctx.lineTo(-w / 2 + 8, h / 2 - 8); ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#2f5bd8'; ctx.fillRect(-w / 2 + 6, -h / 2 + 8, w - 16, 6);
+      ctx.fillStyle = '#e3243b'; ctx.beginPath(); ctx.arc(-2, 4, 3.5, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#8a5a2b'; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(-2, -h / 2 + 2, w / 2 - 8, 2, 0, 0, Math.PI * 2); ctx.stroke();
+      return;
+    }
+    // soft goods: shape + pattern clipped inside + ink border
+    rr(x, y, w, h, r); ctx.fillStyle = c1; ctx.fill();
+    ctx.save(); rr(x, y, w, h, r); ctx.clip();
+    ctx.fillStyle = c2; ctx.strokeStyle = c2;
+    if (kind === 'pillow') {
+      ctx.lineWidth = 7; for (let i = -w; i < w; i += 18) { ctx.beginPath(); ctx.moveTo(i, y - 4); ctx.lineTo(i + h, y + h + 4); ctx.stroke(); }
+    } else if (kind === 'cushion' || kind === 'beanbag') {
+      const g = kind === 'cushion' ? 14 : 16;
+      for (let yy = y + 8, row = 0; yy < y + h; yy += g, row++) for (let xx = x + 8 + (row % 2) * g / 2; xx < x + w; xx += g) { ctx.beginPath(); ctx.arc(xx, yy, 3.2, 0, 7); ctx.fill(); }
+      if (kind === 'beanbag') { ctx.strokeStyle = 'rgba(27,27,47,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + 18, y + 10); ctx.quadraticCurveTo(0, y + 22, x + w - 18, y + 12); ctx.stroke(); }
+    } else if (kind === 'blanket') {
+      ctx.globalAlpha = 0.55; ctx.lineWidth = 5;
+      ctx.strokeStyle = '#e3243b'; for (let i = x + 10; i < x + w; i += 22) { ctx.beginPath(); ctx.moveTo(i, y); ctx.lineTo(i, y + h); ctx.stroke(); }
+      ctx.strokeStyle = '#2f5bd8'; for (let j = y + 8; j < y + h; j += 12) { ctx.beginPath(); ctx.moveTo(x, j); ctx.lineTo(x + w, j); ctx.stroke(); }
+      ctx.globalAlpha = 1; ctx.strokeStyle = INK; ctx.lineWidth = 2; ctx.beginPath();
+      for (let a = 0; a < 14; a += 0.3) { const rr2 = 1 + a * 0.85, px = x + w - 16 + Math.cos(a) * rr2, py = Math.sin(a) * rr2; a ? ctx.lineTo(px, py) : ctx.moveTo(px, py); }
+      ctx.stroke();
+    } else if (kind === 'bolster') {
+      ctx.lineWidth = 8; for (let i = x + 20; i < x + w - 10; i += 26) { ctx.beginPath(); ctx.moveTo(i, y); ctx.lineTo(i, y + h); ctx.stroke(); }
+    } else if (kind === 'floor') {
+      ctx.lineWidth = 4; ctx.beginPath(); for (let i = x, k = 0; i <= x + w; i += 12, k++) ctx.lineTo(i, k % 2 ? y + 9 : y + h - 9); ctx.stroke();
+    }
+    ctx.restore();
+    rr(x, y, w, h, r); ctx.strokeStyle = INK; ctx.lineWidth = 3.5; ctx.stroke();
+    // little highlight seam
+    ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x + r, y + 5); ctx.lineTo(x + w - r, y + 5); ctx.stroke();
+    if (kind === 'cushion') { ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(0, 0, 4, 0, 7); ctx.fill(); }
+    if (kind === 'pillow' || kind === 'cushion') { tassel(x + 4, y + 4, -0.7, -0.7); tassel(x + w - 4, y + 4, 0.7, -0.7); tassel(x + 4, y + h - 4, -0.7, 0.7); tassel(x + w - 4, y + h - 4, 0.7, 0.7); }
+    if (kind === 'bolster') { ctx.fillStyle = '#ffd34d'; ctx.strokeStyle = INK; ctx.lineWidth = 2; [x + 3, x + w - 3].forEach((cx) => { ctx.beginPath(); ctx.arc(cx, 0, 5, 0, 7); ctx.fill(); ctx.stroke(); }); }
+  }
+
+  const stars = Array.from({ length: 90 }, () => ({ x: Math.random(), y: Math.random(), s: Math.random() * 1.6 + 0.4, p: Math.random() * 0.5 + 0.2 }));
+  function draw() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    // void
+    const g = ctx.createLinearGradient(0, 0, 0, H); g.addColorStop(0, '#0b0718'); g.addColorStop(1, '#1d1238');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    for (const s of stars) {
+      const yy = ((s.y * H - S.camY * scale * s.p * 0.3) % H + H) % H;
+      ctx.fillStyle = `rgba(255,247,214,${0.25 + s.p * 0.6})`; ctx.fillRect(s.x * W, yy, s.s, s.s);
+    }
+    ctx.save();
+    ctx.scale(scale, scale);
+    ctx.translate(viewW / 2, -S.camY);
+    // checkered floor of the void
+    const floorY = BASE_H + 60;
+    if (floorY - S.camY < viewH) {
+      for (let i = -14; i < 14; i++) { ctx.fillStyle = i % 2 ? '#2a1b4d' : '#3b2a66'; ctx.fillRect(i * 50, floorY, 50, 400); }
+      ctx.fillStyle = 'rgba(11,7,24,.35)'; ctx.fillRect(-700, floorY, 1400, 400);
+    }
+    // ruler
+    const rx = -viewW / 2 + 10;
+    ctx.font = '700 13px Fredoka, sans-serif'; ctx.textBaseline = 'middle';
+    for (let m = 0; m < 60; m++) {
+      const yy = -m * 100; if (yy < S.camY - 20) break; if (yy > S.camY + viewH + 20) continue;
+      ctx.strokeStyle = 'rgba(255,211,77,.5)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(rx, yy); ctx.lineTo(rx + 16, yy); ctx.stroke();
+      ctx.fillStyle = 'rgba(255,211,77,.8)'; ctx.fillText(m + 'm', rx + 20, yy);
+      ctx.strokeStyle = 'rgba(255,211,77,.18)'; ctx.beginPath(); ctx.moveTo(rx + 16, yy + 50); ctx.lineTo(rx + 8, yy + 50); ctx.stroke();
+    }
+    // best line
+    if (S.best > 0.05) {
+      const by = -S.best * 100;
+      ctx.setLineDash([10, 8]); ctx.strokeStyle = 'rgba(255,211,77,.7)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(-viewW / 2, by); ctx.lineTo(viewW / 2, by); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#ffd34d'; ctx.textAlign = 'right'; ctx.fillText('BEST', viewW / 2 - 10, by - 10); ctx.textAlign = 'left';
+    }
+    // pedestal + mattress base
+    const sq = Math.sin(S.squish * Math.PI) * 4;
+    ctx.fillStyle = '#e3243b'; ctx.strokeStyle = INK; ctx.lineWidth = 4;
+    ctx.beginPath(); ctx.moveTo(-BASE_W / 2 + 30, BASE_H); ctx.lineTo(BASE_W / 2 - 30, BASE_H); ctx.lineTo(BASE_W / 2 - 5, floorY); ctx.lineTo(-BASE_W / 2 + 5, floorY); ctx.closePath(); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#fff7d6'; for (let i = -3; i <= 3; i += 2) { ctx.beginPath(); ctx.moveTo(i * 30, BASE_H); ctx.lineTo(i * 30 + 15, BASE_H); ctx.lineTo(i * 36 + 18, floorY); ctx.lineTo(i * 36, floorY); ctx.closePath(); ctx.fill(); }
+    ctx.save(); ctx.translate(0, BASE_H / 2); ctx.scale(1 + sq * 0.004, 1 - sq * 0.02);
+    rr(-BASE_W / 2, -BASE_H / 2, BASE_W, BASE_H, 12); ctx.fillStyle = '#2f5bd8'; ctx.fill();
+    ctx.save(); rr(-BASE_W / 2, -BASE_H / 2, BASE_W, BASE_H, 12); ctx.clip();
+    ctx.fillStyle = '#ffd34d'; for (let i = -BASE_W / 2 + 14; i < BASE_W / 2; i += 28) for (const j of [-8, 8]) { ctx.beginPath(); ctx.arc(i + (j > 0 ? 14 : 0), j, 3.5, 0, 7); ctx.fill(); }
+    ctx.restore();
+    rr(-BASE_W / 2, -BASE_H / 2, BASE_W, BASE_H, 12); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.stroke();
+    ctx.restore();
+
+    // items
+    for (const it of items) {
+      const b = it.body;
+      ctx.save(); ctx.translate(b.position.x, b.position.y); ctx.rotate(b.angle);
+      if (S.kingerBody === b && imgOk(kingerImg)) {
+        // Kinger peeking out of the top of his room
+        // Kinger leans out of a side window of his room
+        const side = b.position.x > 0 ? -1 : 1, bob = Math.sin(S.t * 0.08) * 1.5;
+        ctx.save(); ctx.translate(side * (it.w / 2 + 4), -it.h / 2 + 4 + bob); ctx.rotate(side * 0.25);
+        ctx.drawImage(kingerImg, 0, 0, 100, 82, -24, -38, 48, 40); ctx.restore();
+      }
+      drawItem(it);
+      ctx.restore();
+    }
+
+    // Bubble event
+    const ev = S.event;
+    if (ev && ev.type === 'bubble') {
+      const bx = ev.warn > 0 ? -ev.dir * (viewW / 2 - 26) : ev.x, by = ev.y + Math.sin((ev.t || 0) * 0.08) * 8;
+      if (ev.warn > 0) {
+        ctx.globalAlpha = 0.5 + 0.5 * Math.sin(ev.warn * 0.3);
+        ctx.fillStyle = '#ffd34d'; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.moveTo(bx + ev.dir * 18, by); ctx.lineTo(bx - ev.dir * 6, by - 16); ctx.lineTo(bx - ev.dir * 6, by + 16); ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.globalAlpha = 1;
+      } else if (imgOk(bubbleImg)) ctx.drawImage(bubbleImg, bx - 30, by - 30, 60, 60);
+      else { ctx.fillStyle = '#bfe9ff'; ctx.beginPath(); ctx.arc(bx, by, 28, 0, 7); ctx.fill(); }
+    }
+    if (ev && ev.type === 'gust') {
+      const live = ev.warn <= 0, n = live ? 9 : 3;
+      ctx.strokeStyle = live ? 'rgba(191,233,255,.75)' : 'rgba(255,211,77,.7)'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      for (let i = 0; i < n; i++) {
+        const yy = S.camY + 120 + i * (viewH - 200) / n, off = ((S.t * (live ? 9 : 2) + i * 97) % (viewW + 200)) - 100;
+        const xx = ev.dir > 0 ? -viewW / 2 + off : viewW / 2 - off;
+        ctx.beginPath(); ctx.moveTo(xx, yy); ctx.quadraticCurveTo(xx + ev.dir * 30, yy - 10, xx + ev.dir * 60, yy); ctx.stroke();
+      }
+      ctx.lineCap = 'butt';
+    }
+
+    // crane rail + hook + hanging item
+    const hy = hookY();
+    ctx.fillStyle = '#4b2c80'; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+    ctx.fillRect(-viewW / 2, hy - 46, viewW, 12); ctx.strokeRect(-viewW / 2 - 4, hy - 46, viewW + 8, 12);
+    ctx.fillStyle = '#ffd34d'; for (let i = -viewW / 2; i < viewW / 2; i += 24) ctx.fillRect(i + ((S.t * 0.3) % 24), hy - 43, 10, 6);
+    const hx = S.hook.x;
+    ctx.fillStyle = '#e3243b'; rr(hx - 18, hy - 54, 36, 22, 6); ctx.fill(); ctx.stroke();
+    ctx.strokeStyle = '#d9cfff'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(hx, hy - 32); ctx.lineTo(hx, hy + 14); ctx.stroke();
+    ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 5; ctx.beginPath(); ctx.arc(hx, hy + 22, 8, -Math.PI / 2, Math.PI * 0.9); ctx.stroke();
+    if (S.hook.item && S.mode !== 'over') {
+      const it = S.hook.item, sway = Math.cos(S.hook.phase) * 0.06;
+      ctx.save(); ctx.translate(hx, hy + 34 + it.h / 2); ctx.rotate(S.hook.frozen != null ? 0 : sway);
+      // drop guide
+      ctx.setLineDash([4, 8]); ctx.strokeStyle = 'rgba(255,247,214,.22)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(0, it.h / 2 + 6); ctx.lineTo(0, it.h / 2 + 260); ctx.stroke(); ctx.setLineDash([]);
+      drawItem(it); ctx.restore();
+    }
+    ctx.restore();
+  }
+
+  // ═══ HUD + Kinger placement ═══
+  function renderHud() {
+    $('height').textContent = S.height.toFixed(1);
+    $('best').textContent = S.best.toFixed(1);
+    $('hearts').textContent = '❤️'.repeat(S.hearts) + '🤍'.repeat(3 - S.hearts);
+    $('hearts').setAttribute('aria-label', `Fort integrity ${S.hearts} of 3`);
+  }
+  function placeKinger() {
+    if (S.kingerBody) {
+      const b = S.kingerBody, rec = b.plugin.rec, side = b.position.x > 0 ? -1 : 1;
+      const lx = side * (rec.w / 2 + 4), ly = -rec.h / 2 - 14, c = Math.cos(b.angle), sn = Math.sin(b.angle);
+      const p = toScreen(b.position.x + lx * c - ly * sn, b.position.y + lx * sn + ly * c);
+      kingerEl.style.transform = `translate(${p.x - 22}px, ${p.y - 30}px)`;
+      return;
+    }
+    const kw = kingerEl.offsetWidth, kh = kingerEl.offsetHeight;
+    const p = toScreen(-BASE_W / 2 - 34, 0);
+    const x = Math.max(4, p.x - kw), y = Math.min(H - kh - 26, p.y - kh + 30);
+    kingerEl.style.transform = `translate(${x}px, ${y}px)`;
+  }
+
+  // ═══ loop ═══
+  let acc = 0, last = performance.now(), hudTick = 0;
+  function frame(now) {
+    const dt = Math.min(100, now - last); last = now;
+    if (S.mode === 'play') {
+      acc += dt;
+      let n = 0;
+      while (acc >= 1000 / 60 && n < 5) { step(); acc -= 1000 / 60; n++; }
+      if (n === 5) acc = 0;
+    }
+    if (S.mode !== 'play') S.camY += (S.camTarget - S.camY) * 0.06;
+    draw(); placeKinger();
+    if (++hudTick % 6 === 0) renderHud();
+    requestAnimationFrame(frame);
+  }
+
+  // ═══ input ═══
+  function start() {
+    resize(); reset();
+    S.camY = S.camTarget = camTopFor(0);
+    S.mode = 'play';
+    $('startPanel').classList.add('hidden'); $('overPanel').classList.add('hidden'); $('pausePanel').classList.add('hidden');
+    kingerSay(pick(LINES.start), 3600); kingerMood('happy');
+    stage.focus({ preventScroll: true });
+  }
+  function togglePause() {
+    if (S.mode === 'play') { S.mode = 'paused'; $('pausePanel').classList.remove('hidden'); setTimeout(() => $('resumeBtn').focus(), 30); }
+    else if (S.mode === 'paused') { S.mode = 'play'; last = performance.now(); $('pausePanel').classList.add('hidden'); }
+  }
+  $('startBtn').addEventListener('click', start);
+  $('againBtn').addEventListener('click', start);
+  $('resumeBtn').addEventListener('click', togglePause);
+  stage.tabIndex = -1;
+  stage.addEventListener('pointerdown', (e) => { if (e.button > 0) return; e.preventDefault(); drop(); });
+  addEventListener('keydown', (e) => {
+    const tag = e.target && e.target.tagName;
+    if (e.key === 'p' || e.key === 'P') { if (S.mode === 'play' || S.mode === 'paused') { e.preventDefault(); togglePause(); } return; }
+    if (e.key === ' ' || e.key === 'Enter') {
+      if (tag === 'A' || tag === 'BUTTON') return;
+      if (S.mode === 'play') { e.preventDefault(); if (!e.repeat) drop(); }
+    }
+  });
+
+  resize();
+  S.camY = S.camTarget = camTopFor(0);
+  newHookItem(); renderHud();
+  requestAnimationFrame(frame);
+
+  // harmless debug hook for testing: ?debug
+  if (DEBUG) {
+    window.fortDebug = {
+      start, drop, togglePause,
+      step(n = 1) { for (let i = 0; i < n; i++) step(); draw(); placeKinger(); renderHud(); return this.state; },
+      engine, setSub(n) { SUBSTEPS = n; }, setGust(g, b) { GUST = g; if (b != null) BOOP = b; },
+      freezeHook(x) { S.hook.frozen = x; },
+      force(kind) { forcedKind = kind || null; S.next = null; if (S.hook.item && kind) newHookItem(); },
+      events(on) { S.eventsOn = !!on; },
+      startEvent(type) { startEvent(type); },
+      get state() {
+        return { mode: S.mode, height: +S.height.toFixed(3), best: +S.best.toFixed(3), hearts: S.hearts, drops: S.drops, camY: Math.round(S.camY),
+          items: items.length, lost: items.filter((i) => i.lost).length, hookReady: !!S.hook.item && S.hook.cool <= 0, event: S.event && S.event.type,
+          kingerInFort: !!S.kingerBody, positions: items.filter((i) => !i.lost).map((i) => [Math.round(i.body.position.x), Math.round(i.body.position.y), +i.body.angle.toFixed(3)]) };
+      },
+    };
+  }
+  }
+})();
+</script>
+</body>
+</html>

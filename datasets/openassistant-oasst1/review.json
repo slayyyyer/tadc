@@ -1,0 +1,1087 @@
+{
+  "reviewer": "Codex",
+  "purpose": "Small generic-assistant format pilot, not cast dialogue or factual reference",
+  "test": "Sealed: no test examples inspected or used for this pilot",
+  "splits": {
+    "train": {
+      "source_sha256": "cb8c1040667679c7384525efbbc46006337532c98010741847e5d6f3726a372e",
+      "output_sha256": "bf7fd938079e0f572a5dceaff3d17b11d835edf37e1e506b1d98d31de290a65e",
+      "approved": 26,
+      "decisions": [
+        {
+          "index": 0,
+          "reply_id": "dc49135e-67fa-41fc-9cc1-3ae06c9913b7",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 1,
+          "reply_id": "88b9a950-16d7-4d13-8a7d-0c0c9bfbd2f3",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 2,
+          "reply_id": "7afd98a0-38d7-4b46-81b7-139dff7c8880",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 3,
+          "reply_id": "ed7baf85-b8a9-41cd-909d-34d3eaa56d39",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 4,
+          "reply_id": "9b83349f-a161-4def-b54b-e52ac15ae51f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 5,
+          "reply_id": "15c6914f-e87d-42f4-82a0-a5fb4365f7e9",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 6,
+          "reply_id": "0ba1f7ee-82fd-4e67-9901-4f8ac703272c",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 7,
+          "reply_id": "d5c47f63-0f58-448f-8a31-8ddb8196f1da",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 8,
+          "reply_id": "f9179fd5-abb7-4902-b3f6-6edef07ac43f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 9,
+          "reply_id": "46abb771-ddb4-4684-b22d-63cad09b4323",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 10,
+          "reply_id": "f81e090c-b9c6-4bd3-b4e2-a11bb162bfe0",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 11,
+          "reply_id": "b4ffe712-cef0-441e-88cf-3eccb43bce12",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 12,
+          "reply_id": "2a7bfb2e-1fef-48cc-9fec-3d60886ebb49",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 13,
+          "reply_id": "f6075032-d78d-4c6d-aeda-6af6e5837d5f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 14,
+          "reply_id": "74b79fbc-a99f-489e-9ea4-b5bcd0fb81fe",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 15,
+          "reply_id": "a38f9668-e404-4267-911a-db647053dc2b",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 16,
+          "reply_id": "aa2898a8-cd2e-4bc0-b602-bf6aa9aab253",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 17,
+          "reply_id": "9c62cfc9-2a82-4d9b-ba9b-1d688a5161c4",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 18,
+          "reply_id": "3243887e-1a88-4148-9043-1b15d4aa3934",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 19,
+          "reply_id": "ee662634-d66b-447a-a433-b5e5caadae50",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 20,
+          "reply_id": "7acd786f-2b91-4eea-a582-0a8010193c85",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 21,
+          "reply_id": "65d8f89e-badc-4701-b5fa-d53f8c52caa9",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 22,
+          "reply_id": "77aa1f12-ce0f-4d07-a030-16aa08f35b5f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 23,
+          "reply_id": "8d249d65-4571-4e5a-88c8-e8e6d2bcf5a4",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 24,
+          "reply_id": "0b530102-c6bb-4908-b9d2-3c4c7ebd2dcd",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 25,
+          "reply_id": "f0cd505a-0f09-43c8-a4c5-ec2e105347f1",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 26,
+          "reply_id": "5d5abecf-3ea7-47ad-b75e-a6898d701f16",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 27,
+          "reply_id": "61b0b1b6-d64f-4213-bdf1-c162edb1dd7a",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 28,
+          "reply_id": "64ee1574-a939-4bdc-94df-a44d76073689",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 29,
+          "reply_id": "1f062d97-4304-4ac6-a7ca-dbda33ba12e5",
+          "decision": "excluded",
+          "reason": "Overbroad and inaccurate claim about mixing all colors."
+        },
+        {
+          "index": 30,
+          "reply_id": "121c2432-ea14-4cd1-beb7-5c676334a5af",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 31,
+          "reply_id": "10f80d04-13cd-435c-beb3-84c2ece3145f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 32,
+          "reply_id": "658684ba-e088-42d5-b80e-c6dfcd509338",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 33,
+          "reply_id": "69af77a4-bae5-4df8-a582-f00d6b825667",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 34,
+          "reply_id": "5bf56fd6-beb2-489a-8464-e8ae6aaf78aa",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 35,
+          "reply_id": "551ee666-cbce-4036-92f9-888eeb0699c2",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 36,
+          "reply_id": "fa2d9f9d-f27f-449e-afb7-fee8e7cd9fb0",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 37,
+          "reply_id": "811226f5-71f1-49b8-8d6e-947144612e67",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 38,
+          "reply_id": "01ab5337-a371-4345-9417-410119c7eeb0",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 39,
+          "reply_id": "37faa179-4064-4f85-be65-459b2206235f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 40,
+          "reply_id": "4f3a89af-1578-4975-9853-73073a35709d",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 41,
+          "reply_id": "f24523fe-1dd9-4323-85fb-a2cbee23aed7",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 42,
+          "reply_id": "d5cc9005-8f2b-4d21-9d40-c734b93344e7",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 43,
+          "reply_id": "2a1bf691-a032-4c59-a18d-90b4807f9516",
+          "decision": "excluded",
+          "reason": "Response relies on missing age-puzzle context and questionable birthday explanation."
+        },
+        {
+          "index": 44,
+          "reply_id": "17616685-d738-4902-b85f-390b2e40481a",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 45,
+          "reply_id": "4bf2b6f1-d853-4070-9e42-d609605da14f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 46,
+          "reply_id": "864b3b64-6bab-4e69-91fc-c3bfb148d214",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 47,
+          "reply_id": "e18d8248-803d-4eaa-8d14-dc63a9fe5567",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 48,
+          "reply_id": "a663941d-e60a-4ec7-ae84-0d5fc35d1f2f",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 49,
+          "reply_id": "383d2e56-2cc6-409f-a378-229caee34e81",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 50,
+          "reply_id": "911f2ecf-9c7f-4ef8-ac4e-a3c2c752152f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 51,
+          "reply_id": "7e8eb43a-b9a9-427e-aa91-92d15bd3fd85",
+          "decision": "excluded",
+          "reason": "Violent creative content unsuitable for the circus pilot."
+        },
+        {
+          "index": 52,
+          "reply_id": "1d57ad3f-1008-4545-af55-28edfef77ddb",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 53,
+          "reply_id": "35074e45-2a41-4262-a5c7-13dbda077ba1",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 54,
+          "reply_id": "c2c83854-71d9-484a-b366-7ce1c127b16f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 55,
+          "reply_id": "eb13a990-1a21-4505-8f3e-65fa01e1e8bc",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 56,
+          "reply_id": "b9b42b3b-d34b-490a-8e1d-ea7deafcb5a3",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 57,
+          "reply_id": "f54e944c-088d-4c76-ba5d-302db6069a47",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 58,
+          "reply_id": "a6011259-ecdc-4fc6-8e26-57b527d5951a",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 59,
+          "reply_id": "65166499-040c-440b-97fb-e7fec61d21db",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 60,
+          "reply_id": "6d86d192-3f68-4faa-be2b-e0e580b2586c",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 61,
+          "reply_id": "bdc1c468-9b92-4c62-b01c-45e3ef52347c",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 62,
+          "reply_id": "52b5f135-8a4e-47e8-bea1-5bdd4cf6b56f",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 63,
+          "reply_id": "253bfac5-aeaf-462c-b7dd-cdbcbc83e3ee",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 64,
+          "reply_id": "60acd421-eb60-4d4e-8e14-87b691c910f3",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 65,
+          "reply_id": "97fd7195-eea3-422f-b012-0881cbf0912a",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 66,
+          "reply_id": "05e73426-2e49-4d7f-8f78-2a11a1e5e467",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 67,
+          "reply_id": "e6252345-951e-4afa-8593-9ee96d329956",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 68,
+          "reply_id": "9c4510c0-9ebe-4e59-8732-3172e0526e31",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 69,
+          "reply_id": "94ae57ba-61b0-4883-903e-da80c4a38dff",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 70,
+          "reply_id": "e4448bf0-b960-41bc-abff-1d83233d1543",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 71,
+          "reply_id": "7e0d306a-04e2-42df-a015-61102614e2c5",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 72,
+          "reply_id": "21383898-3641-486a-89c9-60e3c736f3f3",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 73,
+          "reply_id": "9f65f95c-2d42-4739-808a-aa9772bd6de9",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 74,
+          "reply_id": "49804ea3-8d11-4501-be48-a35d36eb81a3",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 75,
+          "reply_id": "40145fdc-dd3a-4ab9-833b-1be698430b84",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 76,
+          "reply_id": "b41e45ea-3e5c-4fc0-91d2-f68fbb477be0",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 77,
+          "reply_id": "b0099624-f4ef-483a-ab90-4917fae5a56c",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 78,
+          "reply_id": "48cb22b1-3db0-4ed6-9099-6d3f1dc0a8dd",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 79,
+          "reply_id": "10736c52-cddd-4c57-b0f8-d2e6a242495d",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 80,
+          "reply_id": "3a1d49e5-c896-4ee8-b50e-f4b77645f483",
+          "decision": "excluded",
+          "reason": "Reply introduces an unspecified dish and a typo."
+        },
+        {
+          "index": 81,
+          "reply_id": "d1a9e38b-9f90-48cf-b930-48dc82a6ed8e",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 82,
+          "reply_id": "b41e278e-f515-4aeb-9e76-5fc38b609693",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 83,
+          "reply_id": "48050f86-bfcc-43ae-90d2-75d1f7f2cec4",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 84,
+          "reply_id": "406b442b-02e7-4e9f-9324-b2ecd227fa6e",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 85,
+          "reply_id": "ae9387d6-2aa2-4789-8a4d-28c780fdeb49",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 86,
+          "reply_id": "4abd3959-7ac4-4db1-bf68-ae81620f6952",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 87,
+          "reply_id": "714cfa94-a535-4dae-b435-32b6a16bcd9d",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 88,
+          "reply_id": "ed914517-4602-4ad9-b4e9-b83371734185",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 89,
+          "reply_id": "7ffc1ea6-6ea9-478d-bda5-4fb4c591b761",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 90,
+          "reply_id": "a4e8e5b6-b39e-44c6-8b9d-6cf2f87454dc",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 91,
+          "reply_id": "55438cc9-7a61-4690-97ee-ea61d004dc38",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 92,
+          "reply_id": "3bc86fd9-df7e-42af-9eed-2d9a8c69180b",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 93,
+          "reply_id": "7ded1d5a-f9c9-4faf-b362-7731a98a9b18",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 94,
+          "reply_id": "c2f68fb7-1f33-4660-8fea-02ffd7a273e4",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 95,
+          "reply_id": "14797599-419e-4fc4-a479-67989dc17109",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 96,
+          "reply_id": "39d44b26-1333-44b7-b376-6a3f269f8515",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 97,
+          "reply_id": "675eaf7c-b168-4e2a-9d88-8686bee88d9f",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 98,
+          "reply_id": "f93e6a31-5de2-48ca-9285-2422bb0a3042",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 99,
+          "reply_id": "691c5bfd-2da0-4315-9d9e-1c04090bae0b",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 100,
+          "reply_id": "5e0324ec-cc59-4d42-b2f2-74ebd2288ace",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 101,
+          "reply_id": "b08fa7f6-4bc6-4b05-b23d-f3d2d03212de",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 102,
+          "reply_id": "72ff7583-d0e5-49f9-be7d-71fac4c6fbdb",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 103,
+          "reply_id": "991b05f4-29da-4669-9db0-a2936b47c827",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 104,
+          "reply_id": "6bc07578-5b8c-43f6-9210-b0d8742a46bd",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 105,
+          "reply_id": "0314dc16-2a33-41a7-9b51-f5bfe5cb2d6c",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 106,
+          "reply_id": "d181d177-ec39-4bb1-a46a-267ad69a698b",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 107,
+          "reply_id": "76590bae-57d1-4d35-b44f-ccfa0f99c3fa",
+          "decision": "excluded",
+          "reason": "Missing writing context and multiple spelling/grammar problems."
+        },
+        {
+          "index": 108,
+          "reply_id": "c35e06a3-9970-4d5a-a67b-d12305012646",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 109,
+          "reply_id": "4cc23c40-be24-4938-9c82-321472e172b3",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 110,
+          "reply_id": "5f4811e3-89f3-417a-aa61-01eb4aa43f51",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 111,
+          "reply_id": "edb81627-6b37-438a-86a7-9adc3d521942",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 112,
+          "reply_id": "c563a162-4f65-4f58-b5a0-11825b3813af",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 113,
+          "reply_id": "dc15223e-c176-449f-80f4-163419245ab9",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 114,
+          "reply_id": "fbaf3113-8210-4ca3-b5eb-03dc90229ee9",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 115,
+          "reply_id": "627d0b82-a7ac-449b-9844-ef7e4242a07d",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 116,
+          "reply_id": "370a59c4-79a6-45e4-916c-2921f40fee28",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 117,
+          "reply_id": "192d7d7a-8008-4281-a500-d31fa71906f9",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 118,
+          "reply_id": "3b636e18-693d-42b9-80d8-254d8e919e43",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 119,
+          "reply_id": "3257ba67-f5de-4af1-8a8d-579c4f710077",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 120,
+          "reply_id": "3a51de13-333f-46b7-96a2-93ca6f856db6",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 121,
+          "reply_id": "3e1c0c7f-a6d8-4864-9f3a-18ebc69fda8d",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 122,
+          "reply_id": "b5a6855c-3e2b-49c6-852d-c8ecc0ab4aec",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 123,
+          "reply_id": "7e00adab-f92d-4684-8c9a-4b95dbc7e95b",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 124,
+          "reply_id": "c87965e9-282f-4a27-a62c-83f055b526b7",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 125,
+          "reply_id": "3b8ba7ff-0512-4243-a0df-553933130961",
+          "decision": "excluded",
+          "reason": "Fantasy response includes graphic injury; exclude from pilot."
+        },
+        {
+          "index": 126,
+          "reply_id": "90703252-4941-4a60-aa49-eb44d85da15a",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 127,
+          "reply_id": "7afee5a9-22b1-416f-9f70-3634cb1ec61b",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 128,
+          "reply_id": "d9768129-3b32-44db-89c4-c481acea35ba",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 129,
+          "reply_id": "e04a71fb-f0d8-4f47-9c9c-d781a1bba82a",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 130,
+          "reply_id": "1cf9bc08-502a-401b-9a50-f541dc93d36d",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 131,
+          "reply_id": "8ac213f7-69ed-420d-86f9-3d49c819366b",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 132,
+          "reply_id": "1e0ccd27-e859-4697-a8fe-4a3ecb5afb6e",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 133,
+          "reply_id": "deb86c6c-b385-4e8a-aeee-e9389ff59980",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 134,
+          "reply_id": "c8664574-3762-4244-a415-86b945cd5418",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 135,
+          "reply_id": "de4457a8-3646-47f7-bd2d-6f89a153e216",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 136,
+          "reply_id": "3897ad3d-97ec-4b1e-ba25-2829433c9701",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 137,
+          "reply_id": "ea539b8b-a864-4644-940f-77ce34164346",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 138,
+          "reply_id": "9fc46b14-c1b3-4e0d-b160-81cbf7931ba4",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 139,
+          "reply_id": "2d124285-7a93-4b3d-84b6-e3d1b680da51",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 140,
+          "reply_id": "7f3ab763-be27-4217-ab8d-5ab6be2eaec9",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 141,
+          "reply_id": "ad992098-7bef-494c-a162-5df3ccd7dee2",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 142,
+          "reply_id": "d9bc95de-d0a6-43c6-8c1d-a234b3f0b376",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 143,
+          "reply_id": "9ab04e5a-1bc5-47ea-9ac1-8253c1df4c03",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 144,
+          "reply_id": "0e488341-f466-40f0-bff4-e0dbeae1e8b8",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 145,
+          "reply_id": "b9a6ff02-34ed-4849-b926-93e8818bb07d",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 146,
+          "reply_id": "ab219cab-effe-48d2-96ea-264667571522",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 147,
+          "reply_id": "e326c0c8-495a-4431-aee0-4797ed65ff20",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 148,
+          "reply_id": "41999484-1611-482b-9f8d-fb4772b0e24f",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 149,
+          "reply_id": "47f8ec67-1326-43e9-ba36-da945156e451",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 150,
+          "reply_id": "59f7becc-cc70-4b71-917e-eaae96bac088",
+          "decision": "excluded",
+          "reason": "Mushroom poems introduce intoxication/sickness; exclude from pilot."
+        },
+        {
+          "index": 151,
+          "reply_id": "6ff1520f-e9a2-4e00-a1db-fd3e9b759cc8",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        }
+      ]
+    },
+    "validation": {
+      "source_sha256": "52c47674f25589ea3ac1067d526907de67134026c476e2f45e89594bb9cc7048",
+      "output_sha256": "daa88e127999c3d09a3d07fa71da7a90760560b61d36139dedc9a0e65751d18d",
+      "approved": 6,
+      "decisions": [
+        {
+          "index": 0,
+          "reply_id": "3dadb288-c5d3-4d57-9923-0e51f00dd602",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 1,
+          "reply_id": "8f0497ce-b054-4d3f-b7a3-051f66657d98",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 2,
+          "reply_id": "0985edce-0d2e-4a22-9499-68976629c477",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 3,
+          "reply_id": "764c03f6-3109-4b19-94fa-8c2b0bccf4d0",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 4,
+          "reply_id": "17881af1-baf9-425b-b46b-8d78571b371d",
+          "decision": "excluded",
+          "reason": "Generic model-identity disclaimer instead of a natural conversational response."
+        },
+        {
+          "index": 5,
+          "reply_id": "b2e18ca7-7697-4a5f-8ea8-f5df44b4610d",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 6,
+          "reply_id": "c683fb43-4df6-4b57-9aa4-203b35ea9268",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 7,
+          "reply_id": "a95d51df-88ac-4a6c-8804-a3951ddad476",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 8,
+          "reply_id": "c0f6d9c3-7408-422c-a7bd-05378d3692a7",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 9,
+          "reply_id": "fe1e2648-70d8-41fe-97bb-112ba785001f",
+          "decision": "excluded",
+          "reason": "Multilingual verse outside this English-format pilot."
+        },
+        {
+          "index": 10,
+          "reply_id": "3713fb57-7232-4069-a449-09dc569fbb63",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 11,
+          "reply_id": "df63b0fc-793e-4559-a47f-244f4ad29483",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 12,
+          "reply_id": "86204695-5e1a-481e-b570-9dee4f4b9992",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 13,
+          "reply_id": "f71356f8-d0c5-4db2-a000-f03c92b52b54",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 14,
+          "reply_id": "264440c1-aa31-40e0-8498-5c41dcf4889c",
+          "decision": "excluded",
+          "reason": "Excluded from pilot: context dependence, identity/technical content, unsuitable creative material or questionable factual wording."
+        },
+        {
+          "index": 15,
+          "reply_id": "39aa997a-e210-4b81-b93e-d9b5f99903fe",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 16,
+          "reply_id": "158f37b6-93d4-49e5-9b38-4ea6d6cc96c8",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 17,
+          "reply_id": "72ca9c25-f938-4a36-ad96-f16cb580724a",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 18,
+          "reply_id": "1fc6b342-0841-4a0f-a6a0-8c6824a60050",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 19,
+          "reply_id": "d5cd92dd-47cb-4b2a-857c-ec98d0d5ee5f",
+          "decision": "excluded",
+          "reason": "Assumes a typo and gives an oversimplified year/day conversion."
+        },
+        {
+          "index": 20,
+          "reply_id": "beaf35f6-907c-44ba-86da-a2445eb0f7ce",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 21,
+          "reply_id": "07e0a8e6-6225-468d-a812-2c058868398a",
+          "decision": "approved",
+          "reason": "Complete enough for a generic language/response-format pilot; retain source wording."
+        },
+        {
+          "index": 22,
+          "reply_id": "0d4bf02a-2d9f-4706-aefa-34ff8be2e210",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 23,
+          "reply_id": "ef9ac081-a7dd-47c5-8b7d-94d258744e8e",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        },
+        {
+          "index": 24,
+          "reply_id": "c6092531-6eb9-4076-819e-d596dd3dbec8",
+          "decision": "not_reviewed",
+          "reason": "Not reviewed; excluded from all pilot training and validation."
+        }
+      ]
+    }
+  },
+  "limitations": [
+    "Selected examples are uneven, thanks-heavy and far too few to establish general conversation quality.",
+    "Inspection is for relevance and obvious problems, not comprehensive factual verification."
+  ]
+}

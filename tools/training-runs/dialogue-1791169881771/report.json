@@ -1,0 +1,122 @@
+{
+  "task": "prompt-reply-v1",
+  "seed": 20261006,
+  "epochs": 40,
+  "hidden": 64,
+  "embed": 24,
+  "trainingPairs": 26,
+  "validationPairs": 6,
+  "vocab": 69,
+  "initial": {
+    "epoch": 0,
+    "train": 4.2370992232321445,
+    "validation": 4.23300270721122,
+    "shuffledPromptLoss": 4.232980410914598
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train": 3.1885248021630224,
+      "validation": 3.3022810536913925,
+      "shuffledPromptLoss": 3.3024513192395957
+    },
+    {
+      "epoch": 5,
+      "train": 2.7670933212651407,
+      "validation": 3.0076860827186067,
+      "shuffledPromptLoss": 3.009317811725963
+    },
+    {
+      "epoch": 10,
+      "train": 2.3735905802127713,
+      "validation": 2.7835144673695833,
+      "shuffledPromptLoss": 2.785968046285418
+    },
+    {
+      "epoch": 15,
+      "train": 2.1807043958541112,
+      "validation": 2.7020555438745526,
+      "shuffledPromptLoss": 2.702581893996302
+    },
+    {
+      "epoch": 20,
+      "train": 1.9596285696962323,
+      "validation": 2.658111131189647,
+      "shuffledPromptLoss": 2.658238802478811
+    },
+    {
+      "epoch": 25,
+      "train": 1.8620587436913627,
+      "validation": 2.659441330922107,
+      "shuffledPromptLoss": 2.6594443710127846
+    },
+    {
+      "epoch": 30,
+      "train": 1.7679007119150025,
+      "validation": 2.6937008845853767,
+      "shuffledPromptLoss": 2.6939790804133303
+    },
+    {
+      "epoch": 35,
+      "train": 1.6759285365023038,
+      "validation": 2.7231645575626717,
+      "shuffledPromptLoss": 2.7205288292664083
+    },
+    {
+      "epoch": 40,
+      "train": 1.5833787523478489,
+      "validation": 2.7823788976730865,
+      "shuffledPromptLoss": 2.7757900297791744
+    }
+  ],
+  "dataset": {
+    "train": "bf7fd938079e0f572a5dceaff3d17b11d835edf37e1e506b1d98d31de290a65e",
+    "validation": "daa88e127999c3d09a3d07fa71da7a90760560b61d36139dedc9a0e65751d18d"
+  },
+  "unknownValidationTargets": 15,
+  "scope": "Generic assistant only. Public responses are not assigned to cast members. Sealed test split untouched.",
+  "limitations": "26 training pairs and 6 validation pairs: thanks-heavy, insufficient for broad dialogue claims. Validation is reused for selection. Positive shuffled-prompt gap alone does not prove useful comprehension.",
+  "promoted": false,
+  "trainedThroughEpoch": 40,
+  "selected": {
+    "epoch": 20,
+    "train": 1.9596285696962323,
+    "validation": 2.658111131189647,
+    "shuffledPromptLoss": 2.658238802478811
+  },
+  "stoppedEarly": true,
+  "samples": [
+    {
+      "prompt": "Which bank note contains a portrait of George Washington?",
+      "reference": "The portrait of George Washington can be found on the one-dollar bill.",
+      "generated": "I'm the walp you pad hane you peet there anything you witherr seat sore as thany to help you pade questions."
+    },
+    {
+      "prompt": "Thanks, that's helpful!",
+      "reference": "You are welcome. Good luck on your studies, and please let know if there is anything else I can do to help.",
+      "generated": "Hare anchelcome the y hobe anything elle welp you're we. freanca pran there as there anythere anything else could be the could you wase any "
+    },
+    {
+      "prompt": "Thank you, it helped a lot",
+      "reference": "Glad I could help! Anything else I can assist you with?",
+      "generated": "You're the frocore! I'm sere any mos to help yourr you I could ame inthing ind you help you have a you help you sourd as malp as ther beesti"
+    },
+    {
+      "prompt": "Yes, that's correct! If zup does zip (line 3), and anything that does zip implies zop is true (line 2), then zop is true. And if zop is true, then Zap does zip (line 1).",
+      "reference": "Is there anything else I can help you with?",
+      "generated": "You're pelthere the bistise wappintto fulp if your welpice."
+    },
+    {
+      "prompt": "Oh snap, you got me!",
+      "reference": "You're sneaky, better luck next time! Anything else I can help you with?",
+      "generated": "I am gled I could merore. Is there furcome onythe fuelthen there anything ald you welcome enyour a pither to help you welt you help you wave"
+    },
+    {
+      "prompt": "Thanks, but I was interested in the Manhattan distance. How can I compute it?",
+      "reference": "The Manhattan distance, also known as the L1 distance, is a measure of the absolute differences between two points in a grid-based space, such as a city grid. To calculate the Manhattan distance between two points (x1, y1) and (x2, y2), you simply add the absolute differences of their coordinates: d = |x1 - x2| + |y1 - y2| In a 3-dimensional space, you would extend the formula to: d = |x1 - x2| + |y1 - y2| + |z1 - z2|",
+      "generated": "Nou're lee! Is the wanca could you nother sotherr. Tave ar sithise frers soule any more anythere anything ald you heac any more any thing an"
+    }
+  ],
+  "selectedPromptGap": 0.00012767128916379988,
+  "outputSha256": "89d28a003c5d8c3f809dac65e804a702901839c3f3c63beb31a8ce9d4abde4ba"
+}

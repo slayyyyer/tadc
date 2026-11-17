@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Jax's Roast Machine</title>
+<!-- Uses local system-font fallbacks; no network requests required. -->
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--purple:#8f5bd6}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:#0b0718;padding-bottom:80px}
+  /* comedy-club stage: brick wall in circus colors + spotlight */
+  #club{position:relative;min-height:56vh;overflow:hidden;
+    background:radial-gradient(ellipse 34% 60% at 50% 62%,rgba(255,240,180,.38),transparent 70%),
+      linear-gradient(transparent 0 0),
+      repeating-linear-gradient(0deg,#3a1630 0 3px,transparent 3px 34px),
+      repeating-linear-gradient(90deg,#3a1630 0 3px,transparent 3px 68px),
+      linear-gradient(#5a1f3f,#2b0f24)}
+  #club::after{content:'';position:absolute;left:0;right:0;bottom:0;height:16%;background:linear-gradient(#2b1a12,#140b06);border-top:5px solid var(--ink)}
+  h1{position:relative;z-index:3;margin:0;padding-top:14px;text-align:center;font-family:'Rye',Georgia,serif;font-weight:400;font-size:clamp(26px,4.6vw,52px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink)}
+  .neon{position:relative;z-index:3;text-align:center;font:400 clamp(18px,2.6vw,26px) 'VT323',monospace;color:#ff7eb6;text-shadow:0 0 10px #ff2a6d,0 0 2px #fff;animation:neon 3s infinite}
+  @keyframes neon{0%,90%,100%{opacity:1}92%{opacity:.4}94%{opacity:1}96%{opacity:.6}}
+  #jax{position:absolute;left:50%;bottom:9%;width:clamp(110px,15vw,180px);transform:translateX(-50%);z-index:2;transform-origin:50% 100%}
+  #jax svg{width:100%;height:auto;filter:drop-shadow(0 12px 10px rgba(0,0,0,.6))}
+  #jax.lean{animation:lean .6s ease-in-out}
+  @keyframes lean{40%{transform:translateX(-50%) rotate(-6deg) scale(1.04)}}
+  #mic{position:absolute;left:calc(50% + clamp(54px,7vw,86px));bottom:9%;width:14px;height:clamp(110px,16vh,160px);z-index:2}
+  #mic::before{content:'';position:absolute;left:5px;bottom:0;width:4px;height:100%;background:#999}
+  #mic::after{content:'';position:absolute;left:-4px;top:-14px;width:22px;height:30px;border-radius:11px;background:#333;border:3px solid #777}
+  #ragatha{position:absolute;right:4%;bottom:9%;width:clamp(70px,9vw,110px);z-index:2;transform:translateX(160%);transition:transform .6s cubic-bezier(.3,1.5,.5,1)}
+  #ragatha.on{transform:none}
+  #ragatha svg{width:100%;height:auto;filter:drop-shadow(0 10px 8px rgba(0,0,0,.6))}
+  #caine{position:absolute;left:3%;bottom:9%;width:clamp(64px,8vw,100px);z-index:2}
+  #caine svg{width:100%;height:auto;filter:drop-shadow(0 10px 8px rgba(0,0,0,.6))}
+  #drums{position:absolute;left:calc(3% + clamp(64px,8vw,100px));bottom:9%;font-size:clamp(28px,4vw,44px);z-index:2;cursor:pointer;filter:drop-shadow(0 4px 3px #000)}
+  /* the roast card */
+  #roastWrap{width:min(860px,94vw);margin:-30px auto 0;position:relative;z-index:5}
+  .card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 var(--red-d);padding:16px 18px}
+  label{font-weight:700;font-size:15px}
+  textarea{width:100%;min-height:72px;margin-top:6px;font:400 22px/1.2 'VT323',monospace;border:3px solid var(--ink);border-radius:12px;padding:8px 10px;background:#fff;resize:vertical;color:var(--ink)}
+  textarea:focus-visible{outline:3px dashed var(--red);outline-offset:2px}
+  .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:10px}
+  .btn{font:700 15px 'Fredoka',system-ui,sans-serif;color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:9px 16px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.red{background:var(--red);color:#fff;font-size:17px}
+  .btn:focus-visible{outline:3px dashed var(--red);outline-offset:2px}
+  .heat{display:flex;gap:4px;margin-left:auto;align-items:center;font-weight:700;font-size:14px}
+  .heat button{font:700 13px 'Fredoka',system-ui,sans-serif;border:3px solid var(--ink);border-radius:999px;padding:5px 10px;cursor:pointer;background:#fff}
+  .heat button.sel{background:var(--red);color:#fff}
+  .private{font-size:12px;color:#5c3a99;margin-top:6px}
+  #result{margin-top:14px;display:none}
+  #result.show{display:block;animation:pop .35s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes pop{from{transform:scale(.9);opacity:0}}
+  .bubbleBox{background:#fff;border:4px solid var(--ink);border-radius:16px;padding:12px 16px;font-size:clamp(16px,2vw,19px);line-height:1.45;position:relative}
+  .bubbleBox::before{content:'JAX';position:absolute;top:-14px;left:16px;background:var(--purple);color:#fff;font:700 12px 'Fredoka',system-ui,sans-serif;padding:2px 10px;border-radius:999px;border:3px solid var(--ink)}
+  .bubbleBox.rag{margin-top:12px;background:#fff1f4}
+  .bubbleBox.rag::before{content:'RAGATHA (rebuttal)';background:var(--red)}
+  .bubbleBox p{margin:0 0 8px}
+  .bubbleBox p:last-child{margin:0}
+  #score{display:flex;align-items:center;gap:12px;margin-top:12px;font-weight:700}
+  #meter{flex:1;height:18px;border:3px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff}
+  #meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,#e3243b,#ffd34d,#5fd38d);transition:width 1s cubic-bezier(.3,1.4,.5,1)}
+  #scoreNum{font:400 34px 'VT323',monospace;min-width:70px;text-align:right}
+  #hist{margin-top:14px;font-size:13px;color:#e4dcff;width:min(860px,94vw);margin-left:auto;margin-right:auto}
+  #hist ol{margin:6px 0 0;padding-left:22px;line-height:1.6}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30}
+  .bubbleBox,#hist li{overflow-wrap:anywhere}
+  #score{flex-wrap:wrap}#meter{min-width:80px}
+  @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+  @media (max-width:640px){#ragatha,#drums{display:none}.heat{margin-left:0}}
+</style>
+</head>
+<body>
+<div id="club">
+  <h1>Jax's Roast Machine</h1>
+  <div class="neon">✦ LIVE TONIGHT · NO REFUNDS · NO EXIT ✦</div>
+  <div id="caine" title="Caine (MC)"></div>
+  <div id="drums" title="Rimshot!" role="button" tabindex="0" aria-label="Rimshot">🥁</div>
+  <div id="jax" title="Jax" role="button" tabindex="0" aria-label="Hear from Jax"></div>
+  <div id="mic"></div>
+  <div id="ragatha" title="Ragatha"></div>
+</div>
+
+<div id="roastWrap">
+  <div class="card">
+    <label for="txt">Hand Jax a commit message (or a variable name, or a meeting title, or your hopes and dreams):</label>
+    <textarea aria-describedby="inputHelp" id="txt" maxlength="400" placeholder="e.g. fix stuff" spellcheck="false"></textarea>
+    <div class="row">
+      <button class="btn red" id="roast">🎤 ROAST IT</button>
+      <button class="btn" id="sample">🎲 Random victim</button>
+      <button class="btn" id="sound" aria-pressed="false">Sound: off</button>
+      <button class="btn" id="clear">Clear the stage</button>
+      <div class="heat" role="group" aria-label="Roast heat">Heat:
+        <button data-heat="0" aria-pressed="false">Mild</button><button data-heat="1" aria-pressed="true" class="sel">Medium</button><button data-heat="2" aria-pressed="false">Extra Crispy</button>
+      </div>
+    </div>
+    <p class="private" id="inputHelp">Enter to roast · Shift+Enter for a new line. Try a made-up message or a random victim.</p>
+    <div class="private">🔒 Nothing you type leaves this page. Jax is mean, not nosy. (Don't paste secrets anyway; Caine says it's tacky.)</div>
+    <div id="result" role="status" aria-live="polite" aria-atomic="true">
+      <div class="bubbleBox" id="jaxSays"></div>
+      <div id="score"><span>Jax’s very biased score</span><div id="meter"><i></i></div><span id="scoreNum">?/10</span></div>
+      <div class="bubbleBox rag" id="ragSays"></div>
+    </div>
+  </div>
+</div>
+<div id="hist"></div>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, confetti, sfx: sharedSfx, pick, wireCaine, say } = window.TADC;
+  const $ = (id) => document.getElementById(id);
+  $('jax').innerHTML = CAST.jax; $('ragatha').innerHTML = CAST.ragatha; $('caine').innerHTML = CAST.caine;
+  const caine = wireCaine($('caine'));
+
+  // ═══ audio: rimshot + a little crowd "ooh" ═══
+  let ac, sound = false, ragTimer, crowdTimer;
+  const reducedMotion = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function muteUnavailable() {
+    sound = false;
+    $('sound').textContent = 'Sound unavailable';
+    $('sound').setAttribute('aria-pressed', 'false');
+  }
+  function sfx(name) {
+    if (!sound) return;
+    try { sharedSfx(name); } catch { muteUnavailable(); }
+  }
+  function audio() {
+    if (!sound) return null;
+    try {
+      if (!ac) ac = new (window.AudioContext || window.webkitAudioContext)();
+      if (ac.state === 'suspended') ac.resume().catch(muteUnavailable);
+      return ac;
+    } catch { muteUnavailable(); return null; }
+  }
+  $('sound').addEventListener('click', () => {
+    sound = !sound;
+    $('sound').textContent = `Sound: ${sound ? 'on' : 'off'}`;
+    $('sound').setAttribute('aria-pressed', String(sound));
+    if (sound) audio();
+    else if (ac) ac.suspend().catch(() => {});
+  });
+  function noiseBurst(t, dur, freq, gain) {
+    const len = Math.floor(ac.sampleRate * dur), buf = ac.createBuffer(1, len, ac.sampleRate), d = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+    const s = ac.createBufferSource(); s.buffer = buf;
+    const f = ac.createBiquadFilter(); f.type = 'bandpass'; f.frequency.value = freq; f.Q.value = 0.9;
+    const g = ac.createGain(); g.gain.value = gain;
+    s.connect(f); f.connect(g); g.connect(ac.destination); s.start(t);
+  }
+  function tom(t, f0) {
+    const o = ac.createOscillator(), g = ac.createGain();
+    o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(f0 * 0.55, t + 0.18);
+    g.gain.setValueAtTime(0.5, t); g.gain.exponentialRampToValueAtTime(0.001, t + 0.22);
+    o.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 0.25);
+  }
+  function rimshot() {
+    if (!audio()) return; const t = ac.currentTime;
+    tom(t, 240); noiseBurst(t, 0.08, 2500, 0.35);
+    tom(t + 0.14, 170); noiseBurst(t + 0.14, 0.08, 2500, 0.3);
+    noiseBurst(t + 0.32, 0.9, 7000, 0.28); // the cymbal "tss"
+  }
+  function ooh() {
+    if (!audio()) return; const t = ac.currentTime;
+    for (let v = 0; v < 6; v++) {
+      const o = ac.createOscillator(), g = ac.createGain(), f = ac.createBiquadFilter();
+      o.type = 'sawtooth'; o.frequency.setValueAtTime(180 + Math.random() * 120, t); o.frequency.linearRampToValueAtTime(140 + Math.random() * 60, t + 0.9);
+      f.type = 'lowpass'; f.frequency.value = 900;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.03, t + 0.15); g.gain.linearRampToValueAtTime(0, t + 1);
+      o.connect(f); f.connect(g); g.connect(ac.destination); o.start(t); o.stop(t + 1.05);
+    }
+  }
+  $('drums').addEventListener('click', rimshot);
+  $('drums').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); rimshot(); } });
+
+  // ═══ the roast engine: detectors → jokes (all original) ═══
+  // Each detector: test(text, info) → returns a list of jokes [mild, medium, extraCrispy] and a score delta.
+  const D = [
+    { test: (t) => !t.trim(), delta: -9, j: ['A blank message. Minimalism! Sort of.', "You gave me nothing. Honestly? Relatable. Still a zero.", "Empty. Like the exit. Like my patience. Like your git history's soul."] },
+    { test: (t) => /^\s*(fix(ed|es)?|update[sd]?|changes?|stuff|misc|wip|tweaks?|edits?)\s*\.?\s*$/i.test(t), delta: -6,
+      j: ['That\'s a little vague! Maybe say what you fixed?', '"%s." Fix WHAT? Your posture? Your life? Be specific.', '"%s." A single word. The commit message equivalent of shrugging at a funeral.'] },
+    { test: (t) => /\bwip\b/i.test(t), delta: -3, j: ['Work in progress! Progress is good!', 'WIP. "Work In Progress." Or as I read it: "Wishful, Incomplete, Panicking."', 'WIP. The progress is theoretical. The work is a rumor.'] },
+    { test: (t) => /(?:^|[\s_-])final(?=$|[\s_-]|\d)|\bfinal\b|final[\s_-]?\d|v\d+[\s_-]?final|\bfor real\b/i.test(t), delta: -2, j: ['"Final" is a strong word!', 'You wrote "final." Narrator voice: it was not final.', '"final." I give it three commits before "final_final_ACTUALLY".'] },
+    { test: (t) => /\b(typo|typos)\b/i.test(t), delta: -1, j: ['Typos happen to everyone!', 'A typo fix. Heroic. Someone get this person a medal made of spellcheck.', 'Fixed a typo. Introduced character development. Allegedly.'] },
+    { test: (t) => /\brevert/i.test(t), delta: -1, j: ['A revert! Knowing when to step back is wise!', 'Revert: the commit message equivalent of "never mind."', 'Revert. Ah yes. The undo button with a paper trail.'] },
+    { test: (t) => /\brefactor/i.test(t), delta: 0, j: ['Refactoring! Tidy code is happy code!', 'Refactor: moving the mess into a nicer room.', 'Refactor. Translation: "I rewrote it and now only I understand it. Again."'] },
+    { test: (t) => /\b(please|pls|plz)\b.*\bwork|\bwork\b.*\b(please|pls|plz)\b|\bpray|\bhopefully\b/i.test(t), delta: -3, j: ['Aww, hoping for the best!', 'Begging the compiler. Bold strategy. Never worked for me either.', 'You PRAYED in a commit message. The CI pipeline does not accept prayers.'] },
+    { test: (t) => /\b(oops|whoops|lol|lmao|oopsie)\b/i.test(t), delta: -2, j: ["Oops happens! Good on you for owning it!", '"oops." The most honest word in software. Still a red flag.', '"oops." Somewhere, a production server just felt a chill.'] },
+    { test: (t) => /\b(asap|urgent|hotfix|critical|emergency|!!+)/i.test(t), delta: -1, j: ['Urgent! Hope everything turned out okay!', 'Hotfix. Hot like "on fire." The building. The building is on fire.', 'URGENT HOTFIX. Typed with the confidence of someone who just broke everything.'] },
+    { test: (t) => /\btodo\b|\bfixme\b|\bhack\b/i.test(t), delta: -2, j: ['A TODO is a promise to your future self!', 'TODO: a note to your future self, who will ignore it, like you.', 'TODO/HACK. A time capsule of regret, buried in plain sight.'] },
+    { test: (t) => /\btests?\b|\bspecs?\b/i.test(t), delta: 1, j: ['Tests! Wonderful! Responsible!', 'You wrote tests? In THIS economy? ...Fine. That\'s actually decent.', 'Tests. Wow. Look at Mr. or Ms. Professional over here. Disgusting. (Good job.)'] },
+    { test: (t) => /^(feat|fix|chore|docs|refactor|test|perf|style|build|ci)(\(.+\))?!?:/i.test(t.trim()), delta: 2, j: ['Conventional commits! So organized!', 'Ooh, Conventional Commits. Following rules. Couldn\'t be me.', 'A conventional commit. You color-code your sock drawer, don\'t you.'] },
+    { test: (t) => /^\s*\[?[A-Z][A-Z0-9]+-\d+\]?\s*$/.test(t), delta: -4, j: ['Just a ticket number! Very mysterious!', 'Only a ticket number. Like a fortune cookie with no fortune.', 'A bare ticket number. You expect me to go LOOK something up? I have a nap scheduled.'] },
+    { test: (t) => t.length > 14 && t === t.toUpperCase() && /[A-Z]/.test(t), delta: -2, j: ['That\'s a lot of capital letters! Very excited!', 'WHY ARE WE YELLING. The code can hear you. It just doesn\'t care.', 'ALL CAPS. Your keyboard is crying. Your reviewers are crying. I\'m laughing.'] },
+    { test: (t) => t.trim().length > 0 && t.trim().length < 6 && !/^\s*\[?[A-Z][A-Z0-9]+-\d+/.test(t), delta: -3, j: ['Short and sweet!', 'That\'s it? I\'ve seen longer messages on a fortune cookie. And it said "no."', 'Five characters. Even Bubble writes longer messages. Bubble mostly writes "food."'] },
+    { test: (t) => t.length > 140, delta: -1, j: ['Very thorough! Maybe a little long for a subject line!', 'This isn\'t a commit message, it\'s a memoir. Put a subject line on top and the novel below.', 'I fell asleep halfway through and woke up in a different sprint.'] },
+    { test: (t) => /[a-z]{5,}/i.test(t) && (t.match(/[aeiou]/gi) || []).length / Math.max(1, (t.match(/[a-z]/gi) || []).length) < 0.18, delta: -5, j: ['Hmm, I think your keyboard sneezed!', 'That\'s not a message. That\'s a keyboard falling down the stairs.', 'asdfghjkl energy. Did a cat write this? Is the cat okay?'] },
+    { test: (t) => /\.\s*$/.test(t.split('\n')[0]) && t.trim().length > 6, delta: -1, j: ['A tidy little period at the end!', 'A period at the end of a subject line. Formal. Unnecessary. Like a tuxedo at a pool party.', 'Ended the subject with a period. Bold. Wrong. But bold.'] },
+    { test: (t) => /\p{Extended_Pictographic}/u.test(t), delta: 0, j: ['Emoji! Fun and festive!', 'Emoji in a commit. Very "I\'m not like other developers."', 'Emoji. Future archaeologists will study this and weep.'] },
+    { test: (t) => /\b(stuff|things|some|various|misc|bunch)\b/i.test(t) && t.length > 6, delta: -2, j: ['Things got done! Nice!', '"stuff" and "things." Truly the poetry of our time.', 'Vague words detected. This message has the specificity of a horoscope.'] },
+    { test: (t) => /^(add|fix|update|remove|refactor|rename|move|bump|implement|improve|handle|prevent|make|use|allow|support)\b/i.test(t.trim()) && t.trim().length >= 12 && t.trim().length <= 72 && !/\.\s*$/.test(t.trim()), delta: 2,
+      j: ['A clear, imperative, right-length subject! Lovely!', 'Imperative mood, sensible length, no period... Ugh. This is good. I hate it.', 'This is... a genuinely good commit message. I have nothing. Get off my stage.'] },
+  ];
+  const OPENERS = [
+    ['Okay, let\'s see what we have here...', 'Alright, alright. Let\'s take a look at this masterpiece.', '*taps mic* Is this thing on? Unfortunately, so is your commit.'],
+  ];
+  const CLOSERS = [
+    ['Anyway, you\'re doing great. Don\'t tell anyone I said that.', 'Anyway. Thanks for coming, I guess.', 'Goodnight! Tip your ringmaster! Don\'t tip me, I\'m above money!'],
+    ['I\'m kidding. Mostly. Like 40% kidding.', 'That\'s my set. I\'d say "I\'m here all week" but I\'m here FOREVER.', 'You\'ve been a terrible audience. My favorite kind.'],
+  ];
+  const RAGATHA = {
+    low: ['Don\'t listen to him! Every commit is a step forward! Even the tiny ones!', 'Jax, be NICE. You wrote "asdf" yesterday, I SAW it.', 'Honestly? Shipping anything at all is brave! I\'m proud of you!'],
+    mid: ['That\'s a perfectly respectable commit! Jax is just jealous of your penmanship!', 'I think it\'s lovely! Clear-ish! Mostly clear! A good effort!'],
+    high: ['THAT was a wonderful commit message! Jax is speechless! Look at him! He\'s speechless!', 'Ten out of ten from me! I\'d frame it! I\'d quilt it!'],
+  };
+  const SAMPLES = ['fix stuff', 'wip', 'final_final_v3 FOR REAL', 'please work', 'asdfghjkl', 'Update README.md', 'feat(circus): add trapdoor to hallway of doors', 'oops', 'URGENT HOTFIX DO NOT REVERT', 'TODO: remember what this does', 'Refactor everything (sorry)', 'Add tests for the exit door (all failing, as expected)', 'Fix typo in exit sign', 'changes.', 'TADC-404', 'misc things and stuff 🎉', 'Revert "Revert "Add the exit""', 'Handle null ringmaster when tent collapses'];
+
+  let heat = 1;
+  document.querySelectorAll('.heat button').forEach((b) => b.addEventListener('click', () => {
+    heat = +b.dataset.heat; document.querySelectorAll('.heat button').forEach((x) => { x.classList.toggle('sel', x === b); x.setAttribute('aria-pressed', String(x === b)); }); sfx('tick');
+  }));
+
+  // ═══ roast! ═══
+  const esc = (s) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const history = [];
+  function roast() {
+    const raw = $('txt').value;
+    const t = raw.replace(/\s+$/, '');
+    const hits = D.filter((d) => { try { return d.test(t); } catch (e) { return false; } });
+    let score = 6 + hits.reduce((s, d) => s + d.delta, 0);
+    if (!hits.length && t.trim()) score = 6;
+    score = Math.max(0, Math.min(10, score));
+    const subject = esc(t.split('\n')[0].slice(0, 60));
+    const jokes = hits.slice(0, 3).map((d) => d.j[heat].replace('%s', () => subject));
+    if (!jokes.length) jokes.push(pick([
+      `"${subject}." Hm. It's... fine? I came here to roast and you gave me a lukewarm sandwich.`,
+      `"${subject}." I have no notes. I resent having no notes.`,
+      `"${subject}." Unremarkable. Like beige. Like Tuesday. Like Kinger's chess strategy.`,
+    ]));
+    const lines = [`<p>${OPENERS[0][heat]}</p>`, ...jokes.map((j) => `<p>${j}</p>`), `<p><i>${pick(CLOSERS)[heat]}</i></p>`];
+    $('jaxSays').innerHTML = lines.join('');
+    $('result').classList.remove('show'); void $('result').offsetWidth; $('result').classList.add('show');
+    $('meter').querySelector('i').style.width = '0';
+    requestAnimationFrame(() => { $('meter').querySelector('i').style.width = score * 10 + '%'; });
+    $('scoreNum').textContent = score + '/10';
+    // Ragatha storms in with a rebuttal
+    const rag = $('ragatha'); rag.classList.add('on');
+    $('ragSays').textContent = pick(score <= 3 ? RAGATHA.low : score >= 8 ? RAGATHA.high : RAGATHA.mid);
+    clearTimeout(ragTimer);
+    ragTimer = setTimeout(() => rag.classList.remove('on'), 4500);
+    // stagecraft
+    const j = $('jax'); j.classList.remove('lean'); void j.offsetWidth; j.classList.add('lean');
+    clearTimeout(crowdTimer);
+    rimshot(); if (heat === 2 || score <= 2) crowdTimer = setTimeout(ooh, 450);
+    if (score >= 9 && !reducedMotion()) { const r = $('jax').getBoundingClientRect(); confetti(r.left + r.width / 2, r.top, 120, 1.1); sfx('fanfare'); }
+    if (Math.random() < 0.4) caine.talk(pick(['Ladies and gentlemen, JAX! Please hold your applause! Forever!', "Ooh! That one stung! I don't have skin and it STUNG!", 'Remember, folks: the roast is a sign of love! Probably!']), 3000);
+    history.unshift(`"${subject || '(empty)'}": ${score}/10`);
+    history.length = Math.min(history.length, 6);
+    $('hist').innerHTML = `<b>Tonight's victims:</b><ol>${history.slice(0, 6).map((h) => `<li>${h}</li>`).join('')}</ol>`;
+    $('result').scrollIntoView({ behavior: reducedMotion() ? 'auto' : 'smooth', block: 'nearest' });
+  }
+  $('clear').addEventListener('click', () => {
+    $('txt').value = ''; history.length = 0; $('hist').innerHTML = '';
+    $('jaxSays').innerHTML = ''; $('ragSays').textContent = '';
+    $('result').classList.remove('show'); $('ragatha').classList.remove('on');
+    clearTimeout(ragTimer); clearTimeout(crowdTimer);
+  });
+  $('jax').addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); $('jax').click(); }
+  });
+  $('roast').addEventListener('click', roast);
+  $('txt').addEventListener('keydown', (e) => { if (e.key === 'Enter' && (e.metaKey || e.ctrlKey || !e.shiftKey)) { e.preventDefault(); roast(); } });
+  $('sample').addEventListener('click', () => { $('txt').value = pick(SAMPLES); roast(); });
+  $('jax').addEventListener('click', () => { say($('jax'), pick(["Don't touch me. I'm WORKING.", 'Autographs are $5. Insults are free.', "Hand me a commit. I'm hungry for mediocrity."]), 2400); sfx('boing'); });
+
+  setTimeout(() => caine.talk("WELCOME to <b>JAX'S ROAST MACHINE!</b> Give him your commit messages! He'll give you... feelings!", 4200), 500);
+})();
+</script>
+</body>
+</html>

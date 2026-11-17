@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bubble's Word Snack</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--void:#0b0718;--absent:#3a3352;
+    --tile:min(58px,calc((100vw - 56px) / 5),calc((100dvh - 330px) / 6.4))}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:var(--void);color:#fff;font-family:'Fredoka',system-ui,sans-serif;overflow-x:hidden}
+  body{background:radial-gradient(ellipse at 50% 20%,#24134d 0%,var(--void) 65%) fixed,var(--void);-webkit-tap-highlight-color:transparent}
+  main{min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;align-items:center;padding:10px 16px 14px;gap:8px}
+  #topbar{width:min(640px,100%);display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-height:34px}
+  #back{font:700 13px 'Fredoka',system-ui,sans-serif;color:var(--ink);background:var(--cream);border:3px solid var(--ink);border-radius:999px;
+    padding:6px 11px;box-shadow:2px 2px 0 var(--ink);text-decoration:none;white-space:nowrap;line-height:1.2}
+  #back:hover{background:var(--gold)}
+  h1{font-family:'Rye';font-weight:400;margin:2px 0 0;font-size:clamp(24px,6vw,40px);color:var(--gold);text-align:center;line-height:1.05;
+     text-shadow:0 3px 0 #8a0c1a,0 6px 0 var(--ink)}
+  #modes{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .btn{font:700 14px 'Fredoka',system-ui,sans-serif;color:var(--ink);background:var(--cream);border:3px solid var(--ink);border-radius:12px;
+       padding:6px 12px;box-shadow:3px 3px 0 var(--ink);cursor:pointer}
+  .btn:hover{background:#fff}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn[aria-pressed="true"]{background:var(--gold)}
+  .btn:focus-visible,.key:focus-visible{outline:3px dashed var(--gold);outline-offset:2px}
+  #status{font-weight:600;font-size:14px;color:#cfc4ff;text-align:center;min-height:18px}
+
+  /* ── stage: Bubble · board · Caine ── */
+  #stage{display:grid;grid-template-columns:auto auto auto;align-items:center;gap:14px}
+  .castbox{width:96px;display:flex;flex-direction:column;align-items:center;gap:4px}
+  .castbox small{font-size:11px;color:#b7a9ff;letter-spacing:.08em;text-transform:uppercase}
+  #bubble{width:88px;height:88px;cursor:pointer;filter:drop-shadow(0 4px 0 rgba(0,0,0,.35));animation:bob 2.4s ease-in-out infinite}
+  #bubble svg{width:100%;height:100%;display:block}
+  #bubble.chomp{animation:chomp .42s ease-in-out}
+  #bubble.yay{animation:yay .7s ease-in-out 2}
+  @keyframes bob{50%{transform:translateY(-6px)}}
+  @keyframes chomp{0%,100%{transform:scale(1)}25%{transform:scale(1.25,.8)}50%{transform:scale(.85,1.2)}75%{transform:scale(1.2,.85)}}
+  @keyframes yay{50%{transform:translateY(-18px) rotate(12deg)}}
+  #caine{width:70px;cursor:pointer}
+  #caine svg{width:100%;height:auto;display:block}
+
+  #board{display:grid;grid-template-rows:repeat(6,var(--tile));gap:6px}
+  .row{display:grid;grid-template-columns:repeat(5,var(--tile));gap:6px}
+  .row.shake{animation:shake .4s}
+  @keyframes shake{20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+  .tile{position:relative;width:var(--tile);height:var(--tile);perspective:300px}
+  .face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;border:3px solid var(--ink);border-radius:10px;
+        font:700 calc(var(--tile) * .55)/1 'Fredoka',system-ui,sans-serif;backface-visibility:hidden;transition:transform .45s ease}
+  .front{background:#211a3a;color:#fff;border-color:#4b4170}
+  .tile.filled .front{border-color:var(--cream);animation:poke .12s}
+  @keyframes poke{50%{transform:scale(1.1)}}
+  .back{transform:rotateX(180deg);color:var(--ink);box-shadow:inset 0 -4px 0 rgba(0,0,0,.18)}
+  .tile.flip .front{transform:rotateX(-180deg)}
+  .tile.flip .back{transform:rotateX(0)}
+  .tile.correct .back{background:var(--gold)}
+  .tile.present .back{background:var(--blue);color:#fff}
+  .tile.absent .back{background:var(--absent);color:#c8c0e0}
+  .back::after{position:absolute;top:2px;right:5px;font-size:calc(var(--tile) * .24);line-height:1}
+  .tile.correct .back::after{content:'✓'}
+  .tile.present .back::after{content:'•';font-size:calc(var(--tile) * .34)}
+  .tile.absent .back::after{content:'×';opacity:.7}
+  .tile.win .back{animation:hop .5s ease}
+  @keyframes hop{40%{transform:translateY(-14px)}}
+
+  /* ── keyboard ── */
+  #kb{width:min(520px,100%);display:flex;flex-direction:column;gap:6px;margin-top:2px;touch-action:manipulation}
+  .krow{display:flex;gap:5px;justify-content:center}
+  .key{flex:1 1 0;min-width:0;height:50px;border:3px solid var(--ink);border-radius:9px;background:var(--cream);color:var(--ink);
+       font:700 17px 'Fredoka',system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 0 var(--ink);padding:0;position:relative;
+       transition:transform .3s,opacity .3s,background .2s}
+  .key:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
+  .key.wide{flex:1.6 1 0;font-size:13px}
+  .key.correct{background:var(--gold)}
+  .key.present{background:var(--blue);color:#fff}
+  .key.correct::after{content:'✓';position:absolute;top:1px;right:3px;font-size:10px}
+  .key.present::after{content:'•';position:absolute;top:-1px;right:3px;font-size:13px}
+  .key.eaten{background:transparent;border-style:dashed;border-color:#4b4170;box-shadow:none;color:transparent}
+  .key.eaten::before{content:'∴';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#8f83b8;font-size:16px}
+  .key.munching{transform:scale(0) rotate(40deg);opacity:0}
+  .crumb{position:fixed;width:6px;height:6px;border-radius:2px;background:#e8c27a;border:1px solid #7a5a22;pointer-events:none;z-index:8000;
+         animation:crumb .8s ease-in forwards}
+  @keyframes crumb{to{transform:translate(var(--dx),70px) rotate(220deg);opacity:0}}
+
+  /* ── end card ── */
+  #veil{position:fixed;inset:0;background:rgba(11,7,24,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:9100}
+  #veil.open{display:flex}
+  #card{width:min(380px,100%);background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-radius:20px;box-shadow:8px 8px 0 #8a0c1a;
+        padding:16px 18px;text-align:center;max-height:calc(100dvh - 32px);overflow:auto}
+  #card h2{font-family:'Rye';font-weight:400;margin:0 0 4px;font-size:26px;color:var(--red)}
+  #card .word{display:inline-block;font:700 26px 'Fredoka';letter-spacing:.18em;background:var(--gold);border:3px solid var(--ink);border-radius:10px;
+        padding:2px 6px 2px 12px;margin:4px 0 8px}
+  #numbers{display:flex;justify-content:space-around;margin:6px 0 10px}
+  #numbers div{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+  #numbers b{display:block;font-size:22px}
+  #dist{display:flex;flex-direction:column;gap:3px;margin:0 0 12px;text-align:left}
+  .bar{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13px}
+  .bar span:first-child{width:12px}
+  .bar .fill{background:var(--absent);color:#fff;border-radius:5px;padding:1px 6px;min-width:22px;text-align:right}
+  .bar.mine .fill{background:var(--red)}
+  #cardBtns{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}
+  #toast{position:fixed;left:50%;top:18px;transform:translate(-50%,-80px);background:var(--ink);color:var(--cream);border:3px solid var(--gold);
+         border-radius:12px;padding:8px 14px;font-weight:700;z-index:9600;transition:transform .25s}
+  #toast.show{transform:translate(-50%,0)}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  @media (max-width:620px){
+    #stage{grid-template-columns:1fr 1fr;grid-template-areas:"b c" "board board";gap:6px 10px;justify-items:center}
+    #bubbleBox{grid-area:b;flex-direction:row}
+    #caineBox{grid-area:c;flex-direction:row}
+    #board{grid-area:board}
+    .castbox{width:auto}
+    #bubble{width:54px;height:54px}
+    #caine{width:42px}
+    :root{--tile:min(58px,calc((100vw - 56px) / 5),calc((100dvh - 380px) / 6.4))}
+  }
+  @media (max-width:400px){ .key{height:46px;font-size:15px} .key.wide{font-size:11px} .krow{gap:4px} }
+  @media (prefers-reduced-motion:reduce){
+    .face,.key{transition:none} #bubble,#bubble.chomp,#bubble.yay,.row.shake,.tile.win .back{animation:none} .crumb{display:none}
+  }
+</style>
+</head>
+<body>
+<main>
+  <div id="topbar"><a id="back" href="../../index.html">← back to the Big Top</a></div>
+  <h1>Bubble's Word Snack</h1>
+  <div id="modes" role="group" aria-label="Game mode">
+    <button class="btn" id="modeDaily" type="button" aria-pressed="true">🍩 Daily Snack</button>
+    <button class="btn" id="modePractice" type="button" aria-pressed="false">🍿 Practice Snacks</button>
+    <button class="btn" id="statsBtn" type="button">📊 Stats</button>
+  </div>
+  <div id="status" aria-hidden="true"></div>
+
+  <div id="stage">
+    <div class="castbox" id="bubbleBox"><div id="bubble" title="Bubble (hungry)"></div><small>Bubble</small></div>
+    <div id="board" role="grid" aria-label="Guess board, 6 rows of 5 letters"></div>
+    <div class="castbox" id="caineBox"><div id="caine" title="Caine"></div><small>Caine</small></div>
+  </div>
+
+  <div id="kb" aria-label="On-screen keyboard"></div>
+  <div id="live" class="sr" aria-live="polite" aria-atomic="true"></div>
+</main>
+
+<div id="veil">
+  <div id="card" role="dialog" aria-modal="true" aria-labelledby="cardTitle">
+    <h2 id="cardTitle">Snack time!</h2>
+    <p id="cardMsg" style="margin:0"></p>
+    <div class="word" id="cardWord">CLOWN</div>
+    <div id="numbers">
+      <div><b id="nPlayed">0</b>Played</div><div><b id="nWin">0</b>Win %</div>
+      <div><b id="nStreak">0</b>Streak</div><div><b id="nBest">0</b>Best</div>
+    </div>
+    <div id="dist" aria-label="Guess distribution"></div>
+    <div id="cardBtns">
+      <button class="btn" id="copyBtn" type="button">📋 Copy result</button>
+      <button class="btn" id="againBtn" type="button">🍿 Practice snack</button>
+      <button class="btn" id="closeBtn" type="button">Close</button>
+    </div>
+  </div>
+</div>
+<div id="toast" role="status"></div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, pick, say, confetti, sfx, wireCaine } = window.TADC;
+  const $ = (id) => document.getElementById(id);
+
+  // ── the snack menu: original list of circus-flavoured 5-letter answers ──
+  const WORDS = `CLOWN TENTS STAGE SHOWS ACTOR CROWD TRICK MAGIC JOKER HONKS NOSES CANDY SWEET TREAT SNACK CHOMP MUNCH BITES CRUMB FUDGE
+    TAFFY CREAM CAKES GUMMY JELLY BEANS LEMON MELON GRAPE SUGAR SYRUP BREAD PIZZA TOAST DONUT RINGS HOOPS BALLS JUMPS FLIPS
+    SPINS TWIRL CAPES MASKS PAINT DANCE MUSIC DRUMS BANJO HORNS FLUTE PIANO ORGAN TUNES CHEER CLAPS BRAVO LAUGH GRINS SMILE
+    TEETH JOLLY FUNNY SILLY WACKY GOOFY DIZZY CRAZY WEIRD QUIRK WHIRL SWIRL SPARK SHINE GLEAM STARS COMET ORBIT EXITS DOORS
+    HALLS MAZES ROOMS TOWER CHESS PAWNS KINGS QUEEN ROOKS BOARD PIECE GAMES PRIZE TOKEN ROPES POLES SWING STILT SEALS HORSE
+    TIGER LIONS BEARS CAMEL MOUSE BUNNY PARTY FEAST FAIRS RIDES WAGON TRAIN WHEEL CRANK LEVER GEARS BOLTS ROBOT PIXEL GHOST
+    SPOOK BLAST FLASH LIGHT LAMPS BULBS PROPS SCENE PLAYS DRAMA ROLES CROWN ROYAL JEWEL BLOOM DAISY TULIP HEART HAPPY MERRY
+    PLUSH DOLLS TEDDY YARNS FLUFF FIZZY SODAS JUICE BERRY APPLE PEACH MANGO PECAN SALTY CHIPS FRIES PASTA GRAVY HONEY WAFER
+    SCONE BAGEL COCOA KAZOO BUGLE TUBAS CELLO CHIME BELLS GONGS BATON STOOL KITES BLOCK CARDS CLUES PRANK CAPER MIRTH DREAM`
+    .split(/\s+/).filter((w) => /^[A-Z]{5}$/.test(w));
+
+  const STORE = 'tadc-wordsnack-v1';
+  const blank = () => ({ played: 0, wins: 0, streak: 0, bestStreak: 0, dist: [0, 0, 0, 0, 0, 0], daily: { date: '', guesses: [], done: false, won: false } });
+  function load() {
+    try {
+      const s = JSON.parse(localStorage.getItem(STORE));
+      if (!s || typeof s !== 'object') return blank();
+      const b = blank();
+      return { ...b, ...s, dist: Array.isArray(s.dist) && s.dist.length === 6 ? s.dist : b.dist, daily: { ...b.daily, ...(s.daily || {}) } };
+    } catch (e) { return blank(); }
+  }
+  function save() { try { localStorage.setItem(STORE, JSON.stringify(stats)); } catch (e) { /* storage blocked: stats last this visit */ } }
+  let stats = load();
+
+  const todayKey = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; };
+  function dailyWord(key) {
+    // deterministic: day number since 2026-01-01 (local), stepped by a prime so neighbouring days aren't alphabetical neighbours
+    const [y, m, d] = key.split('-').map(Number);
+    const day = Math.round((Date.UTC(y, m - 1, d) - Date.UTC(2026, 0, 1)) / 864e5);
+    return WORDS[(((day * 37 + 11) % WORDS.length) + WORDS.length) % WORDS.length];
+  }
+
+  // ── scoring with correct duplicate handling ──
+  function score(guess, answer) {
+    const res = Array(5).fill('absent'), left = {};
+    for (let i = 0; i < 5; i++) {
+      if (guess[i] === answer[i]) res[i] = 'correct';
+      else left[answer[i]] = (left[answer[i]] || 0) + 1;
+    }
+    for (let i = 0; i < 5; i++) {
+      if (res[i] !== 'correct' && left[guess[i]] > 0) { res[i] = 'present'; left[guess[i]]--; }
+    }
+    return res;
+  }
+  window.__wordSnackScore = score; // handy for poking at in the console
+
+  // ── cast ──
+  const bubbleEl = $('bubble'), caineEl = $('caine');
+  bubbleEl.innerHTML = CAST.bubble;
+  caineEl.innerHTML = CAST.caine;
+  const caine = wireCaine($('caineBox'));
+  const LINES = {
+    hungry: ["Feed me letters! The crunchy kind!", "My tummy is making the dial-up noise.", "Five letters. Five tiny sandwiches. Go!",
+      "I skipped breakfast so I could eat the alphabet.", "Guess wrong! Guess wrong! I mean... good luck!"],
+    eat: ["CHOMP! {L} tastes like a Tuesday.", "Mmm, {L}. A little stale. Love it.", "{L}? Gone! Off to the snack dimension!",
+      "Nom nom {L}. Needs salt.", "I ate {L}. No regrets. Several crumbs.", "{L}: delicious. Bring me the cousins."],
+    feast: ["A buffet! {L}! All of it! Mine!", "{L}! That's a whole meal, thank you!"],
+    present: ["Ooh, I can smell {L} in there. It's hiding!", "{L}: in the word, just sitting in the wrong chair."],
+    correct: ["Gold tiles! Can I eat gold? Don't answer that.", "Shiny! You're getting close, I can taste it."],
+    win: ["You got it! I'm so proud I could eat the whole keyboard!", "WINNER! I celebrate by chewing. Loudly.", "Correct! Here, have a crumb. My finest crumb."],
+    lose: ["The word was {W}. Too smart to eat, sadly.", "{W}! I'd have guessed it if I wasn't busy chewing."],
+    weird: ["Is {G} a word? Doesn't matter, I'll eat it anyway.", "{G}... sounds fake. Tastes real though."],
+    short: ["That's not enough letters for a snack!", "Five letters, please. I'm on a strict five-letter diet."],
+    poke: ["Hey! I'm digesting!", "Boop me again and I'll eat your vowels.", "I'm full of letters. Mostly Q."],
+    burp: ["Fine, I'll cough {L} back up. *hic*", "You want {L} back? It's a little soggy now."],
+  };
+  const CAINE = {
+    start: ["Welcome to snack time! Bubble eats the wrong letters. It's a feature!", "A word a day keeps the abstraction away! Probably!"],
+    mid: ["Splendid guessing! Truly within the expected range of guessing!", "Bubble, please stop eating the alphabet. We need it for signage.",
+      "Ooh, suspense! I had the suspense installed last week."],
+    win: ["MAGNIFICENT! Somebody fire the imaginary cannon!", "A champion of the five-letter arts!"],
+    lose: ["Not to worry! Losing builds character. I built several characters!", "Chin up! Tomorrow brings a brand-new word, fresh from the word oven."],
+    practice: ["Practice snacks! Unlimited! Bubble is going to need a bigger tummy."],
+  };
+  const fill = (s, map) => s.replace(/\{(\w)\}/g, (_, k) => map[k] || '');
+  const bubbleSay = (key, map = {}, ms = 3200) => say(bubbleEl, fill(pick(LINES[key]), map), ms);
+  const caineSay = (key, ms = 4000) => caine.talk(pick(CAINE[key]), ms);
+  function bubbleAnim(cls) { bubbleEl.classList.remove('chomp', 'yay'); void bubbleEl.offsetWidth; bubbleEl.classList.add(cls); }
+  bubbleEl.addEventListener('animationend', () => bubbleEl.classList.remove('chomp', 'yay'));
+  TADC.clickable(bubbleEl, 'Bubble');
+  bubbleEl.addEventListener('click', () => { sfx('pop'); bubbleAnim('chomp'); bubbleSay('poke'); });
+  TADC.clickable(caineEl, 'Caine');
+  caineEl.addEventListener('click', () => { sfx('honk'); caineSay('mid'); });
+
+  // ── board & keyboard ──
+  const board = $('board'), rows = [];
+  for (let r = 0; r < 6; r++) {
+    const row = document.createElement('div'); row.className = 'row'; row.setAttribute('role', 'row');
+    const tiles = [];
+    for (let c = 0; c < 5; c++) {
+      const t = document.createElement('div'); t.className = 'tile'; t.setAttribute('role', 'gridcell');
+      t.innerHTML = '<div class="face front"></div><div class="face back"></div>';
+      row.appendChild(t); tiles.push(t);
+    }
+    board.appendChild(row); rows.push({ row, tiles });
+  }
+  const kb = $('kb'), keys = {};
+  ['QWERTYUIOP', 'ASDFGHJKL', '⏎ZXCVBNM⌫'].forEach((line) => {
+    const kr = document.createElement('div'); kr.className = 'krow';
+    for (const ch of line) {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'key';
+      if (ch === '⏎') { b.textContent = 'ENTER'; b.classList.add('wide'); b.dataset.k = 'Enter'; b.setAttribute('aria-label', 'Enter guess'); }
+      else if (ch === '⌫') { b.textContent = '⌫'; b.classList.add('wide'); b.dataset.k = 'Backspace'; b.setAttribute('aria-label', 'Delete letter'); }
+      else { b.textContent = ch; b.dataset.k = ch; b.setAttribute('aria-label', ch); keys[ch] = b; }
+      kr.appendChild(b);
+    }
+    kb.appendChild(kr);
+  });
+  kb.addEventListener('click', (e) => {
+    const b = e.target.closest('.key'); if (!b) return;
+    if (b.classList.contains('eaten')) bubbleSay('burp', { L: b.dataset.k }, 2200);
+    press(b.dataset.k);
+  });
+
+  // ── game state ──
+  let mode = 'daily', answer = '', guesses = [], current = '', over = false, busy = false;
+  const live = $('live'), statusEl = $('status');
+  const announce = (msg) => { live.textContent = ''; setTimeout(() => { live.textContent = msg; }, 30); };
+  const STATE_WORD = { correct: 'correct spot', present: 'in the word, wrong spot', absent: 'not in the word, eaten' };
+
+  function paintRow(r, word, result, animate) {
+    return new Promise((resolve) => {
+      const { tiles } = rows[r];
+      const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const step = animate && !reduce ? 260 : 0;
+      tiles.forEach((t, i) => {
+        t.querySelector('.front').textContent = word[i] || '';
+        t.querySelector('.back').textContent = word[i] || '';
+        t.classList.toggle('filled', !!word[i]);
+        if (!result) { t.className = 'tile' + (word[i] ? ' filled' : ''); t.removeAttribute('aria-label'); return; }
+        setTimeout(() => {
+          t.classList.add(result[i], 'flip');
+          t.setAttribute('aria-label', `${word[i]}, ${STATE_WORD[result[i]]}`);
+          if (animate) sfx('tick');
+        }, i * step);
+      });
+      setTimeout(resolve, result ? 4 * step + (step ? 460 : 0) : 0);
+    });
+  }
+
+  function keyStates() {
+    const best = {}, rank = { absent: 0, present: 1, correct: 2 };
+    guesses.forEach((g) => score(g, answer).forEach((s, i) => { if (!(g[i] in best) || rank[s] > rank[best[g[i]]]) best[g[i]] = s; }));
+    return best;
+  }
+  function crumbs(el) {
+    const r = el.getBoundingClientRect();
+    for (let i = 0; i < 9; i++) {
+      const c = document.createElement('span'); c.className = 'crumb';
+      c.style.left = r.left + r.width / 2 + (Math.random() - 0.5) * r.width + 'px';
+      c.style.top = r.top + r.height / 2 + (Math.random() - 0.5) * r.height + 'px';
+      c.style.setProperty('--dx', (Math.random() - 0.5) * 60 + 'px');
+      c.style.animationDelay = Math.random() * 0.15 + 's';
+      document.body.appendChild(c);
+      setTimeout(() => c.remove(), 1100);
+    }
+  }
+  function paintKeys(animateEats) {
+    const best = keyStates(), newlyEaten = [];
+    for (const [ch, b] of Object.entries(keys)) {
+      const s = best[ch];
+      const wasEaten = b.classList.contains('eaten');
+      b.classList.remove('correct', 'present');
+      if (s === 'correct' || s === 'present') { b.classList.add(s); b.classList.remove('eaten'); b.setAttribute('aria-label', `${ch}, ${STATE_WORD[s]}`); }
+      else if (s === 'absent') {
+        b.setAttribute('aria-label', `${ch}, eaten by Bubble`);
+        if (!wasEaten) {
+          if (animateEats) newlyEaten.push(b); else b.classList.add('eaten');
+        }
+      } else { b.classList.remove('eaten'); b.setAttribute('aria-label', ch); }
+    }
+    newlyEaten.forEach((b, i) => setTimeout(() => {
+      crumbs(b); b.classList.add('munching'); sfx('pop'); bubbleAnim('chomp');
+      setTimeout(() => { b.classList.remove('munching'); b.classList.add('eaten'); }, 300);
+    }, i * 220));
+    return newlyEaten.map((b) => b.dataset.k);
+  }
+
+  function setStatus() {
+    const label = mode === 'daily' ? `Daily Snack for ${todayKey()}` : 'Practice Snack';
+    const progress = !over ? `guess ${Math.min(guesses.length + 1, 6)} of 6`
+      : guesses[guesses.length - 1] === answer ? `solved in ${guesses.length}/6` : 'the snack escaped';
+    statusEl.textContent = `${label} · ${progress}`;
+  }
+
+  async function startGame(m, restore) {
+    mode = m; over = false; busy = false; current = '';
+    $('modeDaily').setAttribute('aria-pressed', m === 'daily');
+    $('modePractice').setAttribute('aria-pressed', m === 'practice');
+    rows.forEach((_, r) => paintRow(r, '', null, false));
+    rows.forEach(({ tiles }) => tiles.forEach((t) => { t.className = 'tile'; }));
+    Object.values(keys).forEach((b) => { b.className = 'key'; b.setAttribute('aria-label', b.dataset.k); });
+    if (m === 'daily') {
+      const key = todayKey();
+      answer = dailyWord(key);
+      if (stats.daily.date !== key) { stats.daily = { date: key, guesses: [], done: false, won: false }; save(); }
+      guesses = (restore ? stats.daily.guesses : []).filter((g) => /^[A-Z]{5}$/.test(g)).slice(0, 6);
+      for (let r = 0; r < guesses.length; r++) await paintRow(r, guesses[r], score(guesses[r], answer), false);
+      paintKeys(false);
+      over = stats.daily.done;
+    } else {
+      let w; do { w = pick(WORDS); } while (w === answer && WORDS.length > 1);
+      answer = w; guesses = [];
+    }
+    setStatus();
+    if (over) { announce(`Today's snack is already finished. The word was ${answer}.`); setTimeout(() => showCard(stats.daily.won, false), 250); }
+    else announce(m === 'daily' ? `Daily Snack. ${guesses.length} of 6 guesses used. Type a five-letter word.` : 'Practice Snack started. Type a five-letter word.');
+  }
+
+  function press(k) {
+    if (over || busy || $('veil').classList.contains('open')) return;
+    if (k === 'Enter') return submit();
+    if (k === 'Backspace') { current = current.slice(0, -1); }
+    else if (/^[A-Z]$/.test(k) && current.length < 5) { current += k; }
+    else return;
+    paintRow(guesses.length, current, null, false);
+  }
+
+  async function submit() {
+    const r = guesses.length;
+    if (current.length < 5) {
+      rows[r].row.classList.remove('shake'); void rows[r].row.offsetWidth; rows[r].row.classList.add('shake');
+      sfx('boing'); bubbleSay('short', {}, 2200); announce('Not enough letters. Five, please.');
+      return;
+    }
+    const g = current; busy = true; current = '';
+    guesses.push(g);
+    if (mode === 'daily') { stats.daily.guesses = guesses.slice(); save(); }
+    const res = score(g, answer);
+    await paintRow(r, g, res, true);
+    const eaten = paintKeys(true);
+    const won = g === answer;
+    announce(`${g}: ` + res.map((s, i) => `${g[i]} ${STATE_WORD[s]}`).join('; ') + '.');
+    if (won || guesses.length === 6) { finish(won); busy = false; return; }
+
+    // Bubble's commentary on this guess
+    if (!WORDS.includes(g) && !/[AEIOUY]/.test(g)) bubbleSay('weird', { G: g });
+    else if (eaten.length >= 3) bubbleSay('feast', { L: eaten.join(', ') });
+    else if (eaten.length) bubbleSay('eat', { L: eaten.join(' and ') });
+    else if (res.includes('correct')) bubbleSay('correct');
+    else { const p = g[res.indexOf('present')]; bubbleSay('present', { L: p }); }
+    if (Math.random() < 0.3) setTimeout(() => caineSay('mid', 3600), 1400);
+    setStatus();
+    setTimeout(() => { busy = false; }, eaten.length * 220 + 120);
+  }
+
+  function finish(won) {
+    over = true;
+    const n = guesses.length;
+    stats.played++;
+    if (won) { stats.wins++; stats.streak++; stats.dist[n - 1]++; stats.bestStreak = Math.max(stats.bestStreak, stats.streak); }
+    else stats.streak = 0;
+    if (mode === 'daily') { stats.daily.done = true; stats.daily.won = won; stats.daily.guesses = guesses.slice(); }
+    save();
+    setStatus();
+    if (won) {
+      rows[n - 1].tiles.forEach((t, i) => setTimeout(() => t.classList.add('win'), i * 90));
+      sfx('fanfare'); bubbleAnim('yay'); bubbleSay('win', {}, 3600);
+      setTimeout(() => caineSay('win', 3600), 900);
+      const r = board.getBoundingClientRect();
+      confetti(r.left + r.width / 2, r.top + r.height / 2, 110, 1.1);
+      announce(`You won in ${n} of 6! The word was ${answer}.`);
+    } else {
+      sfx('honk'); bubbleSay('lose', { W: answer }, 3800);
+      setTimeout(() => caineSay('lose', 3600), 900);
+      announce(`Out of guesses. The word was ${answer}.`);
+    }
+    setTimeout(() => showCard(won, true), 1500);
+  }
+
+  // ── end card / stats ──
+  let lastFocus = null;
+  function showCard(won, fresh) {
+    const finished = over && answer;
+    $('cardTitle').textContent = !finished ? 'Snack stats' : won ? 'Delicious!' : 'Snack escaped!';
+    $('cardMsg').textContent = !finished ? 'Finish a snack to see its word here.'
+      : won ? `Solved in ${guesses.length}/6${mode === 'daily' ? ' · come back tomorrow for a new Daily Snack' : ''}.`
+        : `Bubble couldn't save you this time${mode === 'daily' ? '. New Daily Snack tomorrow!' : '.'}`;
+    $('cardWord').textContent = finished ? answer : '?????';
+    $('cardWord').setAttribute('aria-label', finished ? `The word was ${answer}` : 'Word hidden');
+    $('copyBtn').hidden = !finished;
+    $('nPlayed').textContent = stats.played;
+    $('nWin').textContent = stats.played ? Math.round((stats.wins / stats.played) * 100) : 0;
+    $('nStreak').textContent = stats.streak;
+    $('nBest').textContent = stats.bestStreak;
+    const max = Math.max(1, ...stats.dist), dist = $('dist');
+    dist.innerHTML = '';
+    stats.dist.forEach((v, i) => {
+      const row = document.createElement('div');
+      row.className = 'bar' + (finished && won && guesses.length === i + 1 ? ' mine' : '');
+      row.setAttribute('aria-label', `${i + 1} guesses: ${v} wins`);
+      row.innerHTML = `<span>${i + 1}</span><span class="fill" style="width:${Math.max(8, (v / max) * 100)}%">${v}</span>`;
+      dist.appendChild(row);
+    });
+    lastFocus = document.activeElement;
+    $('veil').classList.add('open');
+    (finished ? $('copyBtn') : $('closeBtn')).focus();
+  }
+  function closeCard() { $('veil').classList.remove('open'); if (lastFocus && lastFocus.focus) lastFocus.focus(); }
+
+  function shareText() {
+    const EMO = { correct: '🟨', present: '🟦', absent: '⬛' };
+    const won = guesses[guesses.length - 1] === answer;
+    const head = `Bubble's Word Snack 🫧 ${mode === 'daily' ? 'Daily ' + todayKey() : 'Practice'} ${won ? guesses.length : 'X'}/6`;
+    const grid = guesses.map((g) => score(g, answer).map((s) => EMO[s]).join('')).join('\n');
+    return `${head}\n${grid}\n🟨 right spot · 🟦 wrong spot · ⬛ eaten`;
+  }
+  function toast(msg) { const t = $('toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(t._t); t._t = setTimeout(() => t.classList.remove('show'), 1800); }
+  $('copyBtn').addEventListener('click', async () => {
+    const text = shareText();
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; }
+    catch (e) {
+      // Fallback for pages where the async clipboard API is blocked.
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      ta.remove();
+    }
+    if (!ok) window.prompt('Your browser blocked copying. Here is your result to copy by hand:', text);
+    sfx(ok ? 'ding' : 'honk');
+    toast(ok ? 'Copied! Crumbs included 🫧' : 'Copy blocked, so here it is to copy by hand 📋');
+  });
+  $('closeBtn').addEventListener('click', closeCard);
+  $('againBtn').addEventListener('click', () => { $('veil').classList.remove('open'); startGame('practice'); caineSay('practice', 3200); });
+  $('veil').addEventListener('click', (e) => { if (e.target === $('veil')) closeCard(); });
+  $('statsBtn').addEventListener('click', () => showCard(over && guesses[guesses.length - 1] === answer, false));
+  $('modeDaily').addEventListener('click', () => { sfx('pop'); startGame('daily', true); });
+  $('modePractice').addEventListener('click', () => { sfx('pop'); startGame('practice'); caineSay('practice', 3200); });
+
+  // ── physical keyboard ──
+  addEventListener('keydown', (e) => {
+    if (e.ctrlKey || e.metaKey || e.altKey) return;
+    if ($('veil').classList.contains('open')) { if (e.key === 'Escape') closeCard(); return; }
+    const t = e.target;
+    const inKb = t && t.closest && t.closest('#kb');
+    const onOtherControl = t && t.closest && !inKb && t.closest('button, a, input, textarea, select, [role="button"]');
+    if (onOtherControl && (e.key === 'Enter' || e.key === ' ')) return; // let that control handle its own activation
+    if (e.key === 'Enter' || e.key === 'Backspace') { e.preventDefault(); press(e.key); return; }
+    if (e.key === ' ' && inKb) { e.preventDefault(); return; } // don't re-click the focused on-screen key
+    if (/^[a-z]$/i.test(e.key)) press(e.key.toUpperCase());
+  });
+
+  startGame('daily', true).then(() => {
+    if (!over) setTimeout(() => bubbleSay('hungry', {}, 3400), 400);
+    if (!over && !guesses.length) setTimeout(() => caineSay('start', 4200), 2200);
+  });
+})();
+</script>
+</body>
+</html>

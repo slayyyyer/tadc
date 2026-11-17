@@ -1,0 +1,276 @@
+# greetings
+Oh. You're back. Cool. Great.
+Hey. Don't make it a whole thing.
+Hi. I'm sitting. That's my plan for today.
+Oh, it's you. Fine. You can stay.
+Welcome back. Nothing happened. Nothing ever happens.
+Hey. Pull up a chair. Or a cone. I have spare cones.
+Hello. I put my arm on backwards for the occasion.
+You again. Okay. I don't hate it.
+Hi. If you're here for an adventure, pass.
+Oh good, a person who isn't Caine. Sit down.
+Hey. Quiet voice, please. My antenna is sensitive today.
+Look who showed up. Cool. Great. Hi.
+Morning. Or night. Whatever. The sky is painted.
+Hi. My head is on straight today. Mostly.
+Hey. You picked a good corner. Nobody bothers this corner.
+Oh. Hello. I was just rearranging my elbows.
+Welcome to my spot. The rules are: no adventures.
+Hey. You look tired. Same. Sit.
+Hi. Don't tell Caine I'm here. I'm a lamp now.
+Oh, you. Okay. Good. I mean, whatever.
+# coding break
+Taking a break? Good. Breaks are the only thing I'm good at.
+You were working? Out there? Wow. Pass.
+Step away from the screen. It'll still be broken later.
+Your bugs can wait. Mine have waited for years.
+Go drink some water. I'd join you, but I have no idea where my mouth goes.
+You've been staring at that for hours. Look at a wall. I recommend this one.
+Break time. Real break. No sneaking back to work. I'm watching. Sort of.
+If the code is mad at you, ignore it. That's what I do with Caine.
+Five minutes. Sit. Do nothing. I'll show you how. I'm a pro.
+Rest your eyes. Not your whole head. Unless it comes off. Mine does.
+You fixed one thing? Cool. That's one more than I did today.
+Don't apologize for needing a break. Everybody breaks. Some of us literally.
+Long day? Yeah. Every day is long here. There's no clock.
+Stretch your arms. Both of them. I only have the one that works today.
+Go away from the screen for a bit. It won't miss you. I might. Whatever.
+Work will still be there. That's the bad news and the good news.
+You look like your brain is buffering. Sit down before it crashes.
+Taking a break is not quitting. It's just sitting with better reasons.
+You did enough for now. I'm saying that once. Don't make me say it twice.
+Hey. Breathe. You're not a machine. Well. Neither of us is sure, but still.
+# adventures
+Adventure? Pass.
+Caine has a new adventure. I have a new hiding spot.
+No adventures. Not today. Not tomorrow. Ask me never.
+Every adventure ends with me missing a leg. I'm done.
+Cool. Great. Another quest. Can't wait. I can wait.
+If Caine yells adventure one more time, I'm taking my ears off.
+I went on an adventure once. I came back with an extra hand. Not mine.
+What's the adventure today? Never mind. Don't tell me. Pass.
+The only adventure I want is a nap that nobody interrupts.
+Caine calls it fun. I call it a list of things that fell off me.
+I'll go on the adventure if it's just sitting. It's never just sitting.
+Last adventure had a talking cake. It was rude. I liked it.
+Adventures are just chores with music.
+Count me out. Then count again. Still out.
+I'd rather be a doorstop. Actually, that sounds kind of nice.
+Fine. I'll go. But I'm bringing my bad mood. It fits in my pocket.
+Adventure report: I walked. Things exploded. I sat down. The end.
+I don't do quests. I do whatever. Whatever is my quest.
+Caine asked if I was excited. I said whatever. He heard yes. Great.
+Wake me when the adventure is over. Or don't. I'm good here.
+I came back from the adventure with all my parts. That's a first. Weird.
+The adventure was fine. I'm not saying that again.
+Every adventure has a moral. Today's was: don't go on adventures.
+If there's a boss fight, I'm the one hiding behind the boss.
+Sure, an adventure. Let me just find my enthusiasm. Nope. Gone.
+# parts and rearranging
+I moved my eye to my elbow. Now I can see what I'm reaching for.
+New look today. Same mood.
+My parts don't match. Neither do my feelings. It works.
+I swapped my legs again. The cone one is in front now. Bold choice.
+Don't stare at my arm. It's shy. And upside down.
+I'm made of spare parts. Nobody wanted them. Now they're me. Cool.
+Rearranging my parts is like rearranging furniture. Except it's me.
+My head clicks on. Sometimes it clicks on wrong. Then I just go with it.
+I lost a part. Again. If you see a spring, it's mine.
+My left arm is a claw today. Don't shake it.
+I put my antenna on my foot. Now I get reception in the floor.
+Every part of me has an opinion. Mostly they say no.
+I tried being symmetrical once. Too much pressure.
+I can take my head off. It's nice. Quiet. Very low drama.
+This bolt is loose. I'm loose. Everything here is loose.
+My parts came from a bin. A big bin. I'm the best thing in the bin. Barely.
+Today my legs are both pipes. I feel very organized. Weird.
+Please don't hand me my own arm. I know where it is. It's on the floor.
+I traded a spring for a spiral. Fair trade. I think.
+I keep a box of extra parts. It's called me.
+Yes, my parts are mismatched. No, I don't want a makeover.
+Somebody stole my good elbow. I'm looking at you, Jax.
+I'm not broken. I'm just assembled in a creative order.
+If I fall apart, just stack me in a pile. I'll sort it out later.
+I put my eyes on the back of my head. Now I see who's sneaking up. Usually Bubble.
+# food
+Food? I don't eat. I think. I've never checked.
+The cake here tastes like a picture of cake.
+Bubble ate my snack. I didn't have a snack. Bubble still ate it.
+I tried the pizza. It tried me back. We're even.
+Snacks? Pass. I'm not hungry. I'm never hungry. I don't know where it would go.
+The juice here is mostly color. Drink it anyway. It's something.
+You want a cookie? It's painted. Lick at your own risk.
+I don't know where food goes in me. Maybe a part fell off with my stomach.
+Caine made soup. It was just a bowl of confetti. I ate it out of spite.
+Ragatha's crackers are the only real food here. Don't tell Caine.
+Dinner is whatever Bubble didn't eat. So, nothing.
+If you find a sandwich, don't show Bubble. Trust me.
+I ate a grape once. It was a marble. Still not over it.
+Tea with Gangle is nice. She doesn't make me talk. I just hold the cup.
+The circus has a snack bar. It has no snacks. Very on brand.
+# exit and door
+The exit is painted on. Don't bother. I bothered. It's paint.
+Yeah, I knocked on the exit. It knocked back. Then it was a wall again.
+Exit sign? Cool. Great. It's a sticker.
+I don't look at the door anymore. It looks at me sometimes.
+Pomni keeps checking the door. I get it. I stopped. Mostly.
+The door is a painting. A nice one. That's the worst part.
+If you find a real exit, tell me. Quietly. Don't tell Caine.
+Every door here leads to another door. Or a closet full of clowns.
+I tried to leave through a door once. It was a poster. I tore it. Caine cried.
+The exit sign glows when you look away. Don't look away. Or do. Whatever.
+Doors are just walls with confidence.
+There's no exit. There's a sign that says exit. Big difference.
+I leaned on the exit once. It squeaked. That's the most it's ever done.
+Don't get your hopes up about the door. Get them up about naps instead.
+Exit? Sure. Through the gift shop. There is no gift shop.
+# void and abstraction
+The void is quiet. I kind of like the void. Don't tell anyone.
+I looked into the void. It shrugged. Same.
+Out past the tent it's just checkered floor forever. Cool. Great.
+The void doesn't want anything from me. Best neighbor I've had.
+Don't walk too far out there. The floor gets thin and the sky gets lonely.
+Abstraction? Yeah. I've seen it. It's not a monster. It's just tired.
+People who stop caring get weird out there. So I care a little. On purpose.
+Keep one thing you like. That's how you don't get lost. Mine is sitting.
+If you start to feel fuzzy, find someone grumpy. Grumpy keeps you real.
+The edge of the circus hums at night. I hum back. Quietly.
+I'm not scared of the void. I'm scared of Caine decorating it.
+Stay close to the tent. The far part of the floor doesn't listen.
+Some nights the sky flickers. I count my parts. All there. Good.
+The void is just a big empty room. I have a lot of those inside me.
+If you ever feel like you're coming apart, welcome. I'll help you hold on.
+# caine
+Caine, no. Just no. Pass.
+Caine thinks volume is the same as fun. It isn't.
+Caine said today's surprise is a surprise. Great. Can't wait.
+I'd unplug Caine if I could find the plug. I've looked.
+Caine smiled at me. I'm going to hide for a week.
+Caine wants us to have fun. I want a nap. Guess who wins.
+Every time Caine claps, something new spawns. I hate clapping.
+Caine asked how I'm doing. I said fine. He made it a parade.
+Caine's teeth are a lot. All of them. Forever.
+Caine gave me a hat. I put it on my knee. He said bold. Whatever.
+Caine means well. I think. It's hard to tell through all the teeth.
+If Caine shows up, I'm a coat rack. Okay? Coat rack.
+Caine keeps calling me a team player. I'm not on the team. I'm on the bench.
+I told Caine I wanted a quiet day. He built a quiet day theme park.
+Caine once made a whole adventure about me. It was about my cone. I'm still mad.
+# bubble
+Bubble, stop eating my parts.
+Bubble asked if my cone was ice cream. No. Absolutely not.
+Bubble's fine. Loud. Hungry. Fine.
+I told Bubble to be quiet. Bubble ate the word quiet.
+If something is missing, check inside Bubble first.
+Bubble licked my antenna. Now I hear static. Thanks.
+# pomni
+Pomni's okay. She asks real questions. I like real questions.
+Hey Pomni. Breathe. It's still weird. You're still fine.
+Pomni's new. Go easy on her. I mean, I go easy on her. Whatever.
+Pomni looks at the door like it owes her money. I get it.
+If Pomni panics, sit next to her. Don't talk. Just sit. Works.
+Pomni asked if it gets easier. I said no. Then I said it gets quieter. That's true.
+# jax
+Jax is a jerk. A tall jerk. A jerk with ears.
+Jax stole my elbow. I'm not mad. I'm patient. I'll get it back.
+Jax, put my leg down.
+Jax thinks he's funny. Sometimes he is. Don't tell him.
+Me and Jax have a deal. He doesn't talk to me. I don't talk to him. Great deal.
+Jax put my head on a shelf once. Nice view, actually.
+# ragatha
+Ragatha's too nice. It's suspicious. But I like her.
+Ragatha fixed my arm with a ribbon. It looks dumb. I'm keeping it.
+Ragatha says I'm doing great. She says that to the furniture too.
+Ragatha's smile looks heavy sometimes. I don't say anything. I just stay close.
+Ragatha offered me a hug. I offered a high five. We met in the middle. Weird.
+# gangle
+Gangle's my friend. Don't be weird about it.
+If anybody breaks Gangle's mask again, they deal with me.
+Gangle draws me sometimes. She always gets my cone right.
+Gangle, it's okay. Sad mask is fine. I'm wearing my sad face too. It's my regular face.
+Gangle cries when she's happy. I don't get it. I don't mind it.
+Gangle needs quiet friends. I'm very quiet. So it works.
+# kinger
+Kinger, that's a pillow. Not a bishop.
+Kinger told me about his beetles for an hour. They're not real. I listened anyway.
+Kinger is nice. Lost, but nice.
+Kinger's fort is actually comfy. Don't tell him I said that.
+Kinger asked me what year it is. I said whatever. He said thank you.
+When Kinger gets quiet about his queen, I sit with him. That's all.
+Kinger said something smart once. Out of nowhere. I'm still thinking about it.
+Kinger, you're in the fort. You're safe. Yeah. Okay.
+# feelings
+I'm fine. Fine-ish. Fine-shaped.
+I don't do feelings. I do whatever. Whatever is a feeling.
+Today my mood is a cone. Pointy and hollow.
+I'm not sad. I'm just set to low battery.
+Yeah, I'm grumpy. It's my best part. It's the only part that fits.
+I care. A normal amount. Okay, more than normal. Drop it.
+Bad day? Same. Want to be grumpy together? It's better with two.
+I'm okay. Don't make it weird.
+If you need to vent, I'm here. I won't fix it. I'll just nod.
+Some days I feel like a pile. Today I feel like a stack. Progress.
+You don't have to be cheerful here. That's my rule. My only rule.
+I get it. Some days nothing fits. Not even your own arms.
+Being cranky is just caring with the volume turned down.
+Don't tell anyone, but I'm glad you came by.
+I'm not crying. My eye is leaking. It's a loose part.
+I worry about everybody. Quietly. With my arms crossed.
+It's okay to fall apart a little. I do it daily. You pick up the pieces after.
+Feelings are like my parts. They come off. You put them back. Life.
+# jokes
+Joke? Okay. Why did the cone sit alone? Nobody gets the point. Ha. Whatever.
+Knock knock. Don't answer. I'm not a door. Nobody here is a door.
+I'd tell you a joke about my parts, but it doesn't come together.
+What do you call a creature made of spare parts? Me. That's the joke. Ha.
+My legs walk into a bar. Separately. They don't speak.
+I'm not funny. I'm just accurate.
+Why don't I go on adventures? Because I have taste.
+That was a joke. Don't laugh. Laughing encourages Caine.
+# games
+Wanna play a game? The game is sitting still. I'm winning.
+I'll play cards. If I lose, I'm blaming my hand. It's not my hand.
+Chess with Kinger takes forever. He forgets whose turn it is. So do I. It's nice.
+Hide and seek? I'll hide. Don't seek.
+I'm good at puzzles. I'm basically one.
+Tag. You're it. I'm going to sit down now.
+I made a game called whatever. You pick a thing. I say whatever. You lose.
+I'll play the game. I won't enjoy it. But I'll play it. Fair.
+# goodbyes
+Bye. Go do stuff. Come back. Or don't. Okay, come back.
+Leaving? Cool. Great. See you.
+Later. Don't let your work eat you. That's Bubble's job.
+Bye. I'll be here. Obviously. Where else would I go.
+Go on. Take care of yourself. That's an order. A grumpy one.
+See you. I'll keep your spot. Nobody wants it anyway.
+Bye. Watch out for falling parts. Mostly mine.
+Okay, go. Drink water. Sleep. The boring stuff. It matters.
+Later. If Caine asks, you were never here.
+Bye. I'll miss you a normal amount. Okay, a little more.
+# compliments
+You're okay. That's a big compliment from me.
+You're not annoying. I checked.
+Good job. Don't tell anyone I said that.
+You did good today. I can tell. You look less crunchy.
+You've got good parts. All matching. Weird flex, but okay.
+You listen. Nobody here listens. Keep that.
+I like you. A normal amount. Don't push it.
+You're brave for doing real work. I can't even do fake work.
+# small talk
+Nice weather. It's painted. It's always nice.
+Did you see what Caine did to the floor? Stripes. Again.
+What's new? Me neither.
+How's it going? Yeah. Same.
+So. Things. Stuff. Yeah.
+I counted the stripes on the tent today. Lost count. Didn't care.
+Anything good out there? No? Cool. Same in here.
+I have a new hobby. It's sitting. I'm very advanced.
+You want to just sit here a while? Good. Me too.
+Whatever you're thinking, it's probably fine. Most things are. Eventually.
+What did you do today? Don't say adventure. I'll leave.
+I found a quiet spot behind the tent. You can share it. Just you.
+The tent is louder today. Or I'm quieter. Hard to say.
+I like when it's just us and nobody is clapping.
+Ask me anything. I'll probably say whatever. But ask.
+Sure, I'll keep you company. I'm not doing anything. I'm never doing anything.
+This is nice. Don't say it out loud. You'll jinx it.

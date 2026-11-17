@@ -1,0 +1,138 @@
+{
+  "seed": 20261004,
+  "epochs": 100,
+  "embed": 24,
+  "hidden": 128,
+  "trainingLines": 387,
+  "validationLines": 43,
+  "initial": {
+    "train": 4.183614435887606,
+    "validation": 4.186728642620181
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train": 2.5076235528555517,
+      "validation": 2.537999311411901
+    },
+    {
+      "epoch": 5,
+      "train": 1.8080212249216498,
+      "validation": 2.0822039369022396
+    },
+    {
+      "epoch": 10,
+      "train": 1.2985328012733737,
+      "validation": 2.076681045397895
+    },
+    {
+      "epoch": 15,
+      "train": 0.9806033016900838,
+      "validation": 2.287497688248139
+    },
+    {
+      "epoch": 20,
+      "train": 0.8173643625794651,
+      "validation": 2.4860137263716875
+    },
+    {
+      "epoch": 25,
+      "train": 0.741872431978098,
+      "validation": 2.682272110891255
+    },
+    {
+      "epoch": 30,
+      "train": 0.6855461504678592,
+      "validation": 2.869943820087673
+    },
+    {
+      "epoch": 35,
+      "train": 0.6517809987568088,
+      "validation": 3.040650709222164
+    },
+    {
+      "epoch": 40,
+      "train": 0.5847513235629699,
+      "validation": 3.1262088191460506
+    },
+    {
+      "epoch": 45,
+      "train": 0.5913857884343496,
+      "validation": 3.218310276815697
+    },
+    {
+      "epoch": 50,
+      "train": 0.633709699284504,
+      "validation": 3.296743000322087
+    },
+    {
+      "epoch": 55,
+      "train": 0.6067839821635538,
+      "validation": 3.2981155985888315
+    },
+    {
+      "epoch": 60,
+      "train": 0.5930612397830317,
+      "validation": 3.3612699905880943
+    },
+    {
+      "epoch": 65,
+      "train": 0.6057788970454909,
+      "validation": 3.4356144170568017
+    },
+    {
+      "epoch": 70,
+      "train": 0.5953287818624796,
+      "validation": 3.5066352887505574
+    },
+    {
+      "epoch": 75,
+      "train": 0.5830367124150073,
+      "validation": 3.5220200776672033
+    },
+    {
+      "epoch": 80,
+      "train": 0.29389743546689373,
+      "validation": 3.5849817463040217
+    },
+    {
+      "epoch": 85,
+      "train": 0.2714916978232156,
+      "validation": 3.6648415236826044
+    },
+    {
+      "epoch": 90,
+      "train": 0.2797836159291264,
+      "validation": 3.829558694801881
+    },
+    {
+      "epoch": 95,
+      "train": 0.23487980372467895,
+      "validation": 3.9183071028307124
+    },
+    {
+      "epoch": 100,
+      "train": 0.2270680193198851,
+      "validation": 4.009612706546249
+    }
+  ],
+  "completedEpochs": 100,
+  "bytes": 369878,
+  "corpusSha256": "651d0e6e3f3c836e3ee4216e495e9d8045a16d796af82d1c1a5f6c5392f3f7c8",
+  "bestValidation": {
+    "epoch": 10,
+    "train": 1.2985328012733737,
+    "validation": 2.076681045397895
+  },
+  "limitations": "Only 430 original lines. Training loss falls strongly while held-out loss worsens after early epochs: substantial overfitting. Shipped final checkpoint is an opt-in experimental character toy, not fluent conversation. Runtime rejects unknown words, malformed contractions, repeated-word loops, blocked terms and exact own-speaker copies; rejected samples fall back to word-chain improv.",
+  "runtimeCheck": {
+    "seedRange": [
+      1,
+      10
+    ],
+    "speakers": 8,
+    "accepted": 38,
+    "requests": 80,
+    "note": "Passing word/filter checks is not a grammatical-quality score. Rejected requests use word-chain fallback."
+  }
+}

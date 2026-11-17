@@ -1,0 +1,266 @@
+{
+  "run": "tools/training-runs/continuation-1791169082003",
+  "sourceSha256": "6b160c77623d45677018e8274921b89c3ca5857b4d00d7b2691c5cdebc6efd3f",
+  "corpusSha256": "651d0e6e3f3c836e3ee4216e495e9d8045a16d796af82d1c1a5f6c5392f3f7c8",
+  "options": {
+    "epochs": 15,
+    "rate": 0.00015,
+    "smoothing": 0.06,
+    "seed": 20261005
+  },
+  "optimizer": "warm-start weights; fresh Adam state",
+  "baseline": {
+    "epoch": 100,
+    "train": 0.2270680202491804,
+    "validation": 4.009612726111408,
+    "generation": {
+      "accepted": 38,
+      "requests": 80,
+      "results": {
+        "caine": 4,
+        "bubble": 10,
+        "pomni": 3,
+        "jax": 3,
+        "ragatha": 6,
+        "gangle": 3,
+        "zooble": 8,
+        "kinger": 1
+      },
+      "samples": {
+        "caine": [
+          "Welcome! Today's adventure!",
+          "I have in five minutes!"
+        ],
+        "bubble": [
+          "YAY! I ate most of it!",
+          "YAY! I ate most of it!"
+        ],
+        "pomni": [
+          "Uh... air? let is... very mostly!",
+          "What look? It is count for deal in."
+        ],
+        "jax": [
+          "I'm not a help desk. But floors.",
+          "Worse. Don't know. Saw a line. Got in it."
+        ],
+        "ragatha": [
+          "A... what? Wonderful!",
+          "A... what? Wonderful!"
+        ],
+        "gangle": [
+          "Work sounds scary. You're very brave. Braver than my ribbonly.",
+          "I can having behind my sad mask."
+        ],
+        "zooble": [
+          "Which arms? We all heard.",
+          "Which arms? It's been gone mine."
+        ],
+        "kinger": [
+          "Splendid! ...Is it count!"
+        ]
+      }
+    }
+  },
+  "history": [
+    {
+      "epoch": 101,
+      "train": 0.1904131645929577,
+      "validation": 4.01317292958035,
+      "generation": {
+        "accepted": 38,
+        "requests": 80,
+        "results": {
+          "caine": 3,
+          "bubble": 10,
+          "pomni": 5,
+          "jax": 4,
+          "ragatha": 4,
+          "gangle": 2,
+          "zooble": 7,
+          "kinger": 3
+        },
+        "samples": {
+          "caine": [
+            "I LOVE hypotheticals! The''ll me! I'll announce it with MANY parts!",
+            "A quiet conversation? MARVELOUS! I'll announce it with TRUMPETS!"
+          ],
+          "bubble": [
+            "A chair! It is only a little chewed!",
+            "Hi! That's three good painted door! Finally, a wall. Even you think it?"
+          ],
+          "pomni": [
+            "Uh... air? THere? No pointy. Jax. Don't know.",
+            "...A rock?d."
+          ],
+          "jax": [
+            "Welcome to my very exclusive you.",
+            "Welcome to my very exclusive you."
+          ],
+          "ragatha": [
+            "That's okay. You're probably just tired. Want a cushion for the uncomfortable silence. It's very... vertical!",
+            "Wonderful! Most three very... very minutes."
+          ],
+          "gangle": [
+            "I missed it... I was hiding behind my sad over here.",
+            "What's then welcome!"
+          ],
+          "zooble": [
+            "Sure. That's the joke. I'm the joke. Ha.",
+            "Which arms? It's been fun."
+          ],
+          "kinger": [
+            "Cookies! I keep emergency cookies in the fort for a bit.",
+            "Cookies! I keep emergency come is in the fort!"
+          ]
+        }
+      }
+    },
+    {
+      "epoch": 105,
+      "train": 0.17945378351842514,
+      "validation": 3.9135644666080434,
+      "generation": {
+        "accepted": 19,
+        "requests": 80,
+        "results": {
+          "caine": 4,
+          "bubble": 5,
+          "pomni": 2,
+          "jax": 1,
+          "ragatha": 2,
+          "gangle": 1,
+          "zooble": 1,
+          "kinger": 3
+        },
+        "samples": {
+          "caine": [
+            "I LOVE hypotheticals, door mine.",
+            "AND NOW... YOU! No, the again."
+          ],
+          "bubble": [
+            "YAY! I ate most of it!",
+            "YAY! I ate most of it!"
+          ],
+          "pomni": [
+            "Hey, me too. Deep break sounds.",
+            "What look? It is a perfectly good answer."
+          ],
+          "jax": [
+            "I'm not a help desk. But floors. That worked?"
+          ],
+          "ragatha": [
+            "Wonderful! Minutes, you'll make me!",
+            "We can makes!"
+          ],
+          "gangle": [
+            "Mine has a little welcome!"
+          ],
+          "zooble": [
+            "Sure. We at nice."
+          ],
+          "kinger": [
+            "Cookies! I keep emergency cookies. I'll just go sit in the fort for a bit.",
+            "Oh, you're very welcome! For what? Doesn't matter! I'm well!"
+          ]
+        }
+      }
+    },
+    {
+      "epoch": 110,
+      "train": 0.18719722557653323,
+      "validation": 3.8377523022566526,
+      "generation": {
+        "accepted": 13,
+        "requests": 80,
+        "results": {
+          "caine": 1,
+          "bubble": 1,
+          "pomni": 2,
+          "jax": 0,
+          "ragatha": 2,
+          "gangle": 3,
+          "zooble": 4,
+          "kinger": 0
+        },
+        "samples": {
+          "caine": [
+            "WELCOME TO BACKSTAGE! It's load-bearing decor!"
+          ],
+          "bubble": [
+            "A chair! It is only a little chewed!"
+          ],
+          "pomni": [
+            "...A rock?d. Okay: I have felt in weeks.",
+            "What look? It's FINE."
+          ],
+          "jax": [],
+          "ragatha": [
+            "We can mend two seconds.",
+            "All of things for don't have for lunch?"
+          ],
+          "gangle": [
+            "Yay!! A visitor! Look, sit.",
+            "I brought both masks. I at a time. It's a door. On a wall. Painted."
+          ],
+          "zooble": [
+            "Triangle ate STop my head.",
+            "I LIKE my legs. They have different personalities. Again. Wow."
+          ],
+          "kinger": []
+        }
+      }
+    },
+    {
+      "epoch": 115,
+      "train": 0.19384601049710126,
+      "validation": 3.782047900834829,
+      "generation": {
+        "accepted": 16,
+        "requests": 80,
+        "results": {
+          "caine": 1,
+          "bubble": 4,
+          "pomni": 1,
+          "jax": 2,
+          "ragatha": 3,
+          "gangle": 0,
+          "zooble": 3,
+          "kinger": 2
+        },
+        "samples": {
+          "caine": [
+            "Why did the ringmaster Came a painted door, silly!"
+          ],
+          "bubble": [
+            "Aww! Okay! I ate most of it!",
+            "Aww! Here! Have a bubble hug! Feel better? I feel better? I feel better!"
+          ],
+          "pomni": [
+            "Oh. Thanks. That actually... helps move?"
+          ],
+          "jax": [
+            "Worse. to Bad the look again.",
+            "I have a ticket to tomorrow. The standing in this place."
+          ],
+          "ragatha": [
+            "Wonderful! A Did you have for lunch?",
+            "Three stitches. Finished! A pocket-squares!"
+          ],
+          "gangle": [],
+          "zooble": [
+            "Same. Take a break. A real one. I'll sit here nice.",
+            "You can build a creature in my game. Please names."
+          ],
+          "kinger": [
+            "I don't have arms. I'm stretching emotionally!",
+            "I moved one square in any direction found a time. Usually away from things."
+          ]
+        }
+      }
+    }
+  ],
+  "selectedEpoch": 100,
+  "promoted": false,
+  "selection": "Lowest held-out cross entropy with seeded runtime acceptance at least as high as the baseline. Acceptance is not fluency.",
+  "limitations": "Selection repeatedly uses the same 43 validation lines; this is not an independent final test. Tiny-corpus output remains experimental."
+}

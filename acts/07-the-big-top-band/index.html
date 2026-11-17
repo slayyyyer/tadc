@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Big Top Band</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at 50% 0%,rgba(227,36,59,.4),transparent 55%),radial-gradient(ellipse at 50% 100%,rgba(47,91,216,.35),transparent 60%),#0b0718;padding-bottom:80px}
+  header{text-align:center;padding:14px 16px 0}
+  h1{font-family:'Rye';font-weight:400;margin:0;font-size:clamp(26px,4.4vw,50px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink)}
+  .sub{color:#cbbff0;margin:4px 0 0;font-size:15px}
+  /* ── stage ── */
+  #stage{position:relative;margin:12px auto 0;width:min(1100px,96vw);height:190px;border-radius:18px 18px 0 0;overflow:hidden;
+    background:linear-gradient(transparent 70%,rgba(0,0,0,.4)),repeating-linear-gradient(90deg,#e3243b 0 60px,#c41d31 60px 120px)}
+  #stage::before{content:'';position:absolute;left:0;right:0;bottom:0;height:46px;background:repeating-conic-gradient(#f4efe6 0 25%,#1b1b2f 0 50%) 0 0/46px 46px;opacity:.9}
+  #stage::after{content:'';position:absolute;left:0;right:0;top:0;height:26px;background:radial-gradient(circle at 50% 0,#ffd34d 0 12px,transparent 13px) 0 0/60px 26px,linear-gradient(#8a0c1a,#8a0c1a) 0 0/100% 8px no-repeat}
+  .spot{position:absolute;top:-40px;width:200px;height:260px;background:radial-gradient(ellipse at 50% 0,rgba(255,240,180,.35),transparent 70%);pointer-events:none;animation:sweep 6s ease-in-out infinite alternate}
+  @keyframes sweep{from{transform:translateX(-80px) rotate(8deg)}to{transform:translateX(80px) rotate(-8deg)}}
+  #band{position:absolute;left:0;right:0;bottom:18px;display:flex;justify-content:space-around;align-items:flex-end;padding:0 8px}
+  .player{width:clamp(44px,7vw,84px);transform-origin:50% 100%;transition:transform .08s;cursor:pointer;position:relative}
+  .player svg{width:100%;height:auto;display:block;filter:drop-shadow(0 6px 4px rgba(0,0,0,.5))}
+  .player.hit{animation:hit .28s cubic-bezier(.3,1.8,.5,1)}
+  @keyframes hit{0%{transform:scale(1.18,.82)}50%{transform:scale(.9,1.14) translateY(-10px)}100%{transform:none}}
+  .player .note{position:absolute;left:50%;top:-10px;font-size:20px;pointer-events:none;animation:note .9s ease-out forwards}
+  @keyframes note{from{transform:translate(-50%,0) scale(.6);opacity:1}to{transform:translate(calc(-50% + var(--dx)),-60px) scale(1.2) rotate(var(--r));opacity:0}}
+  #caineBox{position:absolute;right:10px;top:22px;width:clamp(60px,7vw,90px)}
+  #caineBox svg{width:100%;height:auto}
+  /* ── controls ── */
+  #controls{width:min(1100px,96vw);margin:0 auto;background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-top:none;padding:10px 12px;
+    display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+  .btn{font:700 14px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:7px 13px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.red{background:var(--red);color:#fff}
+  .btn.blue{background:var(--blue);color:#fff}
+  .btn:focus-visible,.cell:focus-visible{outline:3px dashed var(--red);outline-offset:2px}
+  #play{min-width:96px}
+  label.tempo{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px;margin-left:auto}
+  select{font:600 14px 'Fredoka';border:3px solid var(--ink);border-radius:10px;padding:5px 8px;background:#fff}
+  /* ── grid ── */
+  #gridWrap{width:min(1100px,96vw);margin:0 auto;overflow-x:auto;background:#140b26;border:4px solid var(--ink);border-top:none;border-radius:0 0 18px 18px;padding:10px 10px 12px}
+  #grid{display:grid;grid-template-columns:118px repeat(16,minmax(30px,1fr));gap:3px;min-width:640px}
+  .lab{display:flex;align-items:center;gap:6px;font-weight:700;font-size:12px;color:#e4dcff;white-space:nowrap;overflow:hidden}
+  .lab i{font-style:normal;color:#8f84b3;font-weight:600;font-size:11px}
+  .lab .sw{width:10px;height:10px;border-radius:3px;flex:none}
+  .lab.first{border-top:2px solid rgba(255,255,255,.12);padding-top:3px}
+  .cell{height:22px;border-radius:5px;border:none;background:rgba(255,255,255,.07);cursor:pointer;padding:0;transition:transform .08s,background .1s}
+  .cell.beat{background:rgba(255,255,255,.13)}
+  .cell:hover{background:rgba(255,255,255,.25)}
+  .cell.on{background:var(--c);box-shadow:0 0 10px var(--c)}
+  .cell.now{outline:2px solid rgba(255,211,77,.8)}
+  .cell.on.now{transform:scale(1.18);filter:brightness(1.4)}
+  .cell.first{margin-top:6px}
+  #toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(90px);background:var(--ink);border:2px solid var(--gold);color:#fff;padding:8px 14px;border-radius:999px;font-weight:700;transition:transform .3s;z-index:50}
+  #toast.show{transform:translateX(-50%)}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30}
+</style>
+</head>
+<body>
+<header>
+  <h1>The Big Top Band</h1>
+  <p class="sub">Click the grid to write a tune. Each row is a cast member. Press play and watch the band perform. (Space = play/stop)</p>
+</header>
+
+<div id="stage">
+  <div class="spot" style="left:20%"></div><div class="spot" style="left:62%;animation-delay:-3s"></div>
+  <div id="band"></div>
+  <div id="caineBox" title="Caine, conductor"></div>
+</div>
+<div id="controls">
+  <button class="btn red" id="play">▶ Play</button>
+  <select id="preset" aria-label="Preset songs">
+    <option value="">🎼 Load a song…</option>
+  </select>
+  <button class="btn blue" id="compose">🎩 Let Caine compose</button>
+  <button class="btn" id="clear">🧽 Clear</button>
+  <button class="btn" id="share">🔗 Copy song link</button>
+  <label class="tempo">🐌 <input type="range" id="tempo" min="70" max="180" value="120" aria-label="Tempo"> 🚀 <span id="bpm">120</span></label>
+</div>
+<div id="gridWrap"><div id="grid"></div></div>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+<div id="toast"></div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, say, wireCaine, pick, confetti } = window.TADC;
+  const STEPS = 16;
+
+  // ═══ the band: one or more grid rows per musician ═══
+  // Caine plays the calliope (C-major pentatonic, high to low), Kinger plays bass; the rest are percussion.
+  const MELODY = ['E5', 'D5', 'C5', 'A4', 'G4', 'E4', 'D4', 'C4'];
+  const BASS = ['G2', 'E2', 'D2', 'C2'];
+  const LANES = [
+    ...MELODY.map((n, i) => ({ who: 'caine', kind: 'calliope', note: n, label: i === 0 ? 'Caine' : '', sub: n, color: '#ffd34d' })),
+    ...BASS.map((n, i) => ({ who: 'kinger', kind: 'bass', note: n, label: i === 0 ? 'Kinger' : '', sub: n, color: '#b07cff' })),
+    { who: 'zooble', kind: 'kick', label: 'Zooble', sub: 'thump', color: '#5fd38d' },
+    { who: 'jax', kind: 'snap', label: 'Jax', sub: 'snap', color: '#8f5bd6' },
+    { who: 'ragatha', kind: 'clap', label: 'Ragatha', sub: 'clap', color: '#ff6b7d' },
+    { who: 'gangle', kind: 'chime', label: 'Gangle', sub: 'chime', color: '#ff7eb6' },
+    { who: 'pomni', kind: 'honk', label: 'Pomni', sub: 'honk', color: '#6fb6ff' },
+    { who: 'bubble', kind: 'pop', label: 'Bubble', sub: 'pop', color: '#bfe9ff' },
+  ];
+  const ROWS = LANES.length;
+  const FIRST_OF_GROUP = new Set([0, MELODY.length, MELODY.length + BASS.length]);
+  let pattern = Array.from({ length: ROWS }, () => Array(STEPS).fill(false));
+
+  // ═══ preset songs (original) ═══
+  const melodyFromNotes = (notes) => {
+    const rows = Array.from({ length: MELODY.length }, () => Array(STEPS).fill(false));
+    notes.forEach((n, s) => { if (n) rows[MELODY.indexOf(n)][s] = true; });
+    return rows;
+  };
+  const bassFromNotes = (notes) => {
+    const rows = Array.from({ length: BASS.length }, () => Array(STEPS).fill(false));
+    notes.forEach((n, s) => { if (n) rows[BASS.indexOf(n)][s] = true; });
+    return rows;
+  };
+  const hits = (str) => [...str].map((ch) => ch === 'x');
+  const _ = null;
+  const PRESETS = {
+    'Grand Entrance March': [
+      ...melodyFromNotes(['C4', _, 'E4', _, 'G4', _, 'C5', _, 'A4', _, 'G4', 'A4', 'E4', 'D4', 'C4', _]),
+      ...bassFromNotes(['C2', _, _, _, 'G2', _, _, _, 'C2', _, _, _, 'G2', _, 'E2', _]),
+      hits('x...x...x...x...'), hits('....x.......x...'), hits('............x.x.'),
+      hits('x.......x.......'), hits('...............x'), hits('..x...x...x...x.'),
+    ],
+    "Kinger's Pillow Lullaby": [
+      ...melodyFromNotes(['E5', _, _, 'D5', _, _, 'C5', _, _, 'A4', _, _, 'G4', _, _, _]),
+      ...bassFromNotes(['C2', _, _, _, _, _, 'E2', _, _, _, _, _, 'G2', _, _, _]),
+      hits('x.....x.....x...'), hits('................'), hits('................'),
+      hits('x..x..x..x..x..x'), hits('................'), hits('.......x.......x'),
+    ],
+    'Abstraction Shuffle': [
+      ...melodyFromNotes(['A4', 'C5', _, 'A4', 'E5', _, 'D5', 'C5', 'A4', _, 'G4', 'E4', _, 'G4', 'A4', _]),
+      ...bassFromNotes(['D2', _, 'D2', _, _, 'D2', _, 'E2', 'D2', _, 'D2', _, 'C2', _, 'E2', _]),
+      hits('x..x..x...x..x..'), hits('..x...x.x.....x.'), hits('....x.......x...'),
+      hits('...........x....'), hits('x.......x.......'), hits('.x.x.x.x.x.x.x.x'),
+    ],
+    'Honk Symphony No. 1': [
+      ...melodyFromNotes(['G4', _, 'G4', _, 'E4', _, _, _, 'G4', _, 'G4', _, 'C5', _, _, _]),
+      ...bassFromNotes(['C2', _, _, _, 'C2', _, _, _, 'D2', _, _, _, 'G2', _, _, _]),
+      hits('x...x...x...x...'), hits('................'), hits('....x.......x...'),
+      hits('................'), hits('x.x.x.x.xxxx.x.x'), hits('................'),
+    ],
+  };
+  const presetSel = document.getElementById('preset');
+  Object.keys(PRESETS).forEach((k) => { const o = document.createElement('option'); o.value = k; o.textContent = k; presetSel.appendChild(o); });
+
+  // ═══ stage ═══
+  const band = document.getElementById('band');
+  const ORDER = ['kinger', 'zooble', 'jax', 'ragatha', 'gangle', 'pomni', 'bubble'];
+  const players = {};
+  ORDER.forEach((who) => {
+    const el = document.createElement('div');
+    el.className = 'player'; el.title = who[0].toUpperCase() + who.slice(1);
+    el.innerHTML = CAST[who];
+    if (who === 'bubble') el.style.width = 'clamp(34px,4.5vw,54px)';
+    band.appendChild(el);
+    players[who] = el;
+  });
+  const caineBox = document.getElementById('caineBox');
+  caineBox.innerHTML = CAST.caine;
+  const caine = wireCaine(caineBox);
+  players.caine = caineBox;
+  const PLAYER_LINES = {
+    kinger: ['Bum. Bum. BUM. I am the bass. I have always been the bass.', 'Is the bass the low one? I hope I\'m the low one.'],
+    zooble: ['I hit things. That\'s my whole job. Honestly? Kind of relaxing.', 'Fine. I\'ll be the drums. FINE.'],
+    jax: ['Snap. Snap. You\'re welcome for the rhythm.', 'I\'m only here because there\'s no other band. Snap.'],
+    ragatha: ['Clap along everybody! Everybody? Anybody? Okay, I\'ll clap for all of us!'],
+    gangle: ['*ting!* That\'s my chime! Did you hear it? It was very small!'],
+    pomni: ['Why am I the horn?! Why is my instrument a HONK?!', 'HONK. ...that came out of me. That came out of ME.'],
+    bubble: ['POP! POP! I\'m the percussion! I\'m ALL the percussion!'],
+  };
+  ORDER.forEach((who) => players[who].addEventListener('click', () => { ensureAudio(); playSound(LANES.find((l) => l.who === who), audio.currentTime); bounce(who); say(players[who], pick(PLAYER_LINES[who]), 2600); }));
+  caineBox.addEventListener('click', () => { ensureAudio(); playSound(LANES[2], audio.currentTime); caine.talk(pick(REVIEW.generic), 3000); });
+
+  function bounce(who) {
+    const el = players[who]; if (!el) return;
+    el.classList.remove('hit'); void el.offsetWidth; el.classList.add('hit');
+    if (Math.random() < 0.5) {
+      const n = document.createElement('span');
+      n.className = 'note'; n.textContent = pick(['♪', '♫', '♩', '♬']);
+      n.style.setProperty('--dx', (Math.random() * 40 - 20) + 'px'); n.style.setProperty('--r', (Math.random() * 60 - 30) + 'deg');
+      n.style.color = LANES.find((l) => l.who === who).color;
+      el.appendChild(n); setTimeout(() => n.remove(), 900);
+    }
+  }
+
+  // ═══ grid ═══
+  const grid = document.getElementById('grid');
+  const cells = [];
+  LANES.forEach((lane, r) => {
+    const lab = document.createElement('div');
+    lab.className = 'lab' + (FIRST_OF_GROUP.has(r) ? ' first' : '');
+    lab.innerHTML = `<span class="sw" style="background:${lane.color}"></span>${lane.label || ''} <i>${lane.sub}</i>`;
+    grid.appendChild(lab);
+    cells[r] = [];
+    for (let s = 0; s < STEPS; s++) {
+      const b = document.createElement('button');
+      b.className = 'cell' + (s % 4 === 0 ? ' beat' : '') + (FIRST_OF_GROUP.has(r) ? ' first' : '');
+      b.style.setProperty('--c', lane.color);
+      b.setAttribute('aria-label', `${lane.label || lane.who} ${lane.sub} step ${s + 1}`);
+      b.addEventListener('pointerdown', (e) => { e.preventDefault(); paintStart(r, s); });
+      b.addEventListener('pointerenter', () => paintOver(r, s));
+      b.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); toggle(r, s); } });
+      grid.appendChild(b);
+      cells[r][s] = b;
+    }
+  });
+  // click-and-drag painting
+  let painting = null;
+  function paintStart(r, s) { painting = !pattern[r][s]; setCell(r, s, painting); if (painting) preview(r); }
+  function paintOver(r, s) { if (painting !== null && pattern[r][s] !== painting) { setCell(r, s, painting); if (painting) preview(r); } }
+  addEventListener('pointerup', () => { painting = null; saveHash(); });
+  function toggle(r, s) { setCell(r, s, !pattern[r][s]); if (pattern[r][s]) preview(r); saveHash(); }
+  let honkSong = false; // true while the unedited Honk Symphony is loaded (mystery clue)
+  function setCell(r, s, on) { pattern[r][s] = on; cells[r][s].classList.toggle('on', on); honkSong = false; }
+  function preview(r) { if (!playing) { ensureAudio(); playSound(LANES[r], audio.currentTime); bounce(LANES[r].who); } }
+  function renderAll() { for (let r = 0; r < ROWS; r++) for (let s = 0; s < STEPS; s++) cells[r][s].classList.toggle('on', pattern[r][s]); }
+
+  // ═══ audio ═══
+  let audio, master, noiseBuf;
+  function ensureAudio() {
+    if (audio) { audio.resume(); return; }
+    audio = new (window.AudioContext || window.webkitAudioContext)();
+    master = audio.createGain(); master.gain.value = 0.7;
+    const comp = audio.createDynamicsCompressor();
+    master.connect(comp); comp.connect(audio.destination);
+    noiseBuf = audio.createBuffer(1, audio.sampleRate * 0.5, audio.sampleRate);
+    const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+  }
+  const freq = (n) => {
+    const m = /^([A-G])(\d)$/.exec(n);
+    return 440 * Math.pow(2, ({ C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 }[m[1]] + (+m[2] - 4) * 12 - 9) / 12);
+  };
+  function env(g, t, a, peak, dur) {
+    g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(peak, t + a); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  }
+  function osc(type, f, t, dur, dest) { const o = audio.createOscillator(); o.type = type; o.frequency.setValueAtTime(f, t); o.connect(dest); o.start(t); o.stop(t + dur + 0.05); return o; }
+  function noise(t, dur, dest) { const s = audio.createBufferSource(); s.buffer = noiseBuf; s.connect(dest); s.start(t); s.stop(t + dur); return s; }
+  function playSound(lane, t) {
+    const g = audio.createGain(); g.connect(master);
+    switch (lane.kind) {
+      case 'calliope': { // wheezy pipe with vibrato
+        const f = freq(lane.note);
+        env(g, t, 0.015, 0.16, 0.32);
+        const lfo = audio.createOscillator(), lg = audio.createGain(); lfo.frequency.value = 6.5; lg.gain.value = f * 0.012; lfo.connect(lg);
+        [[1, 'triangle', 1], [2, 'sine', 0.35], [3, 'sine', 0.15]].forEach(([mult, type, amp]) => {
+          const og = audio.createGain(); og.gain.value = amp; og.connect(g);
+          const o = osc(type, f * mult, t, 0.32, og); lg.connect(o.frequency);
+        });
+        lfo.start(t); lfo.stop(t + 0.4);
+        break;
+      }
+      case 'bass': {
+        const lp = audio.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(900, t); lp.frequency.exponentialRampToValueAtTime(200, t + 0.3);
+        lp.connect(g); env(g, t, 0.01, 0.35, 0.38); osc('sawtooth', freq(lane.note), t, 0.38, lp); break;
+      }
+      case 'kick': { const o = osc('sine', 150, t, 0.3, g); o.frequency.exponentialRampToValueAtTime(40, t + 0.25); env(g, t, 0.003, 0.9, 0.3); break; }
+      case 'snap': {
+        const hp = audio.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1800; hp.connect(g);
+        env(g, t, 0.002, 0.45, 0.12); noise(t, 0.13, hp); break;
+      }
+      case 'clap': {
+        const bp = audio.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 1300; bp.Q.value = 1.2; bp.connect(g);
+        g.gain.setValueAtTime(0.0001, t);
+        [0, 0.012, 0.024].forEach((o) => { g.gain.setValueAtTime(0.5, t + o); g.gain.exponentialRampToValueAtTime(0.05, t + o + 0.01); });
+        g.gain.setValueAtTime(0.4, t + 0.035); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.2);
+        noise(t, 0.22, bp); break;
+      }
+      case 'chime': { env(g, t, 0.002, 0.18, 1.1); osc('sine', 1760, t, 1.1, g); const g2 = audio.createGain(); g2.gain.value = 0.4; g2.connect(g); osc('sine', 2637, t, 0.7, g2); break; }
+      case 'honk': {
+        const bp = audio.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 700; bp.Q.value = 3; bp.connect(g);
+        env(g, t, 0.01, 0.5, 0.26); const o = osc('sawtooth', 330, t, 0.26, bp); o.frequency.exponentialRampToValueAtTime(250, t + 0.24); break;
+      }
+      case 'pop': { env(g, t, 0.002, 0.3, 0.09); const o = osc('sine', 1100, t, 0.09, g); o.frequency.exponentialRampToValueAtTime(220, t + 0.08); break; }
+    }
+  }
+
+  // ═══ transport ═══
+  let playing = false, step = 0, nextTime = 0, timer = null, bpm = 120, loops = 0;
+  const visQueue = [];
+  function schedule() {
+    const stepLen = 60 / bpm / 4;
+    while (nextTime < audio.currentTime + 0.12) {
+      const swing = step % 2 ? stepLen * 0.12 : 0; // a little circus swagger
+      const whoHit = new Set();
+      for (let r = 0; r < ROWS; r++) if (pattern[r][step]) { playSound(LANES[r], nextTime + swing); whoHit.add(LANES[r].who); }
+      visQueue.push({ step, time: nextTime + swing, who: whoHit });
+      step = (step + 1) % STEPS;
+      if (step === 0) {
+        ++loops;
+        if (honkSong) window.TADC.mystery && window.TADC.mystery.find('stub-4'); // 🎟️ mystery clue: a full honk-symphony loop
+        if (loops % 2 === 0) setTimeout(review, (nextTime - audio.currentTime) * 1000);
+      }
+      nextTime += stepLen;
+    }
+  }
+  let lastVis = -1;
+  function drawLoop() {
+    if (playing && audio) {
+      while (visQueue.length && visQueue[0].time <= audio.currentTime) {
+        const v = visQueue.shift();
+        if (lastVis >= 0) for (let r = 0; r < ROWS; r++) cells[r][lastVis].classList.remove('now');
+        for (let r = 0; r < ROWS; r++) cells[r][v.step].classList.add('now');
+        lastVis = v.step;
+        v.who.forEach(bounce);
+      }
+    }
+    requestAnimationFrame(drawLoop);
+  }
+  requestAnimationFrame(drawLoop);
+
+  const playBtn = document.getElementById('play');
+  function togglePlay() {
+    ensureAudio();
+    playing = !playing;
+    if (playing) {
+      step = 0; loops = 0; visQueue.length = 0; nextTime = audio.currentTime + 0.06;
+      timer = setInterval(schedule, 25); schedule();
+      playBtn.textContent = '■ Stop';
+      if (isEmpty()) caine.talk("Ah, the sound of SILENCE! Very avant-garde! Maybe click a few squares?", 3200);
+    } else {
+      clearInterval(timer);
+      if (lastVis >= 0) for (let r = 0; r < ROWS; r++) cells[r][lastVis].classList.remove('now');
+      lastVis = -1;
+      playBtn.textContent = '▶ Play';
+    }
+  }
+  playBtn.addEventListener('click', togglePlay);
+  addEventListener('keydown', (e) => {
+    if (e.key === ' ' && !(e.target instanceof HTMLButtonElement && e.target.classList.contains('cell')) && e.target.tagName !== 'SELECT') { e.preventDefault(); togglePlay(); }
+  });
+  const tempo = document.getElementById('tempo');
+  tempo.addEventListener('input', () => { bpm = +tempo.value; document.getElementById('bpm').textContent = bpm; });
+
+  // ═══ Caine, music critic ═══
+  const REVIEW = {
+    generic: [
+      "BRAVO! BRAVISSIMO! I'm conducting! I don't know how! I'm doing it anyway!",
+      "Magnificent! The void has never sounded so... audible!",
+      "Ten out of ten! I am a very generous critic! I'm the only critic!",
+    ],
+    honky: ["So many HONKS! A honk-forward composition! Bold! Pomni is not okay!"],
+    sparse: ["Minimalist! Daring! I can hear every individual silence!"],
+    dense: ["SO MANY NOTES! It's a wall of sound! It's a CIRCUS of sound! It IS a circus!"],
+    noMelody: ["Lovely rhythm! But where's the CALLIOPE? I'm right here! Tootle me!"],
+    melodic: ["What a melody! I'll be humming it forever! Literally! I can't stop!"],
+  };
+  const isEmpty = () => pattern.every((row) => row.every((x) => !x));
+  function review() {
+    if (!playing) return;
+    const count = pattern.flat().filter(Boolean).length;
+    const honks = pattern[ROWS - 2].filter(Boolean).length;
+    const mel = pattern.slice(0, MELODY.length).flat().filter(Boolean).length;
+    let pool = REVIEW.generic;
+    if (count === 0) return;
+    if (honks >= 6) pool = REVIEW.honky;
+    else if (count > 70) pool = REVIEW.dense;
+    else if (count < 10) pool = REVIEW.sparse;
+    else if (mel === 0) pool = REVIEW.noMelody;
+    else if (mel >= 8 && Math.random() < 0.5) pool = REVIEW.melodic;
+    caine.talk(pick(pool), 3400);
+  }
+
+  // ═══ presets, compose, clear, share ═══
+  presetSel.addEventListener('change', () => {
+    const p = PRESETS[presetSel.value]; if (!p) return;
+    honkSong = presetSel.value === 'Honk Symphony No. 1'; // 🎟️ mystery clue tracking
+    pattern = p.map((row) => row.slice()); renderAll(); saveHash();
+    caine.talk(`Now performing: <b>${presetSel.value}</b>! Press PLAY, maestro!`, 2800);
+    presetSel.value = '';
+  });
+  document.getElementById('compose').addEventListener('click', () => {
+    honkSong = false;
+    pattern = Array.from({ length: ROWS }, () => Array(STEPS).fill(false));
+    // melody: a wandering random walk on the pentatonic, with rests
+    let pos = 2 + Math.floor(Math.random() * 4);
+    for (let s = 0; s < STEPS; s++) {
+      if (Math.random() < (s % 2 ? 0.35 : 0.7)) { pattern[pos][s] = true; pos = Math.max(0, Math.min(MELODY.length - 1, pos + pick([-2, -1, -1, 0, 1, 1, 2]))); }
+    }
+    const b0 = MELODY.length, bRoot = b0 + BASS.length - 1;
+    [0, 8].forEach((s) => { pattern[bRoot][s] = true; });
+    [4, 12].forEach((s) => { if (Math.random() < 0.7) pattern[b0 + Math.floor(Math.random() * BASS.length)][s] = true; });
+    const P = b0 + BASS.length;
+    for (let s = 0; s < STEPS; s++) {
+      if (s % 4 === 0 || Math.random() < 0.08) pattern[P][s] = true;              // Zooble kick
+      if (s % 8 === 4 || Math.random() < 0.06) pattern[P + 1][s] = true;          // Jax snap
+      if (s === 12 || (s % 8 === 4 && Math.random() < 0.3)) pattern[P + 2][s] = true; // Ragatha clap
+      if (s % 8 === 0 && Math.random() < 0.6) pattern[P + 3][s] = true;           // Gangle chime
+      if (Math.random() < 0.06) pattern[P + 4][s] = true;                         // Pomni honk (rare, as is right)
+      if (s % 4 === 2 && Math.random() < 0.6) pattern[P + 5][s] = true;           // Bubble pop
+    }
+    renderAll(); saveHash();
+    const r = caineBox.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + 30, 50, 0.8);
+    caine.talk(pick([
+      "I have composed a MASTERPIECE! In four seconds! A personal record!",
+      "Behold! My latest opus! It's called 'Untitled Banger Number Nine Thousand'!",
+      "I wrote this one in my sleep! I don't sleep! That's how good it is!",
+    ]), 3200);
+  });
+  document.getElementById('clear').addEventListener('click', () => {
+    honkSong = false;
+    pattern = Array.from({ length: ROWS }, () => Array(STEPS).fill(false)); renderAll(); saveHash();
+    caine.talk("A blank canvas! Terrifying! Thrilling! Mostly terrifying!", 2400);
+  });
+
+  // song <-> URL hash (hex of the bit grid), so a song can be bookmarked or shared
+  function encode() {
+    const bits = pattern.flat().map((x) => (x ? '1' : '0')).join('');
+    let hex = '';
+    for (let i = 0; i < bits.length; i += 4) hex += parseInt(bits.slice(i, i + 4).padEnd(4, '0'), 2).toString(16);
+    return `${hex}-${bpm}`;
+  }
+  function decode(str) {
+    const [hex, b] = str.split('-');
+    if (!hex || !/^[0-9a-f]+$/.test(hex)) return false;
+    const bits = [...hex].map((h) => parseInt(h, 16).toString(2).padStart(4, '0')).join('');
+    if (bits.length < ROWS * STEPS) return false;
+    pattern = Array.from({ length: ROWS }, (_, r) => Array.from({ length: STEPS }, (_, s) => bits[r * STEPS + s] === '1'));
+    if (b && +b >= 70 && +b <= 180) { bpm = +b; tempo.value = bpm; document.getElementById('bpm').textContent = bpm; }
+    return true;
+  }
+  function saveHash() { history.replaceState(null, '', '#song=' + encode()); }
+  const toast = document.getElementById('toast');
+  function showToast(msg) { toast.textContent = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2200); }
+  document.getElementById('share').addEventListener('click', async () => {
+    saveHash();
+    try { await navigator.clipboard.writeText(location.href); showToast('Song link copied! 🎶'); }
+    catch (e) { showToast('Copy blocked: the link is in the address bar 🎶'); }
+  });
+
+  // ═══ boot ═══
+  const m = /song=([^&]+)/.exec(location.hash);
+  if (!(m && decode(m[1]))) pattern = PRESETS['Grand Entrance March'].map((row) => row.slice());
+  renderAll();
+  setTimeout(() => caine.talk("Welcome to <b>THE BIG TOP BAND!</b> I conduct, they perform, YOU compose! Press PLAY!", 4200), 400);
+})();
+</script>
+</body>
+</html>

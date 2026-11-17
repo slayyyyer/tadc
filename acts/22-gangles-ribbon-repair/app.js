@@ -1,0 +1,15 @@
+(() => {
+const $=id=>document.getElementById(id);let round=0,game;
+$('app').innerHTML=`<div class="layout"><section class="panel"><div class="stat"><span id="round"></span><span id="moves"></span></div><p class="small">Start at the left of the top tile. Rotate each tile until every piece joins the ribbon. The last tile is marked FINISH.</p><div class="grid" id="tiles" aria-label="Ribbon puzzle"></div><p id="status" class="status" role="status"></p><div class="controls"><button id="hint">Untangle one tile</button><button id="reset">New tangle</button><button id="next" class="primary" disabled>Next ribbon →</button></div></section><aside class="panel"><div class="host"><div class="host-art">${TADC.CAST.gangle}</div><p class="quote">“A knot is just a ribbon that needs a little patience.”</p></div><h2>Three little repairs</h2><p>Click or tap to turn a tile clockwise. Keyboard: Tab to a tile, then Enter or Space.</p><p class="small">No clock. No penalties. Hints are always welcome.</p></aside></div>`;
+function render(){const result=Ribbon.check(game);$('round').textContent=`Ribbon ${round+1} of 3 · ${game.size} × ${game.size}`;$('moves').textContent=`${game.moves} turns`;
+ $('tiles').style.gridTemplateColumns=`repeat(${game.size},1fr)`;
+ if(!$('tiles').children.length)game.tiles.forEach((_,i)=>{const button=document.createElement('button');button.style.cssText='aspect-ratio:1;padding:4px;min-width:0;position:relative';button.onclick=()=>{game.tiles[i]=Ribbon.rotate(game.tiles[i]);game.moves++;render();};$('tiles').append(button);});
+ [...$('tiles').children].forEach((button,i)=>{const ends=[[50,0],[100,50],[50,100],[0,50]];const mask=game.tiles[i];button.innerHTML=`<svg viewBox="0 0 100 100" aria-hidden="true" style="width:100%;display:block"><g stroke="${result.seen.has(i)?'#f9a6c0':'#8d8099'}" stroke-width="12" fill="none" stroke-linecap="round">${ends.map(([x,y],d)=>mask&(1<<d)?`<path d="M50 50 L${x} ${y}"/>`:'').join('')}</g><circle cx="50" cy="50" r="7" fill="#fff6e2"/></svg>${i===0||i===game.end?`<span style="position:absolute;left:3px;top:2px;font-size:9px">${i===0?'START':'FINISH'}</span>`:''}`;
+ button.setAttribute('aria-label',`Row ${Math.floor(i/game.size)+1}, column ${i%game.size+1}: ${['up','right','down','left'].filter((_,d)=>mask&(1<<d)).join(' and ')}. Rotate.`);button.disabled=result.won;});
+ $('next').disabled=!result.won;$('hint').disabled=result.won;
+ $('status').textContent=result.won?(round===2?'All three ribbons repaired. Gangle has a bow for every mood.':'A whole ribbon! Gangle is doing a very small victory dance.'):`${result.seen.size} of ${game.tiles.length} pieces connected to the start.`;
+ $('next').textContent=round===2?'Begin another set':'Next ribbon →';}
+function start(){game=Ribbon.make(round+3);$('tiles').replaceChildren();render();}
+$('hint').onclick=()=>{const i=game.tiles.findIndex((mask,i)=>mask!==game.base[i]);if(i>=0){game.tiles[i]=game.base[i];game.moves++;render();}};
+$('reset').onclick=start;$('next').onclick=()=>{round=(round+1)%3;start();};start();
+})();

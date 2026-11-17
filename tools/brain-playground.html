@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cast Brain Playground</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  body{margin:0;min-height:100vh;background:#0b0718;color:#fff7d6;font-family:'Fredoka',system-ui,sans-serif;display:flex;justify-content:center;padding:18px 12px}
+  main{width:min(640px,100%)}
+  h1{font-family:'Rye',Georgia,serif;font-weight:400;color:#ffd34d;text-shadow:0 3px 0 #8a0c1a;margin:0 0 4px;font-size:clamp(24px,5vw,36px)}
+  p{margin:0 0 12px;color:#cbbff0;font-size:14px}
+  .who{display:flex;flex-wrap:wrap;gap:6px;margin:0 0 12px}
+  .who button{font:700 14px 'Fredoka',system-ui,sans-serif;border:3px solid #1b1b2f;border-radius:999px;padding:6px 12px;background:#fff7d6;color:#1b1b2f;cursor:pointer}
+  .who button[aria-pressed=true]{background:#ffd34d;box-shadow:0 0 0 3px #e3243b}
+  .row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .row button,a.btn{font:700 13px 'Fredoka',system-ui,sans-serif;border:3px solid #1b1b2f;border-radius:999px;padding:6px 12px;background:#2f5bd8;color:#fff;cursor:pointer;text-decoration:none}
+  #portrait{float:right;width:70px;margin:0 0 6px 10px}
+  #portrait svg{width:100%;height:auto}
+</style>
+</head>
+<body>
+<main>
+  <a class="btn" id="back" href="../index.html">← back to the Big Top</a>
+  <h1>🧠 Cast Brain Playground</h1>
+  <p>Chat with the cast. Their brains are made entirely of circus parts: intent matching, memory, and a Markov "improv" voice trained only on the circus's own original lines. No internet, no APIs.</p>
+  <div class="who" role="group" aria-label="Who to talk to"></div>
+  <div id="portrait" aria-hidden="true"></div>
+  <div id="chat"></div>
+  <label><input id="neural" type="checkbox"> Experimental tiny-model improv (may be muddled)</label>
+  <div class="row">
+    <button type="button" id="improv">🎭 Ask for an improv line</button>
+    <button type="button" id="forget">🧽 Make them forget me</button>
+  </div>
+</main>
+<script src="../assets/cast.js"></script>
+<script src="../assets/corpus.js"></script>
+<script src="../assets/tinylm-weights.js"></script>
+<script src="../assets/tinylm.js"></script>
+<script src="../assets/castbrain.js"></script>
+<script>
+(() => {
+  const B = window.CircusBrain, T = window.TADC;
+  const names = { caine: 'Caine', bubble: 'Bubble', pomni: 'Pomni', jax: 'Jax', ragatha: 'Ragatha', gangle: 'Gangle', zooble: 'Zooble', kinger: 'Kinger' };
+  let who = 'caine';
+  document.getElementById('neural').disabled = !window.CircusTinyLM?.ready;
+  document.getElementById('neural').addEventListener('change', e => B.setNeuralEnabled(e.target.checked));
+  const chat = B.mountChat(document.getElementById('chat'), who);
+  const group = document.querySelector('.who');
+  const paint = () => {
+    group.querySelectorAll('button').forEach((b) => b.setAttribute('aria-pressed', b.dataset.who === who ? 'true' : 'false'));
+    document.getElementById('portrait').innerHTML = T.CAST[who] || '';
+  };
+  B.WHO.forEach((w) => {
+    const b = document.createElement('button'); b.type = 'button'; b.dataset.who = w; b.textContent = names[w];
+    b.addEventListener('click', () => { who = w; chat.setWho(w); paint(); });
+    group.appendChild(b);
+  });
+  paint();
+  document.getElementById('improv').addEventListener('click', () => {
+    const line = B.improv(who);
+    const log = document.querySelector('.cb-log');
+    const li = document.createElement('li'); li.className = 'them';
+    li.innerHTML = `<b>${names[who].toUpperCase()} (IMPROV)</b>`; li.append(document.createTextNode(line));
+    log.appendChild(li); log.scrollTop = log.scrollHeight;
+    try { T.babble(who, line, 2600); } catch (e) { /* voice optional */ }
+  });
+  document.getElementById('forget').addEventListener('click', () => { B.forget(); alert('Done! They have forgotten you. Kinger forgot you twice.'); });
+})();
+</script>
+</body>
+</html>

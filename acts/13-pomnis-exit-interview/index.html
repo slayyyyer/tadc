@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pomni's Exit Interview</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--amber:#ffcf6b}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at 50% 0%,rgba(47,91,216,.35),transparent 60%),#0b0718;display:flex;flex-direction:column;align-items:center;padding:14px 12px 70px;min-height:100%}
+  h1{font-family:'Rye';font-weight:400;margin:0;font-size:clamp(24px,4.2vw,46px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink);text-align:center}
+  .sub{color:#cbbff0;margin:4px 0 10px;font-size:15px;text-align:center}
+  #wrap{position:relative;width:min(900px,100%)}
+  #crt{position:relative;background:#120c06;border:10px solid #2b2140;border-radius:22px;box-shadow:0 0 0 4px var(--ink),8px 8px 0 4px var(--red-d),inset 0 0 80px rgba(255,170,60,.12);
+    padding:18px 20px 12px;height:min(62vh,560px);display:flex;flex-direction:column;overflow:hidden}
+  #crt::after{content:'';position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 2px,transparent 2px 4px);border-radius:12px}
+  #log{flex:1;overflow-y:auto;font:400 21px/1.3 'VT323',monospace;color:var(--amber);text-shadow:0 0 6px rgba(255,180,60,.55);padding-right:8px;scrollbar-color:#5a4020 transparent}
+  #log p{margin:0 0 10px;white-space:pre-wrap}
+  #log .cmd{color:#fff;opacity:.85}
+  #log .room{color:var(--gold);font-size:25px;margin-bottom:2px;text-decoration:underline;text-underline-offset:4px}
+  #log .caine{color:#ff8a8a}
+  #log .pomni{color:#8ab4ff}
+  #log .sys{color:#5dff8c}
+  #log .glitch{animation:gl .15s steps(2) 6;color:#ff2a6d}
+  @keyframes gl{50%{transform:translateX(3px) skewX(10deg)}}
+  #inputRow{display:flex;align-items:center;gap:8px;border-top:2px dashed rgba(255,180,60,.25);padding-top:8px;font:400 23px 'VT323',monospace;color:var(--amber)}
+  #cmd{flex:1;background:transparent;border:none;outline:none;color:#fff;font:400 23px 'VT323',monospace;caret-color:var(--amber)}
+  #chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;justify-content:center}
+  .chip{font:700 13px 'Fredoka';color:var(--ink);background:var(--cream);border:3px solid var(--ink);border-radius:999px;padding:4px 10px;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+  .chip:focus-visible{outline:3px dashed var(--gold);outline-offset:2px}
+  #hud{display:flex;justify-content:space-between;width:min(900px,100%);margin-bottom:8px;font-weight:700;font-size:14px;color:#cbbff0}
+  #pomni{position:absolute;right:-14px;bottom:-22px;width:clamp(70px,9vw,110px);pointer-events:none;transform-origin:50% 100%;transition:transform .3s}
+  #pomni svg{width:100%;height:auto;filter:drop-shadow(0 8px 6px rgba(0,0,0,.6))}
+  #pomni.panic{animation:panic .12s linear 8}
+  @keyframes panic{50%{transform:translateX(-4px) rotate(-4deg)}}
+  .btn{font:700 14px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30}
+  @media (max-width:600px){#log{font-size:18px}#pomni{display:none}}
+</style>
+</head>
+<body>
+<h1>Pomni's Exit Interview</h1>
+<p class="sub">A text adventure. Type commands like <b>look</b>, <b>go north</b>, <b>take key</b>, <b>talk to caine</b>. Type <b>help</b> if stuck.</p>
+<div id="hud"><span>📍 <span id="where">?</span></span><span>⭐ Score <span id="score">0</span>/100 · 🚶 Moves <span id="moves">0</span></span></div>
+<div id="wrap">
+  <div id="crt">
+    <div id="log" aria-live="polite"></div>
+    <div id="inputRow"><span>&gt;</span><input id="cmd" autocomplete="off" spellcheck="false" aria-label="Command" placeholder="what do you do?"></div>
+  </div>
+  <div id="pomni"></div>
+</div>
+<div id="chips"></div>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, sfx, confetti } = window.TADC;
+  document.getElementById('pomni').innerHTML = CAST.pomni;
+
+  // ═══ world (all original) ═══
+  const ROOMS = {
+    tent: {
+      name: 'The Main Tent',
+      desc: () => 'A vast striped tent over a checkered floor that goes on far longer than floors should. Caine hovers in the middle, beaming at nothing in particular.' +
+        '\nExits: NORTH to the Hallway of Doors, EAST to a suspicious pile of pillows, WEST to the kitchen.',
+      exits: { n: 'hall', e: 'fort', w: 'kitchen' },
+      people: ['caine'],
+    },
+    hall: {
+      name: 'The Hallway of Doors',
+      desc: () => `A hallway lined with doors on both sides. Every door you try opens onto a wall painted to look like a door.${state.hallDepth ? ` (You are ${state.hallDepth} hallway-lengths deep. It looks exactly the same.)` : ''}` +
+        `\nExits: SOUTH to the Main Tent, NORTH (more hallway?), EAST to Jax's room${state.trapdoorFound ? ', DOWN through the trapdoor' : ''}.` +
+        (state.trapdoorFound ? '' : '\nOne floor tile looks slightly less checkered than the others.'),
+      exits: { s: 'tent', e: 'jax', d: 'cellar', n: 'hall' },
+    },
+    fort: {
+      name: "Kinger's Pillow Fort",
+      desc: () => 'A magnificent fortress of pillows, cushions, and one very confused ottoman. Kinger peeks out from a window made of a pillowcase.' +
+        (state.keyFound ? '' : '\nOne pillow looks oddly lumpy.') + '\nExits: WEST to the Main Tent.',
+      exits: { w: 'tent' },
+      people: ['kinger'],
+    },
+    kitchen: {
+      name: 'The Kitchen',
+      desc: () => 'A kitchen where every appliance is cartoonishly oversized. Bubble is orbiting the fridge.' +
+        (state.items.chicken === 'kitchen' ? '\nA RUBBER CHICKEN lies on the counter, looking smug.' : '') +
+        (state.items.sandwich === 'kitchen' ? '\nA SANDWICH sits on a plate. Bubble is eyeing it.' : '') + '\nExits: EAST to the Main Tent.',
+      exits: { e: 'tent' },
+      people: ['bubble'],
+    },
+    jax: {
+      name: "Jax's Room",
+      desc: () => 'A room decorated entirely in "I could not care less." Jax leans against a closet door, blocking it with maximum smugness.' +
+        (state.jaxMoved ? '\nThe closet is open now. ' + (state.items.lantern === 'jax' ? 'A LANTERN sits inside.' : 'It is empty, except for a note that says "you owe me".') : '') +
+        '\nExits: WEST to the Hallway of Doors.',
+      exits: { w: 'hall' },
+      people: ['jax'],
+    },
+    cellar: {
+      name: 'The Cellar',
+      desc: () => state.lit
+        ? 'Lantern light flickers over damp stone. Things in the corners shuffle away from the light, muttering. At the far end stands a heavy door marked, in glowing green letters: EXIT.' +
+          (state.exitOpen ? ' It stands open.' : ' It is locked.') + '\nExits: UP to the hallway' + (state.exitOpen ? ', and THROUGH the exit.' : '.')
+        : 'It is extremely dark. Something down here has a great many eyes, and all of them are looking at you. Maybe bring a light.\nExits: UP to the hallway.',
+      exits: { u: 'hall', t: 'beyond' },
+    },
+    beyond: { name: '???', desc: () => '', exits: {} },
+  };
+  const ITEMS = {
+    key: { name: 'brass key', desc: 'A small brass key with a tag that reads "DEFINITELY NOT THE EXIT KEY (it is)".' },
+    chicken: { name: 'rubber chicken', desc: 'A rubber chicken. It squeaks with tremendous comedic timing.' },
+    sandwich: { name: 'sandwich', desc: 'A sandwich of unknown filling. It hums faintly.' },
+    lantern: { name: 'lantern', desc: 'A brass lantern. It glows the warm color of "maybe things will be okay."' },
+  };
+  const TALK = {
+    caine: () => state.exitOpen
+      ? "CAINE: You found the exit?! How WONDERFUL! I'm sure it leads somewhere AMAZING! (He is very sure. Suspiciously sure.)"
+      : pick(["CAINE: The exit? Oh, it's around here SOMEWHERE! I'd tell you, but that would spoil the adventure!",
+        "CAINE: Have you tried the Hallway of Doors? It's my favorite hallway! It never ends! Isn't that efficient?",
+        "CAINE: Kinger has been hoarding things in that pillow fort again. Probably nothing important! Probably!"]),
+    kinger: () => state.keyFound
+      ? 'KINGER: Did you find my key? Keep it! I have no idea what it opens. I have no idea what anything opens!'
+      : "KINGER: Welcome to the fort! Please don't touch the lumpy pillow. I keep important things in it. I forget which things.",
+    bubble: () => state.items.sandwich === 'kitchen'
+      ? "BUBBLE: Is that sandwich yours? It's not mine. YET."
+      : pick(['BUBBLE: I ate a door once! It was painted on! Tasted like paint!', "BUBBLE: Wanna know a secret? The hallway has a basement! Floor's lumpy! I licked it!"]),
+    jax: () => state.jaxMoved
+      ? "JAX: The closet's open. Don't make it weird."
+      : "JAX: Closet's closed. You want in? Make me laugh. I'm not easy. I'm the hardest audience in the circus.",
+  };
+  const pick = (a) => a[Math.floor(Math.random() * a.length)];
+
+  // ═══ state ═══
+  let state;
+  function reset() {
+    state = {
+      room: 'tent', inv: [], moves: 0, score: 0, awarded: new Set(),
+      items: { key: 'fort-hidden', chicken: 'kitchen', sandwich: 'kitchen', lantern: 'jax' },
+      keyFound: false, jaxMoved: false, trapdoorFound: false, lit: false, exitOpen: false, hallDepth: 0, done: false,
+    };
+  }
+  function award(id, pts, why) {
+    if (state.awarded.has(id)) return;
+    state.awarded.add(id); state.score += pts;
+    out(`[+${pts} points: ${why}]`, 'sys'); sfx('ding');
+    hud();
+  }
+
+  // ═══ output ═══
+  const log = document.getElementById('log');
+  function out(text, cls = '') {
+    const p = document.createElement('p'); if (cls) p.className = cls;
+    p.textContent = text; log.appendChild(p); log.scrollTop = log.scrollHeight;
+  }
+  function hud() {
+    document.getElementById('where').textContent = ROOMS[state.room].name;
+    document.getElementById('score').textContent = state.score;
+    document.getElementById('moves').textContent = state.moves;
+  }
+  function describe() { out(ROOMS[state.room].name, 'room'); out(ROOMS[state.room].desc()); hud(); }
+  function panic(line) {
+    const el = document.getElementById('pomni'); el.classList.remove('panic'); void el.offsetWidth; el.classList.add('panic');
+    out(line, 'pomni'); sfx('honk');
+  }
+
+  // ═══ parser ═══
+  const DIRS = { n: 'n', north: 'n', s: 's', south: 's', e: 'e', east: 'e', w: 'w', west: 'w', u: 'u', up: 'u', d: 'd', down: 'd', through: 't', in: 't', exit: 't', out: 't' };
+  const DIR_NAME = { n: 'north', s: 'south', e: 'east', w: 'west', u: 'up', d: 'down', t: 'through' };
+  function findItem(words) {
+    const s = words.join(' ');
+    return Object.keys(ITEMS).find((k) => s.includes(k) || s.includes(ITEMS[k].name));
+  }
+  function findPerson(words) {
+    const s = words.join(' ');
+    return ['caine', 'kinger', 'bubble', 'jax', 'pomni'].find((p) => s.includes(p));
+  }
+  function handle(raw) {
+    const input = raw.trim().toLowerCase().replace(/[^\w\s']/g, '');
+    if (!input) return;
+    out('> ' + raw.trim(), 'cmd');
+    if (state.done && !/^(restart|again|reset)/.test(input)) { out('The adventure is over. Type RESTART to play again, or go back to the Big Top.'); return; }
+    let words = input.split(/\s+/).filter((w) => !['the', 'a', 'an', 'at', 'to', 'with'].includes(w));
+    let [verb, ...rest] = words;
+    if (DIRS[verb]) { rest = [verb]; verb = 'go'; }
+    state.moves++;
+    switch (verb) {
+      case 'look': case 'l':
+        if (rest.length) return examine(rest);
+        return describe();
+      case 'examine': case 'x': case 'inspect': case 'search': case 'check': return examine(rest);
+      case 'go': case 'walk': case 'move': case 'run': case 'climb': case 'enter': return go(rest[0] === 'into' ? rest.slice(1) : rest);
+      case 'take': case 'get': case 'grab': case 'pick': return take(rest.filter((w) => w !== 'up'));
+      case 'drop': return drop(rest);
+      case 'inventory': case 'i': case 'inv':
+        return out(state.inv.length ? 'You are carrying: ' + state.inv.map((k) => ITEMS[k].name).join(', ') + '.' : 'You are carrying nothing but a growing sense of unease.');
+      case 'talk': case 'ask': case 'chat': return talk(rest);
+      case 'give': case 'show': return give(rest);
+      case 'use': case 'unlock': case 'open': case 'light': case 'squeeze': case 'squeak': return use(verb, rest);
+      case 'eat': return out(state.inv.includes('sandwich') ? 'You consider eating the sandwich. The sandwich considers you back. You both decide against it.' : 'Nothing here looks edible. Except, worryingly, everything.');
+      case 'honk': sfx('honk'); return out('HONK. A distant HONK answers. You decide not to think about it.');
+      case 'help': case 'commands':
+        return out('Try: LOOK, GO NORTH (or N/S/E/W/UP/DOWN), TAKE <thing>, DROP <thing>, INVENTORY (I), EXAMINE <thing>, TALK TO <someone>, GIVE <thing> TO <someone>, USE <thing>, OPEN <thing>, HINT, SCORE, RESTART.', 'sys');
+      case 'hint': return hint();
+      case 'score': return out(`Score: ${state.score} of 100, in ${state.moves} moves.`, 'sys');
+      case 'restart': case 'again': case 'reset': reset(); log.innerHTML = ''; intro(); return;
+      case 'quit': case 'leave': case 'escape':
+        return out('CAINE (from somewhere): "There is no QUIT! Only CONTINUE! Isn\'t that uplifting?"', 'caine');
+      case 'scream': case 'panic': return panic('POMNI: AAAAAAAAAA! ...okay. Okay. Better. Not better.');
+      case 'wait': case 'z': return out('You wait. The circus does not.');
+      case 'xyzzy': case 'plugh': return out('A hollow voice says: "Wrong game. But I admire the reference."', 'sys');
+      case 'sleep': return out('You lie down on the checkered floor. It hums a lullaby in a key that does not exist. You get up again.');
+      case 'dance': return out('You perform a small, nervous jig. Somewhere, Caine applauds.');
+      default: return out(pick(["I don't know how to do that. Neither does the circus.", "That's not a thing you can do here. Probably not anywhere.", 'Caine would love that. The parser would not.']));
+    }
+  }
+
+  function examine(words) {
+    const r = state.room;
+    const s = words.join(' ');
+    const it = findItem(words);
+    if (it && (state.inv.includes(it) || state.items[it] === r)) return out(ITEMS[it].desc);
+    if (r === 'fort' && /pillow|lump|cushion|fort/.test(s) && !state.keyFound) {
+      state.keyFound = true; state.items.key = 'fort';
+      out('You rummage through the lumpy pillow. Inside, among several socks and a half-written sonnet, is a BRASS KEY.');
+      return award('key-find', 10, 'found something in the lumpy pillow');
+    }
+    if (r === 'hall' && /floor|tile|checker/.test(s)) {
+      if (!state.trapdoorFound) { state.trapdoorFound = true; out('You press on the less-checkered tile. It swings open: a TRAPDOOR leading DOWN into darkness.'); return award('trapdoor', 10, 'found the trapdoor'); }
+      return out('The trapdoor is open. It leads DOWN.');
+    }
+    if (r === 'hall' && /door/.test(s)) return out('You open a door. Behind it: a wall, painted to look like a door. You open THAT door. It is also painted. You close both, embarrassed.');
+    if (r === 'cellar' && /door|exit/.test(s)) return out(state.lit ? (state.exitOpen ? 'The EXIT door stands open. Light spills through.' : 'A heavy door with a brass keyhole and a sign: EXIT. It looks extremely real. Suspiciously real.') : "You can't see anything. You can feel eyes, though.");
+    const who = findPerson(words);
+    if (who && (ROOMS[r].people || []).includes(who)) {
+      return out({
+        caine: 'Caine: a floating set of teeth in a top hat, with eyes. He waves. His teeth wave too.',
+        kinger: 'Kinger: a chess king of tremendous dignity and very little short-term memory.',
+        bubble: 'Bubble: a small, chaotic bubble with too many teeth. It is chewing on something. You do not ask what.',
+        jax: 'Jax: tall, purple, and radiating "no." He is blocking the closet on purpose.',
+      }[who]);
+    }
+    if (who === 'pomni' || /self|me|myself/.test(s)) return out('You are Pomni: jester hat, worried eyes, and an unshakable desire to find the exit.', 'pomni');
+    out("You don't see anything special about that.");
+  }
+
+  function go(words) {
+    const d = DIRS[words[0]];
+    if (!d) return out('Go where? (NORTH, SOUTH, EAST, WEST, UP, DOWN)');
+    const r = state.room, dest = ROOMS[r].exits[d];
+    if (!dest || (d === 't' && !state.exitOpen)) return out(pick(["You can't go that way.", 'A wall. Painted to look like an exit. Classic.', "There's nothing that way. Except more circus."]));
+    if (r === 'hall' && d === 'd' && !state.trapdoorFound) return out("You can't go that way. The floor seems very committed to being a floor.");
+    if (r === 'hall' && d === 'n') {
+      state.hallDepth++;
+      if (state.hallDepth === 10) {
+        out('You walk north for the tenth time. At last the hallway ends, at a tiny door marked STAFF ONLY. Inside is a broom closet containing a single sticky note:');
+        out('"Congrats on the walk! Remember to stretch. - C"', 'caine');
+        award('hall-end', 5, 'reached the end of the endless hallway');
+        window.TADC.mystery && window.TADC.mystery.find('stub-2'); // 🎟️ mystery clue: the broom closet's secret
+        return;
+      }
+      out(state.hallDepth > 10 ? 'More hallway. You have already found the broom closet. The hallway seems smug about it.' : pick(['You walk north. The hallway continues. It looks exactly the same.', 'More doors. More hallway. Is that the same scuff mark?', 'You walk north. The hallway seems to stretch to accommodate you.']));
+      return hud();
+    }
+    if (r === 'hall' && d === 's') state.hallDepth = 0;
+    if (d === 't') return ending();
+    state.room = dest;
+    if (dest === 'cellar' && !state.lit) panic('POMNI: It\'s so dark! Why are there EYES?! WHY ARE THERE SO MANY EYES?!');
+    describe();
+    if (dest === 'cellar' && state.lit) award('cellar-lit', 5, 'braved the cellar with a light');
+  }
+
+  function take(words) {
+    const it = findItem(words);
+    if (!it) return out(words.length ? "You can't take that." : 'Take what?');
+    if (state.inv.includes(it)) return out('You already have it.');
+    if (state.items[it] !== state.room) return out("You don't see that here.");
+    if (it === 'lantern' && !state.jaxMoved) return out("Jax is blocking the closet. He raises an eyebrow. You lower your hand.");
+    state.inv.push(it); state.items[it] = 'inv';
+    out(`Taken: ${ITEMS[it].name}.`); sfx('pop');
+    if (it === 'key') award('key', 5, 'pocketed the key');
+    if (it === 'lantern') { state.lit = true; out('You light the lantern. Everything feels about 12% less doomed.'); award('lantern', 10, 'got the lantern'); }
+    if (it === 'chicken') award('chicken', 5, 'acquired the rubber chicken');
+  }
+  function drop(words) {
+    const it = findItem(words);
+    if (!it || !state.inv.includes(it)) return out("You aren't carrying that.");
+    state.inv = state.inv.filter((k) => k !== it); state.items[it] = state.room;
+    if (it === 'lantern') state.lit = false;
+    if (it === 'sandwich' && state.room === 'kitchen') { state.items.sandwich = 'eaten'; out('You set down the sandwich. Bubble immediately eats it, the plate, and part of the counter. "THANK YOU!"'); return award('bubble-fed', 2, 'fed Bubble'); }
+    out(`Dropped: ${ITEMS[it].name}.`);
+  }
+  function talk(words) {
+    const who = findPerson(words);
+    if (!who) return out('Talk to whom?');
+    if (who === 'pomni') return out('You give yourself a little pep talk. It goes about as well as expected.', 'pomni');
+    if (!(ROOMS[state.room].people || []).includes(who)) return out(`${who[0].toUpperCase() + who.slice(1)} isn't here.`);
+    out(TALK[who](), who === 'caine' ? 'caine' : '');
+    award('talk-' + who, 2, `chatted with ${who}`);
+  }
+  function give(words) {
+    const it = findItem(words), who = findPerson(words);
+    if (!it || !state.inv.includes(it)) return out("You don't have that to give.");
+    if (!who || !(ROOMS[state.room].people || []).includes(who)) return out('Give it to whom?');
+    if (who === 'jax' && it === 'chicken') {
+      state.inv = state.inv.filter((k) => k !== 'chicken'); state.items.chicken = 'jax-has'; state.jaxMoved = true;
+      out('You squeeze the rubber chicken at Jax. It lets out a long, mournful SQUEEEEAK.');
+      out("JAX: ...pfff. PFFFHAHA. Okay. Okay, that got me. Fine. Take whatever's in the closet. Tell anyone and I'll deny it.");
+      sfx('honk'); confetti(innerWidth / 2, innerHeight / 2, 40, 0.7);
+      return award('jax', 15, 'made Jax laugh');
+    }
+    if (who === 'jax' && it === 'sandwich') return out("JAX: A sandwich? I'm not hungry, I'm BORED. Make me laugh.");
+    if (who === 'bubble' && it === 'sandwich') {
+      state.inv = state.inv.filter((k) => k !== 'sandwich'); state.items.sandwich = 'eaten';
+      out('BUBBLE: FOR ME?! *chomp* *chomp* *chomp the plate too* THANK YOU!'); return award('bubble-fed', 2, 'fed Bubble');
+    }
+    if (who === 'kinger') return out("KINGER: For me? How kind! ...I'm going to put it in the fort and forget about it. Maybe you'd better keep it.");
+    if (who === 'caine') return out("CAINE: A gift! For ME? I'm touched! Keep it, it'll be more useful in your ADVENTURE!", 'caine');
+    out(`${who[0].toUpperCase() + who.slice(1)} politely declines.`);
+  }
+  function use(verb, words) {
+    const s = words.join(' ');
+    const it = findItem(words);
+    if ((it === 'chicken' || verb === 'squeeze' || verb === 'squeak') && state.inv.includes('chicken')) {
+      if (state.room === 'jax' && !state.jaxMoved) return give(['chicken', 'jax']);
+      sfx('honk'); return out('SQUEEEEAK. The rubber chicken performs flawlessly. Nobody laughs. Tough room.');
+    }
+    if ((it === 'key' || /door|exit|unlock/.test(s) || verb === 'unlock') && state.room === 'cellar') {
+      if (!state.lit) return out("You fumble in the dark. Something with a lot of eyes giggles. You'll need a light first.");
+      if (!state.inv.includes('key')) return out('The EXIT door is locked. You need a key.');
+      if (state.exitOpen) return out("It's already open. Go THROUGH it, if you dare.");
+      state.exitOpen = true; sfx('fanfare');
+      out('The brass key turns with a satisfying CLUNK. The EXIT door swings open. Light pours in. You could go THROUGH.');
+      return award('unlock', 15, 'unlocked the EXIT');
+    }
+    if (it === 'lantern' || verb === 'light') return out(state.lit ? 'The lantern is already lit, glowing bravely.' : "You don't have a lantern.");
+    if (verb === 'open' && state.room === 'jax' && /closet/.test(s)) return out(state.jaxMoved ? "It's already open." : "Jax doesn't budge. 'Make me laugh,' he says, deadpan.");
+    if (verb === 'open' && state.room === 'hall' && /door/.test(s)) return examine(['door']);
+    out("Nothing happens. Well, something happens somewhere, but not here.");
+  }
+  function hint() {
+    const h = !state.keyFound ? 'Kinger keeps things in his pillows. Try EXAMINE PILLOW in the fort (east of the Main Tent).'
+      : !state.inv.includes('key') ? 'You found a key. TAKE KEY.'
+      : !state.trapdoorFound ? 'The Hallway of Doors has a suspicious floor tile. Try EXAMINE FLOOR.'
+      : !state.jaxMoved ? 'Jax wants a laugh. Maybe something from the kitchen (west of the tent) is funny?'
+      : !state.lit ? "The closet in Jax's room has something bright. TAKE LANTERN."
+      : !state.exitOpen ? 'Go DOWN from the hallway to the cellar and USE KEY on the door.'
+      : 'Go THROUGH the exit. What could possibly go wrong?';
+    out('HINT: ' + h, 'sys');
+  }
+  function ending() {
+    state.done = true;
+    award('exit', 10, 'went through the EXIT');
+    out('You step through the EXIT door. Blinding light. A rush of wind. The sound of a crowd...', 'glitch');
+    sfx('glitch');
+    setTimeout(() => {
+      out('The Main Tent', 'room');
+      out('...You are standing in the Main Tent. The checkered floor stretches out before you. Confetti falls from the ceiling.');
+      out('CAINE: "CONGRATULATIONS! You found the exit! It leads back IN! Isn\'t that the BEST possible outcome?!"', 'caine');
+      panic('POMNI: ...of course it does.');
+      out(`\n*** THE END (?) ***\nFinal score: ${state.score} of 100, in ${state.moves} moves.` + (state.score >= 100 ? '\nPERFECT SCORE! Caine is so proud he has started crying confetti.' : '\nThere may be more to find. (Endless hallways, hungry Bubbles...)') +
+        '\n\nPS: If this was your coding break, maybe the real exit is the tab close button. Or another snack. Type RESTART to play again.', 'sys');
+      sfx('fanfare'); confetti(innerWidth / 2, innerHeight * 0.3, 160, 1.3);
+      state.room = 'tent'; hud();
+    }, 1600);
+  }
+
+  // ═══ input & chips ═══
+  const cmd = document.getElementById('cmd');
+  const history = []; let hIdx = 0;
+  cmd.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') { const v = cmd.value; if (v.trim()) { history.push(v); hIdx = history.length; } cmd.value = ''; handle(v); }
+    else if (e.key === 'ArrowUp') { if (hIdx > 0) { cmd.value = history[--hIdx]; e.preventDefault(); } }
+    else if (e.key === 'ArrowDown') { if (hIdx < history.length - 1) cmd.value = history[++hIdx]; else { hIdx = history.length; cmd.value = ''; } }
+  });
+  document.getElementById('crt').addEventListener('click', () => cmd.focus());
+  const chips = document.getElementById('chips');
+  ['look', 'inventory', 'north', 'south', 'east', 'west', 'up', 'down', 'hint', 'help'].forEach((c) => {
+    const b = document.createElement('button'); b.className = 'chip'; b.textContent = c.toUpperCase();
+    b.addEventListener('click', () => { handle(c); cmd.focus(); });
+    chips.appendChild(b);
+  });
+
+  function intro() {
+    out('POMNI\'S EXIT INTERVIEW', 'room');
+    out('You are Pomni. You have one goal: find the EXIT. Everyone you ask insists there isn\'t one. Everyone you ask is also lying, a little.', 'pomni');
+    out('(Type HELP for commands, HINT if stuck.)', 'sys');
+    describe();
+  }
+  reset(); intro(); cmd.focus();
+})();
+</script>
+</body>
+</html>

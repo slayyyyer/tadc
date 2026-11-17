@@ -1,0 +1,36 @@
+#hangoutLaunch{position:fixed;left:14px;top:12px;z-index:8;font-size:13px;padding:8px 14px}
+#hangout{width:min(850px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;padding:0;border:3px solid #ffd34d;border-radius:20px;background:#211631;color:#fff7d6;box-shadow:0 25px 100px #000a;font:16px/1.5 'Fredoka',system-ui,sans-serif;user-select:text}
+#hangout::backdrop{background:#0b0718d9;backdrop-filter:blur(5px)}
+.hangout-header{padding:16px 22px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #ffffff26}
+.hangout-header span{font-size:12px;text-transform:uppercase;letter-spacing:2px;color:#ffd34d}
+#hangoutCast{display:flex;flex-wrap:wrap;gap:8px;padding:16px 22px}
+#hangout button{font:inherit;cursor:pointer}
+#hangoutCast button{color:#ecdcff;background:#ffffff08;border:1px solid #977aac;border-radius:999px;padding:8px 13px;min-height:44px}
+#hangoutCast button[aria-pressed=true]{background:#ffd34d;color:#211631;border-color:#ffd34d}
+.hangout-content{padding:6px 24px 26px;display:grid;grid-template-columns:170px minmax(0,1fr);gap:28px}
+#hangoutPortrait{align-self:start;background:radial-gradient(ellipse,#704b8466,transparent 70%);padding:20px 10px}
+#hangoutPortrait svg{width:100%;height:230px;display:block}
+#hangoutName{font:normal 36px 'Rye',Georgia,serif;color:#ffd34d;margin:0}
+#hangoutSubtitle{color:#ccbbdd;font-size:13px;margin:4px 0 18px}
+#hangoutLine{font-size:19px;min-height:90px;margin:0 0 15px}
+.hangout-actions{display:flex;flex-wrap:wrap;gap:10px}
+.hangout-activity{margin-top:18px;padding:16px;background:#120c20;border:1px dashed #9e83b3;border-radius:12px}
+#hangoutProp{display:block;font-size:34px;min-height:51px}#hangoutReply{margin:6px 0 0;min-height:48px}
+.hangout-content h3{font-size:13px;letter-spacing:1px;text-transform:uppercase;margin:24px 0 10px;color:#cebada}
+#hangoutPicks{display:flex;flex-direction:column;gap:8px}#hangoutPicks a{color:#fff7d6;text-decoration:none;background:#ffffff0b;border-radius:8px;padding:12px;border:1px solid #ffffff25}
+#hangoutPicks a:hover{background:#ffffff1b}
+#hangout :is(button,a):focus-visible{outline:3px dashed #ffd34d;outline-offset:3px}
+@media(max-width:600px){.hangout-content{grid-template-columns:1fr;gap:0;padding:0 18px 20px}#hangoutPortrait{display:none}#hangoutLine{min-height:0}#hangoutCast{padding:12px 18px;gap:6px}.hangout-header{padding:12px 18px}.hangout-header span{letter-spacing:0;font-size:11px}#hangoutName{font-size:29px}}
+@media(prefers-reduced-motion:reduce){#hangout *,#hangout *::before,#hangout *::after{animation:none!important;transition:none!important}}
+
+#hangoutWatch{margin-top:18px}
+#hangoutWatch[hidden]{display:none}
+@media(max-width:480px){
+  #marquee{top:72px}
+  #hangoutLaunch{top:10px;font-size:12px;min-height:44px}
+  #hud{max-width:calc(100vw - 170px)}
+}
+
+#hangoutChat{margin-bottom:12px}#hangoutChat .cb-row button{min-height:44px}
+#hangoutChat .cb-note{color:#d4c2ee}#hangoutChat .cb-log{min-height:45px}
+.hangout-chat-note{font-size:12px;color:#d4c2ee}#hangoutImprovLine{overflow-wrap:anywhere}

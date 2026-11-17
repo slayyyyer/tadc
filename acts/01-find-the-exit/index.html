@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Find the Exit</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--exit:#5dff8c}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#07040f;color:#fff;font-family:'Fredoka',system-ui,sans-serif;user-select:none;cursor:none}
+  #bg{position:fixed;inset:0;width:100%;height:100%}
+  #world{position:fixed;inset:0;transform-origin:50% 50%}
+  #world.zoom{transition:transform 1.3s cubic-bezier(.6,0,.9,.4),filter 1.3s,opacity 1.3s}
+  /* door */
+  #door{position:absolute;left:0;top:0;width:110px;height:180px;will-change:transform}
+  #door .inner{position:absolute;inset:0;transform-origin:50% 100%}
+  #door .sign{position:absolute;left:50%;top:-34px;transform:translateX(-50%);font:700 15px 'Fredoka';letter-spacing:.25em;padding:3px 10px 3px 13px;
+    background:#08321a;color:var(--exit);border:2px solid var(--exit);border-radius:5px;text-shadow:0 0 8px var(--exit);box-shadow:0 0 18px rgba(93,255,140,.7)}
+  #door .frame{position:absolute;inset:0;border-radius:8px 8px 0 0;background:#04020a;border:6px solid var(--frame,#ffd34d);
+    box-shadow:0 0 30px var(--glow,rgba(255,211,77,.6)),inset 0 0 40px rgba(93,255,140,.25);perspective:500px;overflow:visible}
+  #door .portal{position:absolute;inset:0;border-radius:3px 3px 0 0;overflow:hidden;
+    background:radial-gradient(circle at 50% 55%,#fff 0,#b07cff 12%,#2f5bd8 30%,#0b0718 70%);opacity:0;transition:opacity .4s}
+  #door .portal::before{content:'';position:absolute;inset:-50%;background:repeating-conic-gradient(from 0deg,rgba(255,255,255,.18) 0 10deg,transparent 10deg 20deg);animation:twirl 3s linear infinite}
+  @keyframes twirl{to{transform:rotate(360deg)}}
+  #door .panel{position:absolute;inset:0;transform-origin:0 50%;transition:transform .9s cubic-bezier(.5,1.6,.5,1);
+    background:linear-gradient(90deg,var(--panelA,#e3243b) 0 50%,var(--panelB,#2f5bd8) 50%);border-radius:3px 3px 0 0;box-shadow:inset 0 0 0 4px rgba(0,0,0,.25)}
+  #door .panel::before,#door .panel::after{content:'';position:absolute;left:14%;right:14%;border:3px solid rgba(0,0,0,.25);border-radius:4px}
+  #door .panel::before{top:10%;height:32%}
+  #door .panel::after{bottom:10%;height:36%}
+  #door .knob{position:absolute;right:12px;top:52%;width:12px;height:12px;border-radius:50%;background:var(--gold);box-shadow:0 0 6px var(--gold);z-index:2}
+  #door.open .panel{transform:rotateY(-105deg)}
+  #door.open .portal{opacity:1}
+  #door .sweat{position:absolute;right:-26px;top:-10px;font-size:26px;opacity:0;transition:opacity .3s}
+  #door.tired .sweat{opacity:1;animation:sweat 1s ease-in-out infinite}
+  @keyframes sweat{50%{transform:translateY(6px)}}
+  #door .face{position:absolute;left:50%;top:38%;transform:translateX(-50%);display:flex;gap:16px;z-index:3;pointer-events:none}
+  #door .face i{width:12px;height:16px;border-radius:50%;background:#fff;display:block;box-shadow:inset 0 -5px 0 var(--ink)}
+  #door.tired .face i{height:6px;margin-top:8px;box-shadow:none;background:var(--ink)}
+  /* cursor: Pomni's hat */
+  #hat{position:fixed;left:0;top:0;width:64px;pointer-events:none;z-index:9999;transform-origin:50% 60%;opacity:0;transition:opacity .2s}
+  #hat.on{opacity:1}
+  #hud .hint{font:600 13px 'Fredoka';color:#cbbff0;margin-top:4px;text-shadow:none}
+  #back:focus-visible{outline:3px dashed var(--gold);outline-offset:4px}
+  @media (hover:none){html,body,#back{cursor:auto}}
+  #hat svg{width:100%;height:auto;filter:drop-shadow(0 4px 4px rgba(0,0,0,.6))}
+  /* HUD */
+  #hud{position:fixed;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;z-index:50;pointer-events:none}
+  #hud .title{font-family:'Rye';font-size:clamp(20px,3vw,34px);color:var(--gold);text-shadow:0 3px 0 #8a0c1a,0 5px 0 var(--ink)}
+  #hud .stats{text-align:right;font-weight:700;font-size:15px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.2);border-radius:12px;padding:8px 12px;line-height:1.5}
+  #hud .stats b{color:var(--gold)}
+  #back{position:fixed;left:14px;bottom:14px;z-index:60;font:700 14px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;
+    padding:8px 14px;box-shadow:3px 3px 0 var(--ink);text-decoration:none;cursor:none}
+  #caine{position:fixed;right:18px;bottom:10px;width:clamp(90px,10vw,140px);z-index:40;animation:fl 3s ease-in-out infinite}
+  #caine svg{width:100%;height:auto;filter:drop-shadow(0 10px 8px rgba(0,0,0,.6))}
+  @keyframes fl{50%{transform:translateY(-10px) rotate(-2deg)}}
+  #flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:80;transition:opacity .25s}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="world">
+  <div id="door">
+    <div class="inner">
+      <div class="sign">EXIT</div>
+      <div class="frame">
+        <div class="portal"></div>
+        <div class="panel"></div>
+        <div class="knob"></div>
+        <div class="face"><i></i><i></i></div>
+      </div>
+      <div class="sweat">💦</div>
+    </div>
+  </div>
+</div>
+<div id="hud">
+  <div class="title">Adventure 01 · Find the Exit<div class="hint">mouse, tap, or arrow keys + space</div></div>
+  <div class="stats">Escape attempts: <b id="attempts">0</b><br>Depth: <b id="depth">1</b><br>Best depth: <b id="best">1</b></div>
+</div>
+<a id="back" href="../../index.html">← back to the Big Top</a>
+<div id="caine"></div>
+<div id="hat"></div>
+<div id="flash"></div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, say, confetti, sfx, wireCaine, pick } = window.TADC;
+
+  // Only Pomni's hat as the cursor (top slice of her SVG).
+  document.getElementById('hat').innerHTML = CAST.pomni.replace('viewBox="0 0 100 150"', 'viewBox="0 0 100 46"');
+  const caineEl = document.getElementById('caine');
+  caineEl.innerHTML = CAST.caine;
+  const caine = wireCaine(caineEl);
+
+  const ATTEMPT_QUIPS = {
+    1: "Ooh, going for the exit already? BOLD! I love the enthusiasm!",
+    3: "It's a very shy door. Be gentle. Or don't! It's a door!",
+    5: "Have you considered NOT leaving? Just a thought! A wonderful thought!",
+    8: "The door has filed a formal complaint. Against you specifically.",
+    11: "I admire your persistence! I do not admire where it's pointed!",
+    14: "Hm. Hmmmm. It appears to be... getting tired? That's never happened!",
+  };
+  const DEPTH_QUIPS = [
+    "You did it! You opened the exit! And it leads to... MORE CIRCUS! Isn't that DELIGHTFUL?",
+    "Another door?! What are the odds! (The odds are 100%.)",
+    "Ooh, this one's a little smaller. Doors are like that. They shrink when you chase them.",
+    "Depth {d}! You're really committed to this bit! So am I!",
+    "Fun fact: every exit in the circus opens onto the circus. It's very efficient!",
+    "Depth {d}! At this rate you'll reach the bottom by... never! Hooray!",
+  ];
+  const DOOR_GIVES_UP = [
+    "*wheeze* ...fine... FINE... open me... see if I care...",
+    "I'm a door, not a marathon runner! Just... click... me...",
+    "Okay. You win. I need a little sit. Doors can sit. Watch me.",
+  ];
+  const POMNI_PANIC = ["Almost! ALMOST!", "Come BACK here!", "Why is it so FAST?!", "Please, I just want to leave!", "It's mocking me. The door is mocking me."];
+
+  // ═══ state ═══
+  const doorEl = document.getElementById('door');
+  const hatEl = document.getElementById('hat');
+  const world = document.getElementById('world');
+  const attemptsEl = document.getElementById('attempts'), depthEl = document.getElementById('depth'), bestEl = document.getElementById('best');
+  let W = innerWidth, H = innerHeight;
+  let mx = W / 2, my = H / 2, lastMx = mx, lastMy = my;
+  let dx = W * 0.65, dy = H * 0.5, vx = 0, vy = 0;
+  let wanderX = dx, wanderY = dy;
+  let attempts = 0, depth = 1, state = 'chase'; // chase | tired | opening
+  let lastFleeAt = 0;
+  let best = 1;
+  try { best = parseInt(localStorage.getItem('tadc-exit-best') || '1', 10) || 1; } catch (e) { /* storage blocked */ }
+  bestEl.textContent = best;
+  const DOOR_W = 110, DOOR_H = 180;
+  const TIRED_AT = 15;
+  const scale = () => Math.max(0.55, 1 - (depth - 1) * 0.07);
+  const LEVEL_COLORS = [
+    ['#e3243b', '#2f5bd8', '#ffd34d'], ['#b07cff', '#5fd38d', '#ff7eb6'], ['#ff7eb6', '#ffd34d', '#6fb6ff'],
+    ['#2f5bd8', '#e3243b', '#5dff8c'], ['#5fd38d', '#b07cff', '#ffd34d'],
+  ];
+  function paintLevel() {
+    const [a, b, f] = LEVEL_COLORS[(depth - 1) % LEVEL_COLORS.length];
+    doorEl.style.setProperty('--panelA', a);
+    doorEl.style.setProperty('--panelB', b);
+    doorEl.style.setProperty('--frame', f);
+    doorEl.style.setProperty('--glow', f + '99');
+  }
+  paintLevel();
+
+  addEventListener('resize', () => { W = innerWidth; H = innerHeight; resizeBg(); });
+  // The door only flees from a pointer that is actually here. (Before, the hat started at screen
+  // centre, so on small screens attempts ticked up before you had touched anything.)
+  let pointerActive = false, touchLiftTimer = 0;
+  const setPointer = (x, y) => { mx = x; my = y; pointerActive = true; hatEl.classList.add('on'); };
+  addEventListener('pointermove', (e) => { setPointer(e.clientX, e.clientY); });
+  document.documentElement.addEventListener('pointerleave', () => { pointerActive = false; hatEl.classList.remove('on'); });
+  addEventListener('pointerup', (e) => {
+    if (e.pointerType !== 'touch') return;
+    // A lifted finger isn't chasing anything; let the door relax shortly after.
+    clearTimeout(touchLiftTimer);
+    touchLiftTimer = setTimeout(() => { pointerActive = false; hatEl.classList.remove('on'); }, 450);
+  });
+
+  // Keyboard play: arrows / WASD steer the hat, Space or Enter grabs.
+  const held = new Set();
+  const KEYMAP = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1], a: [-1, 0], d: [1, 0], w: [0, -1], s: [0, 1] };
+  addEventListener('keydown', (e) => {
+    const k = e.key.length === 1 ? e.key.toLowerCase() : e.key;
+    if (KEYMAP[k]) {
+      e.preventDefault(); held.add(k);
+      if (!pointerActive) setPointer(mx, my);
+    } else if ((k === ' ' || k === 'Enter') && !(e.target instanceof Element && e.target.closest('a,button'))) {
+      e.preventDefault();
+      if (!e.repeat) { if (!pointerActive) setPointer(mx, my); grab(mx, my); }
+    }
+  });
+  addEventListener('keyup', (e) => held.delete(e.key.length === 1 ? e.key.toLowerCase() : e.key));
+  addEventListener('blur', () => held.clear());
+
+  function bumpAttempt() {
+    attempts++;
+    attemptsEl.textContent = attempts;
+    if (ATTEMPT_QUIPS[attempts]) caine.talk(ATTEMPT_QUIPS[attempts], 3800);
+    else if (Math.random() < 0.18) say(hatEl, pick(POMNI_PANIC), 1600);
+    if (attempts >= TIRED_AT && state === 'chase') {
+      state = 'tired';
+      doorEl.classList.add('tired');
+      sfx('ding');
+      setTimeout(() => { if (state === 'tired') say(doorEl, pick(DOOR_GIVES_UP), 3200); }, 900);
+    }
+  }
+
+  // ═══ physics ═══
+  function tick(now) {
+    // keyboard steering
+    if (held.size) {
+      let kx = 0, ky = 0;
+      held.forEach((k) => { kx += KEYMAP[k][0]; ky += KEYMAP[k][1]; });
+      mx = Math.max(0, Math.min(W, mx + kx * 9)); my = Math.max(0, Math.min(H, my + ky * 9));
+    }
+    // hat cursor with a little swing
+    const swing = Math.max(-25, Math.min(25, (mx - lastMx) * 1.5));
+    hatEl.style.transform = `translate(${mx - 32}px, ${my - 20}px) rotate(${swing}deg)`;
+    lastMx += (mx - lastMx) * 0.3; lastMy += (my - lastMy) * 0.3;
+
+    const s = scale();
+    const cx = dx, cy = dy;
+    if (state === 'chase' || state === 'tired') {
+      const fatigue = Math.min(1, attempts / TIRED_AT);
+      const R = (220 - fatigue * 120) * s + 40;
+      const ddx = cx - mx, ddy = cy - my, dist = Math.hypot(ddx, ddy) || 1;
+      if (state === 'chase' && pointerActive && dist < R) {
+        const push = ((R - dist) / R) * (2.6 + depth * 0.25) * (1 - fatigue * 0.7);
+        vx += (ddx / dist) * push; vy += (ddy / dist) * push;
+        if (now - lastFleeAt > 650) { lastFleeAt = now; bumpAttempt(); sfx('boing'); }
+      }
+      // wander
+      if (Math.random() < 0.01 || Math.hypot(wanderX - cx, wanderY - cy) < 30) {
+        wanderX = 120 + Math.random() * (W - 240); wanderY = 140 + Math.random() * (H - 300);
+      }
+      const wanderPull = state === 'tired' ? 0.0015 : 0.004;
+      vx += (wanderX - cx) * wanderPull; vy += (wanderY - cy) * wanderPull;
+      vx *= state === 'tired' ? 0.86 : 0.92; vy *= state === 'tired' ? 0.86 : 0.92;
+      dx += vx; dy += vy;
+      // walls (bouncy!)
+      const hw = DOOR_W * s / 2 + 10, top = 60 + DOOR_H * s / 2, bottom = H - DOOR_H * s / 2 - 20;
+      if (dx < hw) { dx = hw; vx = Math.abs(vx) * 0.9; }
+      if (dx > W - hw) { dx = W - hw; vx = -Math.abs(vx) * 0.9; }
+      if (dy < top) { dy = top; vy = Math.abs(vy) * 0.9; }
+      if (dy > bottom) { dy = bottom; vy = -Math.abs(vy) * 0.9; }
+    }
+    // squash & stretch
+    const sp = Math.min(1, Math.hypot(vx, vy) / 25);
+    const ang = Math.atan2(vy, vx);
+    const stretch = 1 + sp * 0.35, squash = 1 - sp * 0.22;
+    const tilt = Math.max(-18, Math.min(18, vx * 1.2));
+    doorEl.style.transform =
+      `translate(${dx - DOOR_W / 2}px, ${dy - DOOR_H / 2}px) scale(${s}) rotate(${tilt}deg)`;
+    doorEl.querySelector('.inner').style.transform =
+      `rotate(${ang}rad) scale(${stretch}, ${squash}) rotate(${-ang}rad)`;
+
+    drawBg(now / 1000);
+    requestAnimationFrame(tick);
+  }
+
+  // ═══ clicking ═══
+  addEventListener('pointerdown', (e) => {
+    if (e.target instanceof Element && e.target.closest('#back')) return;
+    clearTimeout(touchLiftTimer);
+    setPointer(e.clientX, e.clientY);
+    grab(e.clientX, e.clientY);
+  });
+
+  function grab(x, y) {
+    if (state === 'opening') return;
+    const r = doorEl.getBoundingClientRect();
+    const hit = x > r.left - 10 && x < r.right + 10 && y > r.top - 10 && y < r.bottom + 10;
+    if (hit && state === 'tired') return openDoor();
+    if (hit && state === 'chase') {
+      // Caught it mid-dodge! Counts as two attempts and it panics.
+      bumpAttempt(); bumpAttempt();
+      vx += (Math.random() - 0.5) * 60; vy += (Math.random() - 0.5) * 60;
+      sfx('honk');
+      return;
+    }
+    sfx('pop');
+    confetti(x, y, 10, 0.4);
+  }
+
+  function openDoor() {
+    state = 'opening';
+    doorEl.classList.remove('tired');
+    doorEl.classList.add('open');
+    sfx('fanfare');
+    const r = doorEl.getBoundingClientRect();
+    confetti(r.left + r.width / 2, r.top + r.height / 2, 120, 1.1);
+    const quip = DEPTH_QUIPS[Math.min(depth - 1, DEPTH_QUIPS.length - 1)].replace('{d}', depth + 1);
+    setTimeout(() => {
+      // Droste dive: zoom the whole world into the doorway.
+      world.style.transformOrigin = `${dx}px ${dy}px`;
+      world.classList.add('zoom');
+      world.style.transform = 'scale(9)';
+      world.style.filter = 'blur(6px) brightness(2)';
+      world.style.opacity = '0';
+      diving = true;
+    }, 900);
+    setTimeout(() => {
+      const flash = document.getElementById('flash');
+      flash.style.opacity = '1';
+      depth++;
+      depthEl.textContent = depth;
+      if (depth >= 3) window.TADC.mystery && window.TADC.mystery.find('stub-1'); // 🎟️ mystery clue: deep enough, the door drops a stub
+      if (depth > best) {
+        best = depth; bestEl.textContent = best;
+        try { localStorage.setItem('tadc-exit-best', String(best)); } catch (e) { /* storage blocked */ }
+      }
+      attempts = 0; attemptsEl.textContent = 0;
+      doorEl.classList.remove('open');
+      paintLevel();
+      world.classList.remove('zoom');
+      world.style.transform = ''; world.style.filter = ''; world.style.opacity = '';
+      dx = W * (0.25 + Math.random() * 0.5); dy = H * (0.35 + Math.random() * 0.3); vx = vy = 0;
+      setTimeout(() => {
+        flash.style.opacity = '0';
+        diving = false;
+        state = 'chase';
+        caine.talk(quip, 5200);
+      }, 250);
+    }, 2300);
+  }
+
+  // ═══ background: void + nested door frames (Droste) ═══
+  const bg = document.getElementById('bg'), bctx = bg.getContext('2d');
+  let stars = [], diving = false;
+  function resizeBg() {
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    bg.width = W * dpr; bg.height = H * dpr; bctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    stars = Array.from({ length: 220 }, () => ({ a: Math.random() * Math.PI * 2, r: Math.random(), s: 0.2 + Math.random() * 1.6 }));
+  }
+  function drawBg(t) {
+    bctx.fillStyle = '#07040f'; bctx.fillRect(0, 0, W, H);
+    const cx = W / 2, cy = H / 2, maxR = Math.hypot(W, H) / 2;
+    // stars streaming outward (faster while diving)
+    for (const st of stars) {
+      st.r += (diving ? 0.03 : 0.0012) * (0.4 + st.r);
+      if (st.r > 1.2) st.r = 0.02;
+      const x = cx + Math.cos(st.a) * st.r * maxR, y = cy + Math.sin(st.a) * st.r * maxR;
+      bctx.fillStyle = `rgba(255,255,255,${Math.min(1, st.r)})`;
+      bctx.fillRect(x, y, st.s * (diving ? 3 : 1), st.s);
+    }
+    // nested door frames: one per level reached
+    const frames = Math.min(depth, 12);
+    for (let i = frames; i >= 1; i--) {
+      const k = Math.pow(0.72, i) * (1 + Math.sin(t * 0.8 + i) * 0.02);
+      const fw = W * 0.42 * k, fh = H * 0.86 * k;
+      const col = LEVEL_COLORS[(depth - i) % LEVEL_COLORS.length][2];
+      bctx.save();
+      bctx.globalAlpha = 0.12 + 0.05 * (frames - i);
+      bctx.strokeStyle = col; bctx.lineWidth = Math.max(1, 6 * k);
+      bctx.translate(cx, cy + fh * 0.04);
+      bctx.rotate(Math.sin(t * 0.3 + i) * 0.04);
+      bctx.beginPath();
+      bctx.moveTo(-fw / 2, fh / 2); bctx.lineTo(-fw / 2, -fh / 2 + fw * 0.1);
+      bctx.quadraticCurveTo(-fw / 2, -fh / 2, -fw / 2 + fw * 0.1, -fh / 2);
+      bctx.lineTo(fw / 2 - fw * 0.1, -fh / 2); bctx.quadraticCurveTo(fw / 2, -fh / 2, fw / 2, -fh / 2 + fw * 0.1);
+      bctx.lineTo(fw / 2, fh / 2);
+      bctx.stroke();
+      bctx.restore();
+    }
+    // checkered strip of floor at the bottom
+    const fy = H * 0.86, rows = 6, tile = 46;
+    for (let r = 0; r < rows; r++) {
+      const y0 = fy + r * ((H - fy) / rows), y1 = y0 + (H - fy) / rows + 1;
+      const off = ((t * 30) % (tile * 2));
+      for (let x = -tile * 2 + off - (r % 2) * tile; x < W + tile; x += tile * 2) {
+        bctx.fillStyle = 'rgba(227,36,59,.35)'; bctx.fillRect(x, y0, tile, y1 - y0);
+        bctx.fillStyle = 'rgba(244,239,230,.18)'; bctx.fillRect(x + tile, y0, tile, y1 - y0);
+      }
+    }
+  }
+  resizeBg();
+  requestAnimationFrame(tick);
+  setTimeout(() => caine.talk("Welcome to <b>FIND THE EXIT!</b> Pomni's favorite game! The exit is RIGHT THERE. Go on. Grab it! Hoo-hoo!", 5200), 500);
+})();
+</script>
+</body>
+</html>

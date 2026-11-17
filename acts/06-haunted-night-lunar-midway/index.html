@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Haunted Lunar Midway</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--pink:#ff7eb6}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#05030b;color:#fff;font-family:'Fredoka',system-ui,sans-serif;user-select:none}
+  /* ── the moon ── */
+  #world{position:fixed;inset:0;overflow:hidden;transition:transform 2.4s cubic-bezier(.5,0,.3,1),filter 1s}
+  #sky{position:absolute;inset:0;background:radial-gradient(ellipse at 30% 20%,#2a1550 0,#0b0718 55%,#05030b 100%)}
+  .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:tw 3s ease-in-out infinite}
+  @keyframes tw{50%{opacity:.25}}
+  #earth{position:absolute;right:30%;top:10%;width:min(15vw,150px);aspect-ratio:1;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%,#9fe0ff 0,#2f7bd8 35%,#123a8a 70%,#0a1d4a 100%);
+    box-shadow:0 0 50px rgba(111,182,255,.55),inset -14px -10px 24px rgba(0,0,0,.5);transition:all 2.4s}
+  #earth::before{content:'';position:absolute;left:22%;top:30%;width:30%;height:22%;border-radius:50% 40% 60% 40%;background:#5fd38d;opacity:.85;box-shadow:30px 20px 0 -4px #5fd38d}
+  #ground{position:absolute;left:-10%;right:-10%;bottom:0;height:34%;border-radius:50% 50% 0 0/14% 14% 0 0;
+    background:radial-gradient(circle at 20% 40%,#8c8a99 0 3%,transparent 3.5%),radial-gradient(circle at 70% 30%,#8c8a99 0 4%,transparent 4.5%),
+      radial-gradient(circle at 45% 70%,#8c8a99 0 2.5%,transparent 3%),radial-gradient(circle at 85% 75%,#8c8a99 0 3%,transparent 3.5%),
+      linear-gradient(#b9b7c4,#7d7b8a)}
+  #wheel{position:absolute;left:8%;bottom:22%;width:min(36vw,380px);aspect-ratio:1}
+  #wheel .spin{width:100%;height:100%;animation:slowspin 240s linear infinite}
+  @keyframes slowspin{to{transform:rotate(360deg)}}
+  #wheel .leg{position:absolute;left:50%;bottom:-18%;width:6px;height:68%;background:#3a2a5a;transform-origin:top;border-radius:3px}
+  #tent{position:absolute;right:6%;bottom:24%;width:min(24vw,250px)}
+  #booth{position:absolute;left:46%;bottom:26%;width:min(16vw,170px);display:none}
+  #lights{position:absolute;left:0;right:0;top:4%;height:60px}
+  #fog{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 80%,rgba(176,124,255,.45),transparent 60%),linear-gradient(rgba(60,10,90,.35),rgba(20,0,40,.5));
+    opacity:0;transition:opacity 1.2s;pointer-events:none}
+  body.haunted #fog{opacity:1}
+  body.haunted #world{animation:flicker 5s infinite}
+  @keyframes flicker{0%,88%,100%{filter:none}89%{filter:brightness(.4)}91%{filter:brightness(1.2) hue-rotate(40deg)}93%{filter:brightness(.6)}}
+  body.top #world{transform:scale(1.35) translate(-6%,10%)}
+  body.top #earth{width:min(30vw,300px);right:30%;top:6%}
+  body.ringtoss #booth{display:block}
+  /* ── Zooble's misplaced parts ── */
+  .part{position:absolute;cursor:pointer;z-index:3;transition:transform .2s,filter .2s;filter:drop-shadow(0 4px 3px rgba(0,0,0,.5))}
+  .part:hover{transform:scale(1.15) rotate(-6deg);filter:drop-shadow(0 0 10px #ffd34d)}
+  .part.found{animation:yoink .6s forwards;pointer-events:none}
+  @keyframes yoink{40%{transform:scale(1.5) rotate(20deg)}100%{transform:translateY(-120vh) rotate(720deg) scale(.4);opacity:0}}
+  /* ── cast on stage ── */
+  #stage{position:fixed;inset:0;pointer-events:none;z-index:4}
+  .sprite{position:absolute;bottom:22vh;transition:opacity .5s,transform .5s,filter .3s;opacity:0;transform:translateY(30px)}
+  .sprite.on{opacity:1;transform:none}
+  .sprite.dim{filter:brightness(.55) saturate(.7)}
+  .sprite svg{width:100%;height:auto;display:block;filter:drop-shadow(0 12px 10px rgba(0,0,0,.6))}
+  #spGangle{left:30%;width:min(20vw,200px)}
+  #spGangle .bob{animation:gbob 2.4s ease-in-out infinite}
+  @keyframes gbob{50%{transform:translateY(-10px) rotate(-2deg)}}
+  #spMime{left:56%;width:min(17vw,170px)}
+  #spMime .bob{animation:mbob 3.2s ease-in-out infinite;opacity:.82}
+  @keyframes mbob{50%{transform:translateY(-16px) rotate(2deg);opacity:.6}}
+  #spCaine{right:3%;top:8vh;bottom:auto;width:min(14vw,150px)}
+  #spCaine .bob{animation:gbob 3s ease-in-out infinite}
+  /* ── HUD ── */
+  #hud{position:fixed;top:12px;left:12px;right:12px;display:flex;justify-content:space-between;gap:10px;z-index:10;pointer-events:none}
+  .meter{background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);border-radius:12px;padding:6px 10px;font-weight:700;font-size:14px;line-height:1.6}
+  .meter span{letter-spacing:1px}
+  #sceneTitle{position:fixed;left:50%;top:38%;transform:translate(-50%,-50%) scale(.7);z-index:12;opacity:0;pointer-events:none;text-align:center;
+    font-family:'Rye';font-size:clamp(26px,5vw,56px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink),0 0 30px rgba(0,0,0,.8);transition:all .5s cubic-bezier(.3,1.6,.5,1);width:90vw}
+  #sceneTitle small{display:block;font:600 clamp(14px,1.8vw,18px) 'Fredoka';color:#fff;text-shadow:0 2px 6px #000;margin-top:6px}
+  #sceneTitle.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  /* ── dialogue ── */
+  #dlg{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(900px,94vw);z-index:15;background:var(--cream);color:var(--ink);
+    border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 var(--red-d);padding:20px 24px 18px;min-height:130px;cursor:pointer}
+  #name{position:absolute;top:-20px;left:22px;background:var(--pink);color:var(--ink);border:4px solid var(--ink);border-radius:999px;padding:2px 14px;font-weight:700;font-size:16px;display:none}
+  #name.show{display:block}
+  #name.caine{background:var(--red);color:#fff}
+  #name.mime{background:#fff}
+  #name.zooble{background:#5fd38d}
+  #text{font-size:clamp(16px,2vw,20px);line-height:1.45;min-height:2.9em}
+  #text i{color:#5c3a99}
+  #more{position:absolute;right:18px;bottom:10px;font-size:18px;animation:more .8s ease-in-out infinite;opacity:0}
+  #more.show{opacity:1}
+  @keyframes more{50%{transform:translateY(4px)}}
+  #choices{position:fixed;left:50%;bottom:190px;transform:translateX(-50%);width:min(640px,92vw);z-index:16;display:flex;flex-direction:column;gap:10px}
+  .choice{font:700 17px 'Fredoka';text-align:left;color:var(--ink);background:#fff;border:4px solid var(--ink);border-radius:14px;padding:12px 16px;cursor:pointer;
+    box-shadow:4px 4px 0 var(--ink);transition:transform .12s,background .12s;animation:cin .35s cubic-bezier(.3,1.6,.5,1) backwards}
+  .choice:hover,.choice:focus-visible{background:#ffe2f0;transform:translateX(6px);outline:none}
+  .choice::before{content:'💗 ';}
+  @keyframes cin{from{transform:translateY(20px) scale(.9);opacity:0}}
+  /* ── ending ── */
+  #ending{position:fixed;inset:0;z-index:30;display:none;align-items:center;justify-content:center;background:rgba(5,3,11,.75);backdrop-filter:blur(4px)}
+  #ending.show{display:flex}
+  #ending .card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 var(--red-d);padding:22px 26px;max-width:min(560px,92vw);text-align:center}
+  #ending h2{font-family:'Rye';font-weight:400;margin:0 0 6px;font-size:clamp(24px,4vw,38px)}
+  #ending p{margin:6px 0;line-height:1.45}
+  #ending .secret{color:#2a7a4a;font-weight:700}
+  .btn{font:700 15px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:9px 16px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block;margin:10px 4px 0}
+  .btn.red{background:var(--red);color:#fff}
+  #back{position:fixed;left:12px;bottom:auto;top:96px;z-index:20;margin:0;font-size:13px;padding:6px 12px}
+  @media (max-width:700px){#choices{bottom:200px}#spGangle{left:12%;width:34vw}#spMime{left:56%;width:30vw}#back{top:auto;bottom:auto;display:none}}
+</style>
+</head>
+<body>
+<div id="world">
+  <div id="sky"></div>
+  <div id="earth"></div>
+  <div id="ground"></div>
+  <svg id="lights" viewBox="0 0 1000 60" preserveAspectRatio="none"></svg>
+  <div id="wheel"><div class="leg" style="transform:translateX(-50%) rotate(18deg)"></div><div class="leg" style="transform:translateX(-50%) rotate(-18deg)"></div><div class="spin"></div></div>
+  <svg id="tent" viewBox="0 0 200 170">
+    <path d="M100 6 L190 120 L10 120 Z" fill="#e3243b" stroke="#1b1b2f" stroke-width="4"/>
+    <path d="M100 6 L130 120 L70 120 Z" fill="#fff"/><path d="M100 6 L160 120 L145 120 Z M100 6 L40 120 L55 120 Z" fill="#fff"/>
+    <rect x="20" y="118" width="160" height="50" fill="#2f5bd8" stroke="#1b1b2f" stroke-width="4"/>
+    <path d="M80 168 L80 135 Q100 120 120 135 L120 168 Z" fill="#1b1b2f"/>
+    <path d="M100 6 V-6" stroke="#1b1b2f" stroke-width="3"/><path d="M100 -6 L118 0 L100 4 Z" fill="#ffd34d"/>
+  </svg>
+  <svg id="booth" viewBox="0 0 170 160">
+    <rect x="10" y="40" width="150" height="110" fill="#ffd34d" stroke="#1b1b2f" stroke-width="4"/>
+    <path d="M0 40 L85 4 L170 40 Z" fill="#ff7eb6" stroke="#1b1b2f" stroke-width="4"/>
+    <text x="85" y="34" text-anchor="middle" font-family="Rye" font-size="16" fill="#1b1b2f">RING TOSS</text>
+    <rect x="22" y="60" width="126" height="8" fill="#8a0c1a"/>
+    <g fill="#1b1b2f"><rect x="30" y="100" width="6" height="40"/><rect x="82" y="100" width="6" height="40"/><rect x="134" y="100" width="6" height="40"/></g>
+    <g fill="none" stroke="#b07cff" stroke-width="4"><ellipse cx="60" cy="20" rx="12" ry="5"/><ellipse cx="120" cy="10" rx="12" ry="5"/></g>
+  </svg>
+  <div id="fog"></div>
+</div>
+
+<div id="stage">
+  <div class="sprite" id="spGangle"><div class="bob"></div></div>
+  <div class="sprite" id="spMime"><div class="bob"></div></div>
+  <div class="sprite" id="spCaine"><div class="bob"></div></div>
+</div>
+
+<div id="hud">
+  <div class="meter">Gangle <span id="hG"></span><br>The Mime <span id="hM"></span></div>
+  <div class="meter">🧩 Zooble parts: <b id="parts">0</b>/5</div>
+</div>
+<a class="btn" id="back" href="../../index.html">← Big Top</a>
+
+<div id="sceneTitle"></div>
+<div id="choices"></div>
+<div id="dlg" tabindex="0" aria-live="polite">
+  <div id="name"></div>
+  <div id="text"></div>
+  <div id="more">▼</div>
+</div>
+
+<div id="ending"><div class="card">
+  <div id="endEmoji" style="font-size:54px"></div>
+  <h2 id="endTitle"></h2>
+  <p id="endText"></p>
+  <p class="secret" id="endSecret"></p>
+  <p style="font-size:13px;color:#5c3a99" id="endStats"></p>
+  <button class="btn red" id="again">💗 Date again</button>
+  <a class="btn" href="../../index.html">← back to the Big Top</a>
+</div></div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, confetti, sfx, wireCaine } = window.TADC;
+
+  // ═══ the Mildly Haunted Mime (original design) ═══
+  const MIME = `
+<svg viewBox="0 0 100 180" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="wisp" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e9f3ff" stop-opacity=".95"/><stop offset="1" stop-color="#b07cff" stop-opacity="0"/></linearGradient></defs>
+  <ellipse cx="50" cy="16" rx="24" ry="9" fill="#1b1b2f"/><circle cx="62" cy="9" r="4" fill="#1b1b2f"/>
+  <ellipse cx="50" cy="42" rx="22" ry="25" fill="#f8fbff" stroke="#c9d4e8" stroke-width="2"/>
+  <path d="M36 36 L46 36 M54 36 L64 36" stroke="#1b1b2f" stroke-width="3" stroke-linecap="round"/>
+  <path d="M38 30 Q41 27 44 30 M56 30 Q59 27 62 30" stroke="#1b1b2f" stroke-width="2" fill="none"/>
+  <path d="M41 42 L41 48" stroke="#2f5bd8" stroke-width="2.5" stroke-linecap="round"/><circle cx="41" cy="50" r="2" fill="#2f5bd8"/>
+  <path d="M44 54 Q50 58 56 54 Q50 52 44 54 Z" fill="#e3243b"/>
+  <path d="M30 70 L70 70 L76 120 L24 120 Z" fill="#fff" stroke="#c9d4e8" stroke-width="2"/>
+  <g fill="#1b1b2f"><rect x="27" y="78" width="46" height="6"/><rect x="26" y="92" width="48" height="6"/><rect x="25" y="106" width="50" height="6"/></g>
+  <circle cx="18" cy="96" r="8" fill="#fff" stroke="#c9d4e8" stroke-width="2"/><circle cx="82" cy="88" r="8" fill="#fff" stroke="#c9d4e8" stroke-width="2"/>
+  <path d="M24 120 Q30 150 22 176 Q40 160 50 178 Q58 158 76 176 Q70 150 76 120 Z" fill="url(#wisp)"/>
+</svg>`;
+
+  // ═══ Zooble's parts, disguised as scenery ═══
+  const PARTS = {
+    cone: { scene: 'gate', css: 'left:58%;bottom:21%;width:min(5vw,52px)', svg: `<svg viewBox="0 0 40 50"><path d="M20 2 L36 46 L4 46 Z" fill="#ffd34d" stroke="#b8901b" stroke-width="3"/><rect x="0" y="44" width="40" height="6" rx="2" fill="#b8901b"/></svg>`, line: "Hey. That's my LEG. The yellow cone. Give it. ...Thanks." },
+    pipe: { scene: 'wheel', css: 'left:48%;bottom:22%;width:min(2.6vw,26px)', svg: `<svg viewBox="0 0 20 120"><rect x="2" y="0" width="16" height="120" rx="8" fill="#2f5bd8" stroke="#142a73" stroke-width="3"/><circle cx="10" cy="6" r="8" fill="#ffd34d"/></svg>`, line: "My other leg. Somebody hung a LIGHT on it. I'm not even surprised anymore." },
+    head: { scene: 'ringtoss', css: 'left:51%;bottom:44%;width:min(4.2vw,44px)', svg: `<svg viewBox="0 0 44 40"><rect x="2" y="2" width="40" height="36" rx="4" fill="#5fd38d" stroke="#2a7a4a" stroke-width="3"/><circle cx="16" cy="18" r="7" fill="#fff" stroke="#1b1b2f" stroke-width="2"/><circle cx="17" cy="19" r="3" fill="#1b1b2f"/><path d="M26 14 L36 14" stroke="#1b1b2f" stroke-width="3" stroke-linecap="round"/><path d="M14 30 L30 28" stroke="#1b1b2f" stroke-width="2.5"/></svg>`, line: "Oh good. My head. I'd have been really annoyed if someone WON it." },
+    torso: { scene: 'haunted', css: 'right:12%;bottom:44%;width:min(7vw,72px)', svg: `<svg viewBox="0 0 60 44"><path d="M4 4 L56 4 L48 40 L12 40 Z" fill="#ff7eb6" stroke="#a03b6c" stroke-width="3"/></svg>`, line: "That was my torso on the tent. Haunted torso. Great. Love that for me." },
+    neck: { scene: 'top', css: 'left:66%;bottom:30%;width:min(2.6vw,26px)', svg: `<svg viewBox="0 0 16 60"><rect x="2" y="0" width="12" height="60" fill="#b07cff" stroke="#5c3a99" stroke-width="3"/><circle cx="8" cy="4" r="7" fill="#1b1b2f" stroke="#5c3a99" stroke-width="2"/></svg>`, line: "And my neck was a telescope. Of course it was. Okay. I'm whole. Ish." },
+  };
+
+  // ═══ the script (all original) ═══
+  const SCRIPT = [
+    { scene: 'gate', title: 'Episode 1', sub: 'A Very Haunted Night at the Lunar Midway', cast: ['caine'] },
+    { who: 'caine', text: "WELCOME, lovebirds, to the LUNAR MIDWAY! Tonight is DATE NIGHT! There's no air on the moon, but love is in it anyway!" },
+    { who: 'caine', text: "Every ride here runs at exactly one-eighth speed. For SAFETY! And SUSPENSE! Mostly suspense!" },
+    { cast: ['gangle', 'caine'] },
+    { who: null, text: "Gangle floats over, ribbons drifting in the low gravity. The mask is smiling. Mostly." },
+    { who: 'gangle', mood: 'happy', text: "H-hi! You came! I wasn't sure you'd come! I practiced saying hi forty times!" },
+    { choice: [
+      { text: 'Your mask looks really nice tonight.', g: 2, reply: [{ who: 'gangle', mood: 'happy', text: "It's my going-out mask! It's the same mask! But I FEEL fancier!" }] },
+      { text: "Forty times? That's adorable.", g: 1, reply: [{ who: 'gangle', mood: 'happy', text: 'Forty-ONE now! Hi! See? Hi!' }] },
+      { text: 'Is that a mime floating behind you?', m: 1, reply: [
+        { who: 'gangle', mood: 'sad', text: 'W-what? Behind me?! Is it bad? Is my mask on crooked?!' },
+        { who: null, text: '<i>A pale figure in a beret waves politely, then slowly dissolves into a wisp of mist.</i>' },
+      ] },
+    ] },
+    { who: 'zooble', ifMissing: 'cone', text: "Hey. HEY. Somebody's using my leg as a traffic cone. By the gate. The yellow one. You could... click it. If you wanted." },
+
+    { scene: 'wheel', title: 'The Ferris Wheel', sub: 'Estimated ride time: two hours', cast: ['gangle'] },
+    { who: null, text: 'You board the ferris wheel. It begins to turn. Slowly. Very slowly. A moon-snail overtakes you.' },
+    { who: 'gangle', mood: 'happy', text: "It's so romantic! And so... gradual!" },
+    { cast: ['gangle', 'mime'] },
+    { who: null, text: 'In the next car over sits a pale figure in a beret. He is see-through. Only slightly.' },
+    { who: 'mime', text: '<i>*mimes being trapped in a box. The box appears to also be haunted.*</i>' },
+    { cast: ['gangle', 'mime', 'caine'] },
+    { who: 'caine', text: "Oh! That's the Mildly Haunted Mime! He's only a LITTLE haunted! A three out of ten! Wave hello!" },
+    { choice: [
+      { text: 'Wave at the Mime.', m: 2, reply: [{ who: 'mime', text: '<i>*waves back. A tiny cold breeze waves too.*</i>' }] },
+      { text: "Hold one of Gangle's ribbons.", g: 2, reply: [{ who: 'gangle', mood: 'happy', text: "My ribbon is being HELD. This is the best night of my LIFE. Don't let go. Okay, you can let go if you need to. Don't." }] },
+      { text: 'Ask how long this ride actually takes.', reply: [{ who: 'caine', text: 'Two hours! Or three! Time is more of a SUGGESTION on the moon!' }] },
+    ] },
+    { who: 'zooble', ifMissing: 'pipe', text: "Great. Now somebody's using my OTHER leg as a lamp post. The blue pipe down there. Unbelievable." },
+
+    { scene: 'ringtoss', title: 'The Ring Toss', sub: 'Rings may drift into orbit', cast: ['gangle', 'mime'] },
+    { who: null, text: 'A ring toss booth. The rings float gently upward and drift away, because moon.' },
+    { who: 'gangle', mood: 'happy', text: 'Win me a prize? Ooh, ooh, that green cube on the top shelf! It looks like it\'s watching me!' },
+    { who: 'zooble', text: "It's watching you because it's my HEAD. Please do not win my head at a carnival." },
+    { choice: [
+      { text: 'Try for the green cube anyway.', g: 1, reply: [{ who: null, text: 'Your ring sails up, up, and into a gentle orbit. Somewhere, an astronaut will be very confused.' }] },
+      { text: 'Let the Mime have a turn.', m: 2, reply: [{ who: 'mime', text: '<i>*throws an invisible ring. It lands perfectly. The attendant hands him an invisible prize. He gives it to you.*</i>' }] },
+      { text: 'Give Gangle all of your tickets.', g: 2, reply: [{ who: 'gangle', mood: 'happy', text: "TICKETS! I'm going to frame them! I'm going to frame them and then never win anything with them!" }] },
+    ] },
+    { who: 'zooble', ifMissing: 'head', text: '...Could someone just. Grab the head. Please. Before a child wins it.' },
+
+    { scene: 'haunted', title: 'The Mirror Maze', sub: 'Now only mildly haunted!', cast: ['gangle', 'mime'] },
+    { who: null, text: 'The lights flicker. A distant accordion begins to play. Nobody is holding the accordion.' },
+    { who: 'mime', text: '<i>*looks deeply apologetic. This happens whenever he gets nervous.*</i>' },
+    { who: 'gangle', mood: 'sad', text: "I-I don't like haunted things... my mask is slipping... is it slipping? It's slipping." },
+    { choice: [
+      { text: 'Comfort Gangle.', g: 2, reply: [{ who: 'gangle', mood: 'happy', text: 'You... you fixed my mask! With FEELINGS! I didn\'t know you could do that!' }] },
+      { text: 'Ask the Mime to stop haunting, please.', m: 1, reply: [{ who: 'mime', text: "<i>*tries very hard. Spins three times. The accordion switches to a waltz. It's actually kind of lovely.*</i>" }] },
+      { text: 'Share your moon-cotton-candy with both of them.', g: 1, m: 1, reply: [{ who: 'caine', text: "SHARING! How DISGUSTINGLY BEAUTIFUL! I'm crying! I don't have tear ducts!" }] },
+    ] },
+    { who: 'zooble', ifMissing: 'torso', text: "Somebody turned my torso into a tent decoration. The pink thing, top right. I'm not even mad. I'm tired." },
+
+    { scene: 'top', title: 'The Top of the Wheel', sub: 'Finally.', cast: ['gangle', 'mime'] },
+    { who: null, text: 'Two hours later, your car finally reaches the top. The Earth hangs in the sky: blue, enormous, and very far away.' },
+    { cast: ['gangle', 'mime', 'caine'] },
+    { who: 'caine', text: 'And NOW! The moment of TRUTH! Who will you share this view with?!' },
+    { choice: [
+      { text: 'Gangle.', g: 2, reply: [{ who: 'gangle', mood: 'happy', text: 'Me?! ME! Oh no, my mask is doing the happy thing so hard it might crack!' }] },
+      { text: 'The Mime.', m: 2, reply: [{ who: 'mime', text: '<i>*places a hand over his heart. You can see the stars through it.*</i>' }] },
+      { text: 'Honestly? The view.', reply: [{ who: 'caine', text: "The VIEW?! Fair! It's a very good view! I made it!" }] },
+    ] },
+    { who: 'zooble', ifMissing: 'neck', text: 'Last one. My neck. Somebody made it a telescope. Over to the right. I am begging you.' },
+    { ending: true },
+  ];
+
+  // ═══ state & elements ═══
+  const $ = (id) => document.getElementById(id);
+  const sprites = { gangle: $('spGangle'), mime: $('spMime'), caine: $('spCaine') };
+  sprites.gangle.querySelector('.bob').innerHTML = CAST.gangle;
+  sprites.mime.querySelector('.bob').innerHTML = MIME;
+  sprites.caine.querySelector('.bob').innerHTML = CAST.caine;
+  wireCaine(sprites.caine);
+  const NAMES = { gangle: 'Gangle', mime: 'The Mildly Haunted Mime', caine: 'Caine', zooble: 'Zooble (somewhere?)' };
+  let queue, g, m, found, typing, fullText, typeTimer, waiting, scene;
+
+  // stars, lights, ferris wheel
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div'); s.className = 'star';
+    s.style.cssText = `left:${Math.random() * 100}%;top:${Math.random() * 62}%;animation-delay:${-Math.random() * 3}s;opacity:${0.4 + Math.random() * 0.6}`;
+    $('sky').appendChild(s);
+  }
+  let lights = '<path d="M0 10 Q250 50 500 14 Q750 50 1000 10" fill="none" stroke="#1b1b2f" stroke-width="2"/>';
+  for (let i = 1; i < 30; i++) {
+    const x = i / 30 * 1000, y = 10 + Math.sin(i / 30 * Math.PI * 2) * -14 + 20;
+    lights += `<circle cx="${x}" cy="${y}" r="5" fill="${['#ffd34d', '#ff7eb6', '#5dff8c', '#6fb6ff'][i % 4]}"><animate attributeName="opacity" values="1;.3;1" dur="${1.2 + (i % 5) * 0.3}s" repeatCount="indefinite"/></circle>`;
+  }
+  $('lights').innerHTML = lights;
+  let wheel = '<svg viewBox="0 0 200 200"><circle cx="100" cy="100" r="92" fill="none" stroke="#ffd34d" stroke-width="5"/><circle cx="100" cy="100" r="70" fill="none" stroke="#e3243b" stroke-width="3"/>';
+  for (let i = 0; i < 10; i++) {
+    const a = i / 10 * Math.PI * 2, x = 100 + Math.cos(a) * 92, y = 100 + Math.sin(a) * 92;
+    wheel += `<line x1="100" y1="100" x2="${x}" y2="${y}" stroke="#ffd34d" stroke-width="2.5"/><rect x="${x - 9}" y="${y - 7}" width="18" height="14" rx="4" fill="${['#e3243b', '#2f5bd8', '#ff7eb6', '#5fd38d', '#b07cff'][i % 5]}" stroke="#1b1b2f" stroke-width="2"/>`;
+  }
+  wheel += '<circle cx="100" cy="100" r="10" fill="#e3243b" stroke="#1b1b2f" stroke-width="3"/></svg>';
+  document.querySelector('#wheel .spin').innerHTML = wheel;
+
+  function hearts() {
+    $('hG').textContent = (g > 0 ? '💗'.repeat(Math.min(g, 10)) : '·');
+    $('hM').textContent = (m > 0 ? '🤍'.repeat(Math.min(m, 10)) : '·');
+    $('parts').textContent = found.size;
+  }
+
+  // ═══ Zooble parts ═══
+  function placeParts() {
+    document.querySelectorAll('.part').forEach((p) => p.remove());
+    for (const [id, p] of Object.entries(PARTS)) {
+      if (p.scene !== scene || found.has(id)) continue;
+      const el = document.createElement('div');
+      el.className = 'part'; el.style.cssText = p.css; el.innerHTML = p.svg; el.title = '...is that a part of someone?';
+      el.addEventListener('click', (e) => {
+        e.stopPropagation();
+        found.add(id); el.classList.add('found'); hearts();
+        sfx('boing');
+        const r = el.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top, 30, 0.7);
+        if (!typing && !waiting) return;
+        // Zooble interjects without breaking the flow: queue the line next.
+        queue.unshift({ who: 'zooble', text: p.line });
+      });
+      $('world').appendChild(el);
+    }
+  }
+
+  // ═══ engine ═══
+  function setCast(list) {
+    for (const [k, el] of Object.entries(sprites)) el.classList.toggle('on', list.includes(k));
+  }
+  function setMood(mood) {
+    const happy = sprites.gangle.querySelector('.mask-comedy'), sad = sprites.gangle.querySelector('.mask-tragedy');
+    if (!happy) return;
+    happy.style.display = mood === 'sad' ? 'none' : '';
+    sad.style.display = mood === 'sad' ? '' : 'none';
+  }
+  function next() {
+    const step = queue.shift();
+    if (!step) return;
+    if (step.ifMissing && found.has(step.ifMissing)) return next();
+    if (step.scene) return goScene(step);
+    if (step.cast && !step.text) { setCast(step.cast); return next(); }
+    if (step.choice) return showChoices(step.choice);
+    if (step.ending) return ending();
+    speak(step);
+  }
+  function goScene(step) {
+    scene = step.scene;
+    document.body.className = scene;
+    setCast(step.cast || []);
+    placeParts();
+    const t = $('sceneTitle');
+    t.innerHTML = `${step.title}<small>${step.sub || ''}</small>`;
+    t.classList.add('show'); sfx('ding');
+    $('dlg').style.visibility = 'hidden';
+    setTimeout(() => { t.classList.remove('show'); $('dlg').style.visibility = ''; next(); }, 2000);
+  }
+  function speak(step) {
+    const nm = $('name');
+    if (step.who) { nm.textContent = NAMES[step.who]; nm.className = 'show ' + step.who; } else { nm.className = ''; }
+    for (const [k, el] of Object.entries(sprites)) el.classList.toggle('dim', !!step.who && step.who !== k && step.who !== 'zooble');
+    if (!step.who) for (const el of Object.values(sprites)) el.classList.remove('dim');
+    if (step.mood) setMood(step.mood);
+    if (step.who === 'caine') { const s = sprites.caine.querySelector('.caine-svg'); s.classList.remove('quiet'); clearTimeout(s._q); s._q = setTimeout(() => s.classList.add('quiet'), 1800); }
+    if (step.who === 'zooble') sfx('pop');
+    fullText = step.text; typing = true; waiting = false;
+    $('more').classList.remove('show');
+    const txt = $('text');
+    // type out character-by-character, treating HTML tags as atomic
+    const tokens = fullText.match(/<[^>]+>|[^<]/g);
+    let i = 0, out = '';
+    clearInterval(typeTimer);
+    typeTimer = setInterval(() => {
+      out += tokens[i++];
+      while (i < tokens.length && tokens[i].startsWith('<')) out += tokens[i++];
+      txt.innerHTML = out;
+      if (i >= tokens.length) finishTyping();
+    }, 20);
+  }
+  function finishTyping() {
+    clearInterval(typeTimer); $('text').innerHTML = fullText;
+    typing = false; waiting = true; $('more').classList.add('show');
+  }
+  function advance() {
+    if ($('choices').children.length) return;
+    if (typing) return finishTyping();
+    if (waiting) { waiting = false; next(); }
+  }
+  function showChoices(opts) {
+    waiting = false;
+    $('more').classList.remove('show');
+    const box = $('choices'); box.innerHTML = '';
+    opts.forEach((o, idx) => {
+      const b = document.createElement('button'); b.className = 'choice'; b.textContent = o.text;
+      b.style.animationDelay = idx * 0.08 + 's';
+      b.addEventListener('click', (e) => {
+        e.stopPropagation();
+        g += o.g || 0; m += o.m || 0; hearts();
+        sfx(o.g || o.m ? 'ding' : 'pop');
+        if (o.g || o.m) { const r = b.getBoundingClientRect(); confetti(r.left + 40, r.top, 20, 0.5); }
+        box.innerHTML = '';
+        queue.unshift(...(o.reply || []));
+        next();
+      });
+      box.appendChild(b);
+    });
+    box.firstChild.focus({ preventScroll: true });
+  }
+  function ending() {
+    setCast(['gangle', 'mime', 'caine']);
+    let emoji, title, text;
+    if (g >= 5 && g >= m) {
+      emoji = '🎭💗'; title = 'GANGLE ENDING: Happy Mask Forever';
+      text = 'Gangle wraps you in a ribbon-hug as the wheel creaks back down. "Same time next week? Same moon? PLEASE say same moon!" The mask has not stopped smiling in two hours. It may never stop.';
+      setMood('happy');
+    } else if (m >= 4 && m > g) {
+      emoji = '👻🤍'; title = 'MIME ENDING: A Very Quiet Romance';
+      text = 'The Mime mimes a heart. It\'s a little transparent, like him. He hands you an invisible rose. It is cold, weightless, and somehow perfect. The accordion plays one last waltz.';
+    } else {
+      emoji = '🎩✨'; title = 'CAINE ENDING: He Was There the Whole Time';
+      text = 'Caine zooms in between you all. "No match tonight! But the REAL romance was the slow rides we took along the way! And if you\'re lonely, I\'ll be your date! I\'m EVERYONE\'S date!"';
+    }
+    $('endEmoji').textContent = emoji; $('endTitle').textContent = title; $('endText').textContent = text;
+    $('endSecret').textContent = found.size === 5
+      ? '🧩 SECRET: Zooble Reassembled! "...You found all my parts. Cool. Thanks. Worst date I\'ve ever been on, and I wasn\'t even ON it."'
+      : `🧩 Zooble parts found: ${found.size}/5. Zooble is still partly scenery. Zooble would like a word.`;
+    $('endStats').textContent = `Gangle 💗×${g} · Mime 🤍×${m}`;
+    $('ending').classList.add('show');
+    sfx('fanfare');
+    for (let i = 0; i < 5; i++) setTimeout(() => confetti(Math.random() * innerWidth, innerHeight * 0.35, 60, 1.1), i * 160);
+  }
+  function start() {
+    queue = SCRIPT.slice(); g = 0; m = 0; found = new Set(); scene = null; typing = false; waiting = false;
+    $('ending').classList.remove('show'); $('choices').innerHTML = ''; $('text').innerHTML = ''; $('name').className = '';
+    setMood('happy'); hearts(); next();
+  }
+
+  $('dlg').addEventListener('click', advance);
+  addEventListener('keydown', (e) => {
+    if ((e.key === ' ' || e.key === 'Enter') && document.activeElement && !document.activeElement.classList.contains('choice')) { e.preventDefault(); advance(); }
+  });
+  $('again').addEventListener('click', start);
+  start();
+})();
+</script>
+</body>
+</html>

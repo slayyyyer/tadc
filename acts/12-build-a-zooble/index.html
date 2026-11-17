@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Build-a-Zooble</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--green:#5fd38d}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at 50% 0%,rgba(95,211,141,.28),transparent 55%),#0b0718;padding-bottom:70px}
+  header{text-align:center;padding:14px 16px 4px}
+  h1{font-family:'Rye';font-weight:400;margin:0;font-size:clamp(26px,4.4vw,50px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink)}
+  .sub{color:#cbbff0;margin:4px 0 0;font-size:15px}
+  main{display:grid;grid-template-columns:260px minmax(300px,600px) 240px;gap:18px;justify-content:center;align-items:start;padding:12px 14px}
+  .panel{background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-radius:16px;box-shadow:6px 6px 0 var(--red-d);padding:10px}
+  .panel h2{font-family:'Rye';font-weight:400;font-size:18px;margin:2px 0 8px;text-align:center}
+  /* parts bin */
+  #bin{max-height:70vh;overflow:auto}
+  .cat{font:700 11px 'Fredoka';letter-spacing:.14em;color:#5c3a99;margin:8px 2px 4px}
+  .parts{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  .pbtn{aspect-ratio:1;background:#fff;border:3px solid var(--ink);border-radius:10px;cursor:pointer;padding:4px;transition:transform .1s}
+  .pbtn:hover{transform:translateY(-2px) rotate(-3deg);background:#f0ffe8}
+  .pbtn svg{width:100%;height:100%;display:block;pointer-events:none}
+  /* stage */
+  #stageWrap{position:relative;background:repeating-conic-gradient(#f4efe6 0 25%,#ece5d8 0 50%) 0 0/40px 40px;border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 var(--red-d);overflow:hidden;touch-action:none}
+  #stage{width:100%;height:auto;display:block;aspect-ratio:1}
+  #stage .part{cursor:grab}
+  #stage .part.sel{filter:drop-shadow(0 0 4px #ffd34d) drop-shadow(0 0 2px #1b1b2f)}
+  #stage .part.dragging{cursor:grabbing}
+  #stage .part.pop{animation:popin .35s cubic-bezier(.3,1.8,.5,1)}
+  @keyframes popin{from{opacity:0}}
+  #nameTag{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);background:var(--ink);color:var(--gold);font:400 18px 'Rye';padding:4px 14px;border-radius:999px;white-space:nowrap;cursor:pointer}
+  #empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;text-align:center;color:#8f84b3;font-weight:700;pointer-events:none;padding:30px}
+  /* tools */
+  .tools{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .btn{font:700 13px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:12px;padding:7px 8px;cursor:pointer;box-shadow:2px 2px 0 var(--ink);text-align:center;text-decoration:none}
+  .btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .btn.red{background:var(--red);color:#fff}
+  .btn.blue{background:var(--blue);color:#fff}
+  .btn.green{background:var(--green)}
+  .btn.wide{grid-column:span 2}
+  .btn:focus-visible,.pbtn:focus-visible{outline:3px dashed var(--red);outline-offset:2px}
+  .keys{font-size:11px;color:#5c3a99;margin-top:8px;line-height:1.5}
+  #zoobleBox{width:110px;margin:14px auto 0;cursor:pointer}
+  #zoobleBox svg{width:100%;height:auto;filter:drop-shadow(0 8px 6px rgba(0,0,0,.5))}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30}
+  @media (max-width:1000px){main{grid-template-columns:minmax(300px,600px)}#bin{max-height:none}.parts{grid-template-columns:repeat(8,1fr)}}
+  @media (max-width:560px){.parts{grid-template-columns:repeat(5,1fr)}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Build-a-Zooble</h1>
+  <p class="sub">Click parts to add them, drag to arrange, and build the creature of your dreams. Zooble will be judging. Silently. Mostly.</p>
+</header>
+<main>
+  <section class="panel"><h2>🧩 Parts Bin</h2><div id="bin"></div></section>
+  <section>
+    <div id="stageWrap">
+      <svg id="stage" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div id="empty">Your stage is empty.<br>Pick a part from the bin, or hit 🎲 Random.</div>
+      <div id="nameTag" title="Click for a new name">Unnamed Creature</div>
+    </div>
+  </section>
+  <section class="panel">
+    <h2>🔧 Tools</h2>
+    <div class="tools">
+      <button class="btn" id="tRotL" disabled>⟲ Rotate</button>
+      <button class="btn" id="tRotR" disabled>⟳ Rotate</button>
+      <button class="btn" id="tSmall" disabled>➖ Smaller</button>
+      <button class="btn" id="tBig" disabled>➕ Bigger</button>
+      <button class="btn" id="tFlip" disabled>↔ Flip</button>
+      <button class="btn" id="tColor" disabled>🎨 Recolor</button>
+      <button class="btn" id="tFront" disabled>⬆ To front</button>
+      <button class="btn" id="tDup" disabled>⧉ Duplicate</button>
+      <button class="btn red wide" id="tDel" disabled>🗑 Remove part</button>
+      <button class="btn blue wide" id="random">🎲 Random creature</button>
+      <button class="btn green wide" id="rate">⭐ Ask Zooble to rate it</button>
+      <button class="btn wide" id="save">📸 Save as picture</button>
+      <button class="btn wide" id="clear">🧽 Clear stage</button>
+    </div>
+    <div class="keys">Keys (with a part selected): Q/E rotate · −/= size · F flip · C color · D duplicate · Delete remove · arrows nudge</div>
+    <div id="zoobleBox" title="Zooble"></div>
+  </section>
+</main>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, say, confetti, sfx, pick } = window.TADC;
+  const NS = 'http://www.w3.org/2000/svg';
+  const COLORS = ['#e3243b', '#2f5bd8', '#ffd34d', '#5fd38d', '#ff7eb6', '#b07cff', '#fff7d6', '#ff9a3d'];
+  const INK = '#1b1b2f';
+
+  // ═══ the parts (original designs). Each draws centered at 0,0 in the given color. ═══
+  const S = `stroke="${INK}" stroke-width="4" stroke-linejoin="round"`;
+  const PARTS = {
+    heads: {
+      cube: (c) => `<rect x="-40" y="-36" width="80" height="72" rx="8" fill="${c}" ${S}/><circle cx="-12" cy="-4" r="13" fill="#fff" ${S}/><circle cx="-10" cy="-2" r="5" fill="${INK}"/><path d="M8 -10 H28" ${S} stroke-linecap="round"/><path d="M-14 20 L16 16" ${S} stroke-linecap="round"/>`,
+      orb: (c) => `<circle r="40" fill="${c}" ${S}/><circle cx="-14" cy="-6" r="10" fill="#fff" ${S}/><circle cx="14" cy="-6" r="10" fill="#fff" ${S}/><circle cx="-13" cy="-4" r="4" fill="${INK}"/><circle cx="15" cy="-4" r="4" fill="${INK}"/><path d="M-16 18 Q0 30 16 18" fill="none" ${S} stroke-linecap="round"/>`,
+      tv: (c) => `<rect x="-44" y="-34" width="88" height="66" rx="10" fill="${c}" ${S}/><rect x="-34" y="-24" width="68" height="46" rx="6" fill="#163a2a" ${S}/><path d="M-18 -8 V0 M18 -8 V0 M-14 10 Q0 18 14 10" stroke="#5dff8c" stroke-width="4" fill="none" stroke-linecap="round"/><path d="M-14 -34 L-26 -54 M14 -34 L26 -54" ${S} stroke-linecap="round"/>`,
+      tri: (c) => `<path d="M0 -46 L44 34 L-44 34 Z" fill="${c}" ${S}/><circle cx="0" cy="8" r="14" fill="#fff" ${S}/><circle cx="2" cy="10" r="6" fill="${INK}"/>`,
+      blob: (c) => `<path d="M-40 10 Q-46 -36 -6 -40 Q38 -46 42 -4 Q48 36 6 38 Q-36 44 -40 10 Z" fill="${c}" ${S}/><circle cx="-10" cy="-8" r="6" fill="${INK}"/><circle cx="14" cy="-12" r="9" fill="#fff" ${S}/><circle cx="15" cy="-11" r="3.5" fill="${INK}"/><path d="M-12 16 L-4 12 L4 18 L12 12" fill="none" ${S} stroke-linecap="round"/>`,
+    },
+    bodies: {
+      trapezoid: (c) => `<path d="M-50 -36 L50 -36 L36 40 L-36 40 Z" fill="${c}" ${S}/>`,
+      barrel: (c) => `<ellipse rx="44" ry="50" fill="${c}" ${S}/><path d="M-44 -10 H44 M-44 14 H44" ${S} opacity=".5"/>`,
+      box: (c) => `<rect x="-40" y="-44" width="80" height="88" rx="6" fill="${c}" ${S}/><circle cy="-14" r="5" fill="${INK}"/><circle cy="8" r="5" fill="${INK}"/>`,
+      star: (c) => `<path d="M0 -50 L14 -16 L50 -14 L22 8 L32 44 L0 24 L-32 44 L-22 8 L-50 -14 L-14 -16 Z" fill="${c}" ${S}/>`,
+    },
+    necks: {
+      pole: (c) => `<rect x="-8" y="-34" width="16" height="68" fill="${c}" ${S}/>`,
+      spring: (c) => `<path d="M0 -36 L14 -26 L-14 -14 L14 -2 L-14 10 L14 22 L0 36" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/><path d="M0 -36 L14 -26 L-14 -14 L14 -2 L-14 10 L14 22 L0 36" fill="none" stroke="${INK}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity=".6"/>`,
+    },
+    arms: {
+      noodle: (c) => `<path d="M-40 0 Q-10 -30 10 0 T44 -6" fill="none" stroke="${INK}" stroke-width="14" stroke-linecap="round"/><path d="M-40 0 Q-10 -30 10 0 T44 -6" fill="none" stroke="${c}" stroke-width="8" stroke-linecap="round"/><circle cx="44" cy="-6" r="9" fill="#fff" ${S}/>`,
+      stick: (c) => `<path d="M-44 0 H30" stroke="${INK}" stroke-width="14" stroke-linecap="round"/><path d="M-44 0 H30" stroke="${c}" stroke-width="8" stroke-linecap="round"/><circle cx="34" r="10" fill="${c}" ${S}/>`,
+      claw: (c) => `<path d="M-44 0 H14" stroke="${INK}" stroke-width="14" stroke-linecap="round"/><path d="M-44 0 H14" stroke="${c}" stroke-width="8" stroke-linecap="round"/><path d="M14 0 Q34 -22 44 -6 M14 0 Q34 22 44 6" fill="none" ${S} stroke-width="6" stroke-linecap="round"/>`,
+      mitten: (c) => `<path d="M-44 0 H8" stroke="${INK}" stroke-width="14" stroke-linecap="round"/><path d="M-44 0 H8" stroke="${c}" stroke-width="8" stroke-linecap="round"/><path d="M8 -14 Q40 -18 40 0 Q40 18 8 14 Z" fill="#fff" ${S}/><path d="M18 -14 Q14 -28 26 -24" fill="#fff" ${S}/>`,
+    },
+    legs: {
+      cone: (c) => `<path d="M0 -44 L22 40 L-22 40 Z" fill="${c}" ${S}/>`,
+      pipe: (c) => `<rect x="-11" y="-44" width="22" height="88" rx="11" fill="${c}" ${S}/>`,
+      wheel: (c) => `<circle r="30" fill="${INK}"/><circle r="18" fill="${c}" ${S}/><path d="M0 -18 V18 M-18 0 H18" ${S}/>`,
+      pogo: (c) => `<path d="M0 -44 V0" ${S} stroke-width="8"/><path d="M0 0 L12 6 L-12 14 L12 22 L-12 30 L0 36" fill="none" stroke="${c}" stroke-width="6" stroke-linecap="round"/><rect x="-18" y="36" width="36" height="10" rx="5" fill="${c}" ${S}/>`,
+      boot: (c) => `<path d="M-10 -44 H10 V20 H34 Q40 20 40 34 V40 H-10 Z" fill="${c}" ${S}/>`,
+    },
+    extras: {
+      partyhat: (c) => `<path d="M0 -40 L24 30 L-24 30 Z" fill="${c}" ${S}/><path d="M-12 -4 L8 4 M-18 16 L14 22" stroke="#fff" stroke-width="4"/><circle cy="-42" r="8" fill="#ffd34d" ${S}/>`,
+      propeller: (c) => `<rect x="-24" y="-4" width="48" height="12" rx="4" fill="${INK}"/><path d="M0 -6 V-20" ${S}/><ellipse cx="-20" cy="-22" rx="22" ry="7" fill="${c}" ${S}/><ellipse cx="20" cy="-22" rx="22" ry="7" fill="${c}" ${S}/>`,
+      bow: (c) => `<path d="M0 0 L-34 -20 L-34 20 Z M0 0 L34 -20 L34 20 Z" fill="${c}" ${S}/><circle r="8" fill="${c}" ${S}/>`,
+      crown: (c) => `<path d="M-34 20 L-34 -14 L-18 4 L0 -24 L18 4 L34 -14 L34 20 Z" fill="${c}" ${S}/><circle cy="8" r="5" fill="#e3243b"/>`,
+      monocle: (c) => `<circle r="22" fill="rgba(180,230,255,.35)" stroke="${c}" stroke-width="6"/><circle r="22" fill="none" stroke="${INK}" stroke-width="2"/><path d="M18 14 Q30 40 20 60" fill="none" stroke="${c}" stroke-width="3"/>`,
+      bells: (c) => `<path d="M-40 0 Q-20 -30 0 -6 Q20 -30 40 0" fill="none" stroke="${c}" stroke-width="10" stroke-linecap="round"/><circle cx="-40" cy="4" r="9" fill="#ffd34d" ${S}/><circle cx="40" cy="4" r="9" fill="#ffd34d" ${S}/>`,
+      eye: (c) => `<circle r="18" fill="#fff" ${S}/><circle cx="3" cy="2" r="8" fill="${c === '#fff7d6' ? INK : c}"/><circle cx="5" cy="0" r="3.5" fill="${INK}"/>`,
+      mustache: (c) => `<path d="M0 0 Q-16 -14 -34 -2 Q-40 4 -46 -4 Q-40 14 -20 10 Q-8 8 0 2 Q8 8 20 10 Q40 14 46 -4 Q40 4 34 -2 Q16 -14 0 0 Z" fill="${c === '#fff7d6' ? INK : c}" ${S} stroke-width="2"/>`,
+    },
+  };
+  const CAT_LABEL = { heads: 'HEADS', bodies: 'BODIES', necks: 'NECKS', arms: 'ARMS', legs: 'LEGS & WHEELS', extras: 'FANCY EXTRAS' };
+  const DEFAULT_COLOR = { heads: '#5fd38d', bodies: '#ff7eb6', necks: '#b07cff', arms: '#ffd34d', legs: '#2f5bd8', extras: '#e3243b' };
+
+  // ═══ Zooble's commentary (original) ═══
+  const ZOOBLE = {
+    add: ['Mm. A part.', 'Sure. Why not.', "That's... a choice.", 'Bold. Wrong, maybe. But bold.', 'I have one of those. Had. Long story.', 'Okay, that one\'s actually kind of nice.', 'Interesting placement. Very "art."'],
+    wheel: ['Wheels? Fancy. I wish I had wheels.'],
+    many: ["That's a LOT of parts. Even for me. And I'm made of parts."],
+    remove: ['Gone. Like it never happened.', "Good call. That one was looking at me."],
+    random: ['Randomized. Just like my mornings.', 'There. Chaos. You\'re welcome.', 'The dice have spoken. The dice have bad taste.'],
+    poke: ["Don't poke me. I'll come apart. Literally.", "I'm judging. Let me judge.", "Yes, I'm the expert. Unfortunately."],
+    rate: {
+      zero: ['There\'s nothing there. Ten out of ten for honesty.'],
+      few: ['Minimalist. I respect it. Three out of ten parts would agree.', 'Short and sweet. Like my patience.'],
+      mid: ["Okay. That's actually cool. Don't tell anyone I said that.", 'Seven out of ten. Would be confused by again.', "I'd hang out with that. From a distance."],
+      lots: ['That is a LOT of creature. Eleven out of ten. I\'m scared.', 'Masterpiece. Horrifying masterpiece. Frame it.'],
+    },
+  };
+  const zoobleBox = document.getElementById('zoobleBox');
+  zoobleBox.innerHTML = CAST.zooble;
+  const zSay = (arr, ms = 2600) => say(zoobleBox, pick(arr), ms);
+  zoobleBox.addEventListener('click', () => { sfx('boing'); zSay(ZOOBLE.poke); });
+
+  // ═══ parts bin ═══
+  const bin = document.getElementById('bin');
+  for (const [cat, defs] of Object.entries(PARTS)) {
+    const h = document.createElement('div'); h.className = 'cat'; h.textContent = CAT_LABEL[cat]; bin.appendChild(h);
+    const grid = document.createElement('div'); grid.className = 'parts'; bin.appendChild(grid);
+    for (const [name, draw] of Object.entries(defs)) {
+      const b = document.createElement('button'); b.className = 'pbtn'; b.title = `${name} (${cat})`; b.setAttribute('aria-label', `Add ${name}`);
+      b.innerHTML = `<svg viewBox="-60 -60 120 120">${draw(DEFAULT_COLOR[cat])}</svg>`;
+      b.addEventListener('click', () => {
+        const p = addPart(cat, name, DEFAULT_COLOR[cat], 300 + (Math.random() - 0.5) * 120, 290 + (Math.random() - 0.5) * 120);
+        select(p); sfx('pop');
+        const parts = stage.querySelectorAll('.part').length;
+        if (name === 'wheel' && Math.random() < 0.7) zSay(ZOOBLE.wheel);
+        else if (parts === 15) zSay(ZOOBLE.many);
+        else if (Math.random() < 0.35) zSay(ZOOBLE.add);
+      });
+      grid.appendChild(b);
+    }
+  }
+
+  // ═══ stage ═══
+  const stage = document.getElementById('stage');
+  const emptyEl = document.getElementById('empty');
+  let selected = null;
+  function addPart(cat, name, color, x, y, rot = 0, sc = 1, flip = false, animate = true) {
+    const g = document.createElementNS(NS, 'g');
+    g.classList.add('part');
+    Object.assign(g.dataset, { cat, name, color, x, y, rot, sc, flip: flip ? 1 : 0 });
+    render(g);
+    if (animate) { g.classList.add('pop'); setTimeout(() => g.classList.remove('pop'), 400); }
+    stage.appendChild(g);
+    emptyEl.style.display = 'none';
+    return g;
+  }
+  function render(g) {
+    const d = g.dataset;
+    g.innerHTML = PARTS[d.cat][d.name](d.color);
+    g.setAttribute('transform', `translate(${d.x} ${d.y}) rotate(${d.rot}) scale(${(+d.flip ? -1 : 1) * d.sc} ${d.sc})`);
+  }
+  function select(g) {
+    if (selected) selected.classList.remove('sel');
+    selected = g;
+    if (g) g.classList.add('sel');
+    document.querySelectorAll('.tools .btn[id^="t"]').forEach((b) => { b.disabled = !g; });
+  }
+  function toSvg(e) {
+    const pt = stage.createSVGPoint(); pt.x = e.clientX; pt.y = e.clientY;
+    return pt.matrixTransform(stage.getScreenCTM().inverse());
+  }
+  let drag = null;
+  stage.addEventListener('pointerdown', (e) => {
+    const g = e.target.closest('.part');
+    if (!g) { select(null); return; }
+    e.preventDefault();
+    select(g);
+    const p = toSvg(e);
+    drag = { g, dx: p.x - g.dataset.x, dy: p.y - g.dataset.y };
+    g.classList.add('dragging');
+    stage.setPointerCapture(e.pointerId);
+  });
+  stage.addEventListener('pointermove', (e) => {
+    if (!drag) return;
+    const p = toSvg(e);
+    drag.g.dataset.x = Math.max(0, Math.min(600, p.x - drag.dx)).toFixed(1);
+    drag.g.dataset.y = Math.max(0, Math.min(600, p.y - drag.dy)).toFixed(1);
+    render(drag.g);
+  });
+  const endDrag = () => { if (drag) { drag.g.classList.remove('dragging'); drag = null; } };
+  stage.addEventListener('pointerup', endDrag);
+  stage.addEventListener('pointercancel', endDrag);
+  stage.addEventListener('wheel', (e) => { if (!selected) return; e.preventDefault(); scaleBy(e.deltaY < 0 ? 1.08 : 1 / 1.08); }, { passive: false });
+
+  // ═══ tools ═══
+  const edit = (fn) => () => { if (!selected) return; fn(selected.dataset); render(selected); };
+  const rotateBy = (deg) => edit((d) => { d.rot = (+d.rot + deg) % 360; })();
+  const scaleBy = (k) => edit((d) => { d.sc = Math.max(0.3, Math.min(3, d.sc * k)).toFixed(3); })();
+  document.getElementById('tRotL').addEventListener('click', () => rotateBy(-15));
+  document.getElementById('tRotR').addEventListener('click', () => rotateBy(15));
+  document.getElementById('tSmall').addEventListener('click', () => scaleBy(1 / 1.12));
+  document.getElementById('tBig').addEventListener('click', () => scaleBy(1.12));
+  document.getElementById('tFlip').addEventListener('click', edit((d) => { d.flip = +d.flip ? 0 : 1; }));
+  const recolor = edit((d) => { d.color = COLORS[(COLORS.indexOf(d.color) + 1) % COLORS.length]; });
+  document.getElementById('tColor').addEventListener('click', () => { recolor(); sfx('tick'); });
+  const toFront = () => { if (selected) stage.appendChild(selected); };
+  document.getElementById('tFront').addEventListener('click', toFront);
+  const duplicate = () => {
+    if (!selected) return;
+    const d = selected.dataset;
+    select(addPart(d.cat, d.name, d.color, +d.x + 24, +d.y + 24, +d.rot, +d.sc, !!+d.flip)); sfx('pop');
+  };
+  document.getElementById('tDup').addEventListener('click', duplicate);
+  const remove = () => {
+    if (!selected) return;
+    selected.remove(); select(null); sfx('boing');
+    if (Math.random() < 0.4) zSay(ZOOBLE.remove);
+    if (!stage.querySelector('.part')) emptyEl.style.display = '';
+  };
+  document.getElementById('tDel').addEventListener('click', remove);
+  addEventListener('keydown', (e) => {
+    if (!selected || e.target.tagName === 'INPUT') return;
+    const k = e.key.toLowerCase();
+    const nudge = (dx, dy) => edit((d) => { d.x = +d.x + dx; d.y = +d.y + dy; })();
+    const map = {
+      q: () => rotateBy(-15), e: () => rotateBy(15), '-': () => scaleBy(1 / 1.12), '=': () => scaleBy(1.12), '+': () => scaleBy(1.12),
+      f: edit((d) => { d.flip = +d.flip ? 0 : 1; }), c: recolor, d: duplicate, delete: remove, backspace: remove,
+      arrowleft: () => nudge(-6, 0), arrowright: () => nudge(6, 0), arrowup: () => nudge(0, -6), arrowdown: () => nudge(0, 6),
+      escape: () => select(null),
+    };
+    if (map[k]) { e.preventDefault(); map[k](); }
+  });
+
+  // ═══ random creature: assembled in a plausible-ish body layout ═══
+  const keysOf = (cat) => Object.keys(PARTS[cat]);
+  function randomCreature() {
+    stage.querySelectorAll('.part').forEach((p) => p.remove());
+    const col = () => pick(COLORS.slice(0, 6));
+    const legType = pick(keysOf('legs')), armType = pick(keysOf('arms'));
+    const legCol = col(), armCol = col();
+    const legY = legType === 'wheel' ? 470 : 450;
+    addPart('legs', legType, legCol, 262, legY, 0, 1, false);
+    addPart('legs', pick([legType, pick(keysOf('legs'))]), Math.random() < 0.5 ? legCol : col(), 338, legY, 0, 1, true);
+    addPart('arms', armType, armCol, 222, 330, pick([-20, 0, 20]), 1, true);
+    addPart('arms', pick([armType, pick(keysOf('arms'))]), armCol, 378, 330, pick([-20, 0, 20]));
+    addPart('bodies', pick(keysOf('bodies')), col(), 300, 350, 0, 1.15);
+    if (Math.random() < 0.7) addPart('necks', pick(keysOf('necks')), col(), 300, 262);
+    addPart('heads', pick(keysOf('heads')), col(), 300, 196, pick([-8, 0, 8]), 1.05);
+    if (Math.random() < 0.75) addPart('extras', pick(['partyhat', 'propeller', 'crown', 'bells', 'bow']), col(), 300, 128, pick([-10, 0, 10]), 0.9);
+    if (Math.random() < 0.35) addPart('extras', pick(['monocle', 'mustache', 'eye']), col(), 300 + pick([-14, 14]), 206, 0, 0.6);
+    select(null); newName();
+    sfx('fanfare');
+    const r = stage.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height * 0.3, 70, 0.9);
+    zSay(ZOOBLE.random);
+  }
+  document.getElementById('random').addEventListener('click', randomCreature);
+
+  // ═══ names ═══
+  const nameTag = document.getElementById('nameTag');
+  const SYL = ['zoo', 'blo', 'gli', 'mor', 'tix', 'pon', 'quab', 'fle', 'dib', 'snor', 'wum', 'kee', 'plu', 'zor', 'bim'];
+  const TITLES = ['the Magnificent', 'the Slightly Assembled', 'of the Parts Bin', 'the Wobbly', 'Esq.', 'the Third', 'the Unreturnable', 'Who Was Promised'];
+  function newName() {
+    const n = pick(SYL) + pick(SYL) + (Math.random() < 0.5 ? pick(SYL) : '');
+    nameTag.textContent = `${n[0].toUpperCase() + n.slice(1)} ${pick(TITLES)}`;
+  }
+  nameTag.addEventListener('click', () => { newName(); sfx('tick'); });
+
+  // ═══ rate / save / clear ═══
+  document.getElementById('rate').addEventListener('click', () => {
+    const n = stage.querySelectorAll('.part').length;
+    if (n >= 10) window.TADC.mystery && window.TADC.mystery.find('stub-5'); // 🎟️ mystery clue: a ten-part masterpiece
+    const pool = n === 0 ? ZOOBLE.rate.zero : n < 4 ? ZOOBLE.rate.few : n < 12 ? ZOOBLE.rate.mid : ZOOBLE.rate.lots;
+    zSay(pool, 3400); sfx(n >= 4 ? 'fanfare' : 'ding');
+    if (n >= 4) { const r = zoobleBox.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top, 40, 0.7); }
+  });
+  document.getElementById('clear').addEventListener('click', () => {
+    stage.querySelectorAll('.part').forEach((p) => p.remove()); select(null); emptyEl.style.display = ''; nameTag.textContent = 'Unnamed Creature';
+  });
+  document.getElementById('save').addEventListener('click', () => {
+    if (!stage.querySelector('.part')) { zSay(['Save... nothing? Bold archival choice.']); return; }
+    const sel = selected; select(null);
+    const clone = stage.cloneNode(true);
+    clone.setAttribute('width', 1200); clone.setAttribute('height', 1200);
+    const bg = document.createElementNS(NS, 'rect'); bg.setAttribute('x', 0); bg.setAttribute('y', 0); bg.setAttribute('width', 600); bg.setAttribute('height', 600); bg.setAttribute('fill', '#f4efe6');
+    clone.insertBefore(bg, clone.firstChild);
+    const label = document.createElementNS(NS, 'text');
+    Object.entries({ x: 300, y: 580, 'text-anchor': 'middle', 'font-family': 'Fredoka, sans-serif', 'font-weight': 700, 'font-size': 22, fill: INK }).forEach(([k, v]) => label.setAttribute(k, v));
+    label.textContent = nameTag.textContent; clone.appendChild(label);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = 1200;
+      c.getContext('2d').drawImage(img, 0, 0);
+      c.toBlob((blob) => {
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob); a.download = nameTag.textContent.replace(/[^a-z0-9]+/gi, '-').toLowerCase() + '.png';
+        a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        zSay(['Saved. Now it exists forever. Congratulations?']);
+      });
+    };
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(new XMLSerializer().serializeToString(clone));
+    if (sel) select(sel);
+  });
+
+  setTimeout(() => say(zoobleBox, "Welcome to Build-a-Zooble. Yes, it's named after me. No, I didn't agree to it.", 4200), 500);
+})();
+</script>
+</body>
+</html>

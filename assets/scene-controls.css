@@ -1,0 +1,17 @@
+#sceneBanner{display:none!important}
+#scenePlayback{position:fixed;z-index:8;top:calc(5.5vh + clamp(48px,9vw,110px));left:50%;transform:translateX(-50%);width:min(530px,calc(100% - 28px));padding:12px 16px;background:#1b142bed;border:1px solid #a18bb8;border-radius:14px;box-shadow:0 8px 24px #0005;font-size:13px;user-select:text}
+#scenePlayback[hidden]{display:none}
+#sceneTitle{display:block;color:#ffd34d;font-size:14px}
+#sceneSpeaker{display:block;color:#ccb8e0;font-size:11px;margin:4px 0}
+#sceneCaption{margin:6px 0 10px;line-height:1.4}
+.scene-actions{display:flex;gap:8px;flex-wrap:wrap}
+.scene-actions button{min-height:36px;padding:6px 12px;font:600 12px system-ui;border:1px solid #a18bb8;border-radius:8px;background:#33234a;color:#fff;cursor:pointer}
+#sceneLibrary{width:min(660px,calc(100vw - 24px));max-height:calc(100dvh - 24px);overflow:auto;background:#211631;color:#fff7d6;border:3px solid #ffd34d;border-radius:18px;padding:22px;font-family:'Fredoka',system-ui,sans-serif}
+#sceneLibrary::backdrop{background:#0b0718dc;backdrop-filter:blur(5px)}
+#sceneLibrary h2{font:normal 28px Georgia,serif;margin:0 0 8px;color:#ffd34d}
+#sceneLibraryProgress{color:#cfbde2;font-size:14px;line-height:1.5}
+#sceneLibraryList{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+#sceneLibraryList button{font:15px/1.4 'Fredoka',system-ui,sans-serif;text-align:left;padding:14px;min-height:48px;color:#fff7d6;background:#ffffff09;border:1px solid #86679e;border-radius:9px;cursor:pointer}
+#sceneLibraryList button:hover{background:#ffffff18}
+#scenePlayback button:focus-visible,#sceneLibrary button:focus-visible{outline:3px dashed #ffd34d;outline-offset:3px}
+@media(max-width:480px){#sceneLibraryList{grid-template-columns:1fr}#scenePlayback{padding:10px 12px;font-size:12px}.scene-actions button{min-height:44px;flex:1}}

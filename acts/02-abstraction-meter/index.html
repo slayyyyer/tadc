@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Abstraction Meter</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--a:0}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#0b0718;color:#fff;font-family:'Fredoka',system-ui,sans-serif;user-select:none}
+  #scene{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:16px 16px 0;
+    background:
+      radial-gradient(ellipse at 50% 0%,rgba(176,124,255,.25),transparent 60%),
+      linear-gradient(#0b0718 0 62%,transparent 62%),
+      repeating-conic-gradient(#e3243b 0 25%,#f4efe6 0 50%) 0 0/64px 64px;
+    filter:saturate(calc(1 + var(--a) * 1.6)) hue-rotate(calc(var(--a) * 140deg)) contrast(calc(1 + var(--a) * .4));
+    animation:wob calc(3s - var(--a) * 2.2s) ease-in-out infinite;transform-origin:50% 60%}
+  @keyframes wob{
+    25%{transform:skewX(calc(var(--a) * 6deg)) rotate(calc(var(--a) * -2deg)) scale(calc(1 + var(--a) * .03))}
+    75%{transform:skewX(calc(var(--a) * -6deg)) rotate(calc(var(--a) * 2deg)) scale(calc(1 - var(--a) * .03))}}
+  #scene.collapse{animation:collapse 2.2s cubic-bezier(.6,0,.4,1) forwards}
+  @keyframes collapse{to{transform:scale(.02) rotate(900deg);filter:hue-rotate(360deg) blur(8px);opacity:0}}
+  h1{font-family:'Rye';font-weight:400;margin:6px 0 0;font-size:clamp(24px,4vw,46px);color:var(--gold);text-shadow:0 3px 0 #8a0c1a,0 6px 0 var(--ink);text-align:center}
+  .sub{color:#cbbff0;margin:4px 0 6px;text-align:center;font-size:15px}
+  /* gauge */
+  #gaugeWrap{position:relative;width:min(440px,86vw)}
+  #gauge{width:100%;height:auto;display:block;overflow:visible}
+  #pct{position:absolute;left:0;right:0;bottom:6%;text-align:center;font:400 clamp(40px,7vw,68px)/1 'VT323',monospace;color:#fff;text-shadow:0 0 14px rgba(255,255,255,.4)}
+  #status{text-align:center;font-weight:700;font-size:clamp(15px,2vw,20px);letter-spacing:.06em;margin:2px 0 14px;min-height:1.4em}
+  /* cast actions */
+  #actions{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;width:min(980px,100%)}
+  .act{position:relative;background:#fff7d6;color:var(--ink);border:3px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);
+    padding:8px 8px 10px;cursor:pointer;text-align:center;font:700 14px 'Fredoka';transition:transform .1s;overflow:hidden}
+  .act:hover{transform:translateY(-3px) rotate(-1deg)}
+  .act:active{transform:translate(2px,2px)}
+  .act .pic{height:74px;display:flex;align-items:flex-end;justify-content:center}
+  .act .pic svg{height:100%;width:auto}
+  .act .plus{display:block;font-size:12px;color:#5c3a99;margin-top:2px}
+  .act .cd{position:absolute;left:0;bottom:0;height:5px;background:var(--red);width:0}
+  .act.cooling{opacity:.55;cursor:wait}
+  .act.cooling:hover{transform:none}
+  .act:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+  .act .key{position:absolute;top:5px;left:7px;font:700 11px 'Fredoka';color:#5c3a99;border:2px solid #5c3a99;border-radius:5px;padding:0 4px;opacity:.7}
+  .act.nudge{animation:nudge .3s}
+  @keyframes nudge{25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+  #gaugeWrap{cursor:pointer}
+  #gauge.tapped #needle path{animation:tap .4s}
+  @keyframes tap{30%{transform:rotate(-4deg)}60%{transform:rotate(3deg)}}
+  #needle path{transform-origin:200px 210px}
+  #caine{cursor:pointer}
+  .btn:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+  /* controls */
+  #controls{position:fixed;left:14px;bottom:14px;display:flex;gap:8px;z-index:30}
+  .btn{font:700 14px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;
+    box-shadow:3px 3px 0 var(--ink);text-decoration:none}
+  .btn.on{background:var(--red);color:#fff}
+  #caine{position:fixed;right:16px;bottom:8px;width:clamp(90px,10vw,140px);z-index:25;transition:all .6s cubic-bezier(.4,1.6,.5,1)}
+  #caine svg{width:100%;height:auto;filter:drop-shadow(0 10px 8px rgba(0,0,0,.6))}
+  #caine.hero{right:50%;bottom:30%;transform:translateX(50%) scale(2.2)}
+  #ooze{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
+  .shard{position:fixed;pointer-events:none;z-index:21;mix-blend-mode:screen;animation:shard 2.6s ease-out forwards}
+  @keyframes shard{0%{opacity:0;transform:scale(.2) rotate(0)}20%{opacity:.9}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.4) rotate(var(--r))}}
+  @media (max-width:760px){#actions{grid-template-columns:repeat(3,minmax(0,1fr))}.act .pic{height:52px}
+    #caine{width:76px}.act .key{display:none}}
+  @media (hover:none){.act .key{display:none}}
+</style>
+</head>
+<body>
+<div id="scene">
+  <h1>Abstraction Meter</h1>
+  <div class="sub">Your break is ticking. Keep your mind in one piece. The cast is here to help (sort of).</div>
+  <div id="gaugeWrap">
+    <svg id="gauge" viewBox="0 0 400 230">
+      <defs>
+        <linearGradient id="arc" x1="0" x2="1">
+          <stop offset="0" stop-color="#1b0f2e"/><stop offset=".25" stop-color="#e3243b"/><stop offset=".55" stop-color="#ffd34d"/><stop offset="1" stop-color="#5dff8c"/>
+        </linearGradient>
+      </defs>
+      <path d="M30 210 A170 170 0 0 1 370 210" fill="none" stroke="#1b1b2f" stroke-width="40" stroke-linecap="round"/>
+      <path d="M30 210 A170 170 0 0 1 370 210" fill="none" stroke="url(#arc)" stroke-width="30" stroke-linecap="round"/>
+      <g id="ticks"></g>
+      <g id="needle" style="transform-origin:200px 210px;transition:transform .5s cubic-bezier(.4,1.8,.5,1)">
+        <path d="M196 210 L200 54 L204 210 Z" fill="#fff" stroke="#1b1b2f" stroke-width="2"/>
+      </g>
+      <circle cx="200" cy="210" r="16" fill="#ffd34d" stroke="#1b1b2f" stroke-width="4"/>
+      <text x="200" y="30" text-anchor="middle" font-family="Fredoka" font-weight="700" font-size="16" fill="#cbbff0" letter-spacing="3">MENTAL STABILITY</text>
+    </svg>
+    <div id="pct">100%</div>
+  </div>
+  <div id="status">Totally fine!</div>
+  <div id="actions"></div>
+</div>
+<canvas id="ooze"></canvas>
+<div id="controls">
+  <a class="btn" href="../../index.html">← back to the Big Top</a>
+  <button class="btn" id="fast">⏩ Time: normal</button>
+</div>
+<div id="caine"></div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, say, confetti, sfx, wireCaine, pick } = window.TADC;
+  const caineEl = document.getElementById('caine');
+  caineEl.innerHTML = CAST.caine;
+  const caine = wireCaine(caineEl);
+
+  // ═══ the helpers (all original lines) ═══
+  const ACTIONS = [
+    { id: 'ragatha', label: 'Talk to Ragatha', gain: 15, cd: 6, sound: 'ding', lines: [
+      "Hey, hey. You're okay. Want to count the floor tiles with me? We'll stop at a normal number.",
+      "Deep breath in... and out! See? Still here! That's a WIN!",
+      "I believe in you! I believe in you SO hard it's a little scary!",
+    ]},
+    { id: 'gangle', label: 'Hug Gangle', gain: 10, cd: 4, sound: 'pop', lines: [
+      "A HUG?! For ME?! My mask is smiling so hard right now!",
+      "Ribbon hugs are the best hugs. Scientifically!",
+      "Careful, careful, the mask! ...Okay, hug accepted!",
+    ]},
+    { id: 'jax', label: 'Let Jax insult you', gain: 5, cd: 2, sound: 'boing', lines: [
+      "You look like a loading spinner that gave up.",
+      "Wow. Stability. Couldn't be me. Actually it could, I'm just better at it.",
+      "Your break is lasting longer than your attention span. Impressive.",
+      "I'd say 'pull yourself together' but you'd need instructions.",
+    ]},
+    { id: 'kinger', label: "Kinger's pillow fort", gain: 22, cd: 18, sound: 'honk', lines: [
+      "Quick! Inside! The pillows are load-bearing! Nothing can get us in here!",
+      "Welcome to the fort. Password is 'pillow.' Or 'fort.' I forget which.",
+      "Shh. In the fort, the void can't hear you. I tested it. Twice. Maybe.",
+    ]},
+    { id: 'pomni', label: 'Panic with Pomni', gain: 3, cd: 1.5, sound: 'honk', lines: [
+      "Oh good, you're panicking TOO? Let's panic together! That helps, right?!",
+      "AAAAAAA. ...okay. That was oddly therapeutic.",
+      "Is it getting wobbly in here or is it just me? It's not just me?! AAAA!",
+    ]},
+  ];
+  const BUSY = {
+    ragatha: ['One sec, sweetie! Still recovering from the last pep talk!', "I'm refilling my encouragement! Almost full!"],
+    gangle: ['Mask... re-adjusting... one moment!', "Hug batteries recharging! They're ribbon-powered!"],
+    jax: ["I'm still thinking up the next one. Quality takes time.", 'Patience. Good insults are slow-cooked.'],
+    kinger: ['Rebuilding the fort! Pillows are NOT cooperating!', 'Fort under construction! Please use the side moat!'],
+    pomni: ['Hold on, I am still panicking from LAST time!', 'Give me a second to catch my breath! Then we panic again!'],
+  };
+  const actionsEl = document.getElementById('actions');
+  const actionEls = [];
+  ACTIONS.forEach((a, i) => {
+    // Real buttons, so Tab / Enter / Space work. Number keys 1-5 are shortcuts too.
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'act'; el.id = 'act-' + a.id;
+    const art = a.id === 'gangle' ? CAST.gangle : CAST[a.id];
+    el.innerHTML = `<span class="key" aria-hidden="true">${i + 1}</span><span class="pic">${art}</span>${a.label}<span class="plus">+${a.gain}% stability</span><span class="cd"></span>`;
+    el.addEventListener('click', () => use(a, el));
+    actionsEl.appendChild(el);
+    actionEls.push(el);
+  });
+  addEventListener('keydown', (e) => {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= ACTIONS.length) use(ACTIONS[n - 1], actionEls[n - 1]);
+  });
+
+  // ═══ stability state ═══
+  let stability = 100, fast = false, collapsing = false;
+  const DECAY_PER_SEC = 100 / 240; // ~4 minutes from fine to abstracted
+  const STATUS = [
+    [80, 'Totally fine! 🙂'], [60, 'A little wobbly...'], [40, 'Hearing the void hum.'],
+    [20, 'Seeing a few too many eyes.'], [1, '⚠️ ABSTRACTION IMMINENT ⚠️'], [-1, 'A̷B̸S̶T̵R̷A̴C̸T̶E̵D̷'],
+  ];
+  const CAINE_THRESHOLDS = {
+    75: "Everything's FINE! The meter is just being dramatic! Have you tried a hug?",
+    50: "Hmm! Halfway! Perfectly normal! Totally standard! Talk to someone!",
+    25: "Ooh, the floor's getting swirly! That's a feature! Please visit the pillow fort!",
+    10: "Okay, now I'm a LITTLE concerned. Only a little! Mostly delighted! Mostly!",
+  };
+  const said = new Set();
+  const pctEl = document.getElementById('pct'), statusEl = document.getElementById('status'), needle = document.getElementById('needle');
+
+  // ticks on the gauge
+  let ticks = '';
+  for (let i = 0; i <= 10; i++) {
+    const ang = Math.PI * (1 - i / 10);
+    const x1 = 200 + Math.cos(ang) * 140, y1 = 210 - Math.sin(ang) * 140, x2 = 200 + Math.cos(ang) * 124, y2 = 210 - Math.sin(ang) * 124;
+    ticks += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#fff" stroke-width="${i % 5 ? 2 : 4}" opacity=".7"/>`;
+  }
+  document.getElementById('ticks').innerHTML = ticks;
+
+  function render() {
+    const a = (100 - stability) / 100;
+    document.documentElement.style.setProperty('--a', a.toFixed(3));
+    needle.style.transform = `rotate(${-90 + stability * 1.8}deg)`;
+    pctEl.textContent = Math.round(stability) + '%';
+    statusEl.textContent = STATUS.find(([min]) => stability >= min)[1];
+    statusEl.style.color = stability > 60 ? '#5dff8c' : stability > 25 ? '#ffd34d' : '#ff6b7d';
+    for (const th of Object.keys(CAINE_THRESHOLDS).map(Number)) {
+      if (stability <= th && !said.has(th)) { said.add(th); caine.talk(CAINE_THRESHOLDS[th], 4200); }
+      if (stability > th + 8) said.delete(th);
+    }
+  }
+
+  function use(a, el) {
+    if (collapsing) return;
+    if (el.classList.contains('cooling')) {
+      // Still on cooldown: answer the click instead of ignoring it.
+      el.classList.remove('nudge'); void el.offsetWidth; el.classList.add('nudge');
+      sfx('tick');
+      if (!el._speech) say(el, pick(BUSY[a.id]), 1600);
+      return;
+    }
+    stability = Math.min(100, stability + a.gain);
+    sfx(a.sound);
+    say(el, pick(a.lines), 3600);
+    const r = el.getBoundingClientRect();
+    confetti(r.left + r.width / 2, r.top + 10, 14 + a.gain, 0.5);
+    el.classList.add('cooling');
+    const bar = el.querySelector('.cd');
+    bar.style.transition = 'none'; bar.style.width = '100%';
+    requestAnimationFrame(() => { bar.style.transition = `width ${a.cd}s linear`; bar.style.width = '0'; });
+    setTimeout(() => el.classList.remove('cooling'), a.cd * 1000);
+    render();
+  }
+
+  // Tap the glass! Everybody does it. It helps exactly a little.
+  const gaugeEl = document.getElementById('gauge');
+  let lastTap = 0, taps = 0;
+  document.getElementById('gaugeWrap').addEventListener('click', () => {
+    if (collapsing) return;
+    const now = performance.now();
+    taps = now - lastTap < 1500 ? taps + 1 : 1;
+    lastTap = now;
+    gaugeEl.classList.remove('tapped'); void gaugeEl.getBoundingClientRect(); gaugeEl.classList.add('tapped');
+    sfx('tick');
+    if (taps <= 3) stability = Math.min(100, stability + 1);
+    if (taps === 1 || taps === 6) caine.talk(taps === 1
+      ? "Tapping the gauge? Classic! It helps a teeny bit. Scientifically. I measured it with the gauge."
+      : "Okay, okay! The gauge has feelings too! Go hug somebody instead!", 3200);
+    render();
+  });
+
+  // Caine has some opinions about being poked during a crisis.
+  const CAINE_POKES = [
+    "Yes? Need a pep talk? You're doing GREAT! The ooze is just shy!",
+    "I'd help, but I'm supervising! Supervising is a kind of help!",
+    "Don't look at me! Look at your friends! They're very lookable!",
+    "If anything goes wrong, I'll swoop in! I LOVE a good swoop!",
+  ];
+  let pokeIdx = 0;
+  caineEl.setAttribute('role', 'button'); caineEl.tabIndex = 0; caineEl.setAttribute('aria-label', 'Caine');
+  const pokeCaine = () => {
+    if (collapsing || caineEl.classList.contains('hero')) return;
+    sfx('honk');
+    caine.talk(CAINE_POKES[pokeIdx++ % CAINE_POKES.length], 3000);
+  };
+  caineEl.addEventListener('click', pokeCaine);
+  caineEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pokeCaine(); } });
+
+  document.getElementById('fast').addEventListener('click', (e) => {
+    fast = !fast;
+    e.currentTarget.textContent = fast ? '⏩ Time: ZOOMING' : '⏩ Time: normal';
+    e.currentTarget.classList.toggle('on', fast);
+    if (fast) caine.talk("Speeding up time! Totally safe! I've done it before! Once!", 3000);
+  });
+
+  // ═══ the ooze: abstraction creeping in from the edges ═══
+  const cv = document.getElementById('ooze'), ctx = cv.getContext('2d');
+  let W, H;
+  function resize() {
+    const dpr = Math.min(2, devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight; cv.width = W * dpr; cv.height = H * dpr; ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  resize(); addEventListener('resize', resize);
+  const blobs = Array.from({ length: 40 }, (_, i) => {
+    const side = i % 4;
+    return { side, p: Math.random(), r: 30 + Math.random() * 70, ph: Math.random() * 6.28, sp: 0.3 + Math.random() * 0.9, eye: Math.random() < 0.55 };
+  });
+  let massT = 0;
+  function drawOoze(t, a, collapse) {
+    ctx.clearRect(0, 0, W, H);
+    if (a < 0.08 && !collapse) return;
+    const reach = collapse ? 1 : Math.pow(a, 1.4) * 0.55;
+    for (const b of blobs) {
+      const wav = Math.sin(t * b.sp + b.ph);
+      const depth = reach * (0.5 + 0.5 * wav) * (b.side % 2 ? W : H) * 0.5;
+      let x, y;
+      if (b.side === 0) { x = b.p * W; y = depth; }
+      else if (b.side === 1) { x = W - depth; y = b.p * H; }
+      else if (b.side === 2) { x = b.p * W; y = H - depth; }
+      else { x = depth; y = b.p * H; }
+      if (collapse) { const k = Math.min(1, massT / 1.5); x += (W / 2 - x) * k; y += (H / 2 - y) * k; }
+      const r = b.r * (0.6 + a) * (collapse ? 1.6 : 1);
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      g.addColorStop(0, 'rgba(10,0,18,.95)'); g.addColorStop(0.6, 'rgba(40,8,60,.8)'); g.addColorStop(1, 'rgba(40,8,60,0)');
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+      // eyes show up once things get bad
+      if (b.eye && (a > 0.6 || collapse)) {
+        const er = r * 0.16, open = Math.max(0.1, Math.abs(Math.sin(t * 1.3 + b.ph)));
+        ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.ellipse(x, y, er, er * open, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#ff2a6d'; ctx.beginPath(); ctx.arc(x + Math.cos(t + b.ph) * er * 0.3, y, er * 0.45 * open, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+  }
+  function spawnShard(a) {
+    const s = document.createElement('div');
+    s.className = 'shard';
+    const size = 10 + Math.random() * 40 * a;
+    const col = pick(['#ff2a6d', '#05d9e8', '#b07cff', '#ffd34d', '#5dff8c']);
+    const kind = Math.random();
+    s.style.cssText = `left:${Math.random() * innerWidth}px;top:${Math.random() * innerHeight}px;width:${size}px;height:${size}px;` +
+      `--dx:${(Math.random() - 0.5) * 200}px;--dy:${(Math.random() - 0.5) * 200}px;--r:${(Math.random() - 0.5) * 720}deg;` +
+      (kind < 0.33 ? `background:${col}` : kind < 0.66 ? `border:3px solid ${col};border-radius:50%` :
+        `width:0;height:0;border-left:${size / 2}px solid transparent;border-right:${size / 2}px solid transparent;border-bottom:${size}px solid ${col}`);
+    document.body.appendChild(s);
+    setTimeout(() => s.remove(), 2700);
+  }
+
+  // ═══ collapse & rescue ═══
+  function collapse() {
+    collapsing = true; massT = 0;
+    sfx('glitch'); setTimeout(() => sfx('glitch'), 300); setTimeout(() => sfx('glitch'), 700);
+    document.getElementById('scene').classList.add('collapse');
+    setTimeout(() => {
+      caineEl.classList.add('hero');
+      sfx('fanfare');
+      confetti(innerWidth / 2, innerHeight / 2, 220, 1.5);
+      caine.talk("Ah-ah-AH! Not on MY watch! Nobody abstracts during a COFFEE BREAK! Everything is FINE and FUN again! Ta-da!", 5200);
+      stability = 100; said.clear();
+      const scene = document.getElementById('scene');
+      scene.classList.remove('collapse');
+      scene.style.animation = 'none'; void scene.offsetWidth; scene.style.animation = '';
+      collapsing = false;
+      render();
+      setTimeout(() => caineEl.classList.remove('hero'), 4200);
+    }, 3000);
+  }
+
+  // ═══ main loop ═══
+  let last = performance.now(), shardAcc = 0;
+  function loop(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (!collapsing) {
+      stability -= DECAY_PER_SEC * dt * (fast ? 14 : 1);
+      if (stability <= 0) { stability = 0; render(); collapse(); }
+      else render();
+    } else massT += dt;
+    const a = (100 - stability) / 100;
+    shardAcc += dt * a * a * 8;
+    while (shardAcc > 1) { shardAcc--; spawnShard(a); }
+    drawOoze(now / 1000, collapsing ? 1 : a, collapsing);
+    requestAnimationFrame(loop);
+  }
+  render();
+  requestAnimationFrame(loop);
+  setTimeout(() => caine.talk("Welcome to the <b>ABSTRACTION METER!</b> Your stability drains while you rest. Keep it up with a little help from your friends!", 5200), 500);
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+{
+  "dataset": "OpenAssistant/oasst1",
+  "license": "Apache-2.0",
+  "revision": "fdf72ae0827c1cda404aff25b6603abec9e3399b",
+  "source_url": "https://huggingface.co/datasets/OpenAssistant/oasst1/resolve/fdf72ae0827c1cda404aff25b6603abec9e3399b/2023-04-12_oasst_ready.messages.jsonl.gz",
+  "source_sha256": "286a6e9a5a413b3272ae9c0b5a20d327983dea1c24342ae28cb244a6da65185c",
+  "source_bytes": 34196309,
+  "scanned_messages": 88838,
+  "retained_messages_before_pairing": 5683,
+  "pairs": {
+    "train": 152,
+    "validation": 25,
+    "test": 16
+  },
+  "rejected_messages": {
+    "quality": 16878,
+    "flagged_or_missing_labels": 12049,
+    "length": 3994,
+    "language": 47533,
+    "technical_content": 536,
+    "review_or_synthetic": 1586,
+    "contact_code_or_identifier": 529,
+    "circus_excluded_terms": 37,
+    "personal_or_secret_pattern": 13
+  },
+  "files_sha256": {
+    "train.jsonl": "cb8c1040667679c7384525efbbc46006337532c98010741847e5d6f3726a372e",
+    "validation.jsonl": "52c47674f25589ea3ac1067d526907de67134026c476e2f45e89594bb9cc7048",
+    "test.jsonl": "0f053a6a4c519f2aa260fed8fb6a3cee556bd7147c01e0824773cfa62dc816f9"
+  },
+  "selection_limit": 3000,
+  "modified": true,
+  "changes": [
+    "English, positively reviewed, nonsynthetic messages only",
+    "Zero reported spam/PII/inappropriate/hate/sexual/violence labels; toxicity <= .05; quality >= .5",
+    "12-600 characters; omit contact/identifier patterns, code/technical content and circus-excluded terms",
+    "Direct prompt/reply pairs; first-ranked or unranked reply; whitespace normalized",
+    "Only message/conversation IDs retained; volunteer IDs and timestamps omitted",
+    "Global exact text deduplication; 80/10/10 hash-based conversation splits"
+  ],
+  "limitations": [
+    "Automated filtering is not a guarantee of safety, accuracy or absence of personal details.",
+    "General assistant dialogue, not circus dialogue. Manual review remains necessary before training.",
+    "No model trained or runtime vocabulary changed by this import."
+  ]
+}

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bubble's Snack Attack</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:#07040f;color:#fff;font-family:'Fredoka',system-ui,sans-serif;user-select:none;touch-action:none}
+  #game{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+  #hud{position:fixed;top:12px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:5}
+  #hud .title{font-family:'Rye';font-size:clamp(18px,2.8vw,32px);color:var(--gold);text-shadow:0 3px 0 #8a0c1a,0 5px 0 var(--ink)}
+  #hud .stats{font:400 26px/1 'VT323',monospace;text-align:right;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.2);border-radius:12px;padding:8px 12px}
+  #hud .stats b{color:var(--gold);font-weight:400}
+  #feature{position:fixed;left:50%;top:70px;transform:translateX(-50%) scale(.6);opacity:0;z-index:6;pointer-events:none;
+    font-family:'Rye';font-size:clamp(20px,3.6vw,40px);color:#fff;text-shadow:0 3px 0 var(--red),0 6px 0 var(--ink);white-space:nowrap;transition:all .3s cubic-bezier(.3,1.7,.5,1)}
+  #feature.show{opacity:1;transform:translateX(-50%) scale(1)}
+  #feature small{display:block;text-align:center;font:600 15px 'Fredoka';text-shadow:none;color:#cbbff0}
+  #timerBar{position:fixed;left:50%;top:150px;transform:translateX(-50%);width:220px;height:8px;border-radius:4px;background:rgba(255,255,255,.15);overflow:hidden;opacity:0;transition:opacity .3s;z-index:6}
+  #timerBar.show{opacity:1}
+  #timerBar i{display:block;height:100%;background:var(--gold);width:100%}
+  .panel{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;background:rgba(7,4,15,.72);backdrop-filter:blur(3px)}
+  .panel.hidden{display:none}
+  .card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 #8a0c1a;padding:22px 26px;max-width:min(520px,92vw);text-align:center}
+  .card h1,.card h2{font-family:'Rye';font-weight:400;margin:0 0 8px;font-size:clamp(26px,4vw,40px)}
+  .card p{margin:6px 0;line-height:1.45}
+  .card .keys{font-size:14px;color:#5c3a99;margin-top:10px}
+  .card .big{font:400 54px/1 'VT323',monospace;color:var(--red)}
+  .card .bubble{width:90px;margin:0 auto 6px;animation:wob 1.4s ease-in-out infinite}
+  @keyframes wob{50%{transform:scale(1.08,.92) translateY(-4px)}}
+  .btn{font:700 16px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:10px 18px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block;margin:10px 4px 0}
+  .btn.red{background:var(--red);color:#fff}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30;margin:0}
+  #caine{position:fixed;right:14px;bottom:6px;width:clamp(80px,9vw,120px);z-index:8;pointer-events:none;transition:transform .4s cubic-bezier(.3,1.6,.5,1)}
+  #caine svg{width:100%;height:auto;filter:drop-shadow(0 10px 8px rgba(0,0,0,.6))}
+  #caine.announce{transform:translateY(-30px) scale(1.25) rotate(-6deg)}
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+<div id="hud">
+  <div class="title">Adventure 05 · Bubble's Snack Attack</div>
+  <div class="stats">SCORE <b id="score">0</b><br>LIVES <b id="lives">🫧🫧🫧</b><br>BEST <b id="best">0</b></div>
+</div>
+<div id="feature"></div>
+<div id="timerBar"><i id="timerFill"></i></div>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+<div id="caine"></div>
+
+<div class="panel" id="startPanel">
+  <div class="card">
+    <div class="bubble" id="startBubble"></div>
+    <h1>Bubble's Snack Attack!</h1>
+    <p>Bubble is <b>HUNGRY</b>. Steer Bubble around the void and eat the floating code-snacks: semicolons, braces, brackets, and the occasional pizza.</p>
+    <p>Avoid the <b>🐛 bugs</b> and the <b>glitch shards</b>. And watch out: every so often Caine adds a <b>SURPRISE FEATURE</b>.</p>
+    <div class="keys">🖱️ mouse / 👆 drag / ⌨️ arrows or WASD · P to pause</div>
+    <button class="btn red" id="startBtn">CHOMP! ▶</button>
+  </div>
+</div>
+<div class="panel hidden" id="overPanel">
+  <div class="card">
+    <h2>POP!</h2>
+    <div class="big" id="finalScore">0</div>
+    <p id="overLine"></p>
+    <button class="btn red" id="againBtn">Again! Again! ▶</button>
+  </div>
+</div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, confetti, sfx, wireCaine, pick, say } = window.TADC;
+  const caineEl = document.getElementById('caine');
+  caineEl.innerHTML = CAST.caine;
+  const caine = wireCaine(caineEl);
+  document.getElementById('startBubble').innerHTML = CAST.bubble;
+
+  // Bubble sprite drawn from the shared SVG.
+  const bubbleImg = new Image();
+  bubbleImg.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(CAST.bubble.trim().replace('<svg ', '<svg width="120" height="120" '));
+
+  // ═══ original lines ═══
+  const CHOMP = ["Crunchy!", "Tastes like syntax!", "Mmm, semicolon!", "Nom nom NOM!", "More! MORE!", "Is this gluten-free? Don't care!", "Braces! My favorite! They're so CURLY!", "Delicious! Compiled to perfection!"];
+  const OUCH = ["OW! A bug bit me!", "Bubble down! Bubble DOWN!", "That one was spiky!", "I'm fine! I'm a bubble! I re-form!"];
+  const PIZZA = ["PIZZA!!! FROM THE PIZZA DIMENSION!!!", "A whole pizza! I am one with the pizza!"];
+  const OVER = [
+    "Bubble popped! But don't worry, Bubble always comes back. Bubble ALWAYS comes back.",
+    "What a performance! The judges give it a 'chewy' out of ten!",
+    "Bubble ate {n} snacks tonight! That's a circus record! It's always a record! I don't keep records!",
+  ];
+  const FEATURES = [
+    { id: 'reverse', name: 'REVERSE CONTROLS!', sub: "Left is right! Up is down! Caine is sorry! (He isn't.)", dur: 7 },
+    { id: 'giant', name: 'GIANT BUBBLE!', sub: 'Bigger mouth! Bigger hitbox! Bigger feelings!', dur: 8 },
+    { id: 'rain', name: 'SNACK RAIN!', sub: 'It is raining semicolons! Hallelujah!', dur: 7 },
+    { id: 'slippery', name: 'EVERYTHING IS SLIPPERY!', sub: 'Caine waxed the void again.', dur: 8 },
+    { id: 'dark', name: 'LIGHTS OUT!', sub: 'Someone tripped over the power cord. It was Kinger.', dur: 7 },
+    { id: 'bugparty', name: 'BUG PARTY!', sub: 'The bugs heard there was a party. There is now a party.', dur: 6 },
+    { id: 'tiny', name: 'TINY TIME!', sub: 'Bubble shrank in the wash!', dur: 8 },
+  ];
+  const SNACKS = [
+    { t: ';', pts: 10, col: '#ffd34d' }, { t: '{ }', pts: 15, col: '#5dff8c' }, { t: '( )', pts: 10, col: '#6fb6ff' },
+    { t: '[ ]', pts: 10, col: '#ff7eb6' }, { t: '=>', pts: 20, col: '#b07cff' }, { t: '</>', pts: 25, col: '#ff9a3d' },
+    { t: '//', pts: 10, col: '#cbbff0' }, { t: '0', pts: 5, col: '#ffffff' }, { t: '1', pts: 5, col: '#ffffff' },
+  ];
+
+  // ═══ setup ═══
+  const cv = document.getElementById('game'), ctx = cv.getContext('2d');
+  let W, H, DPR;
+  function resize() {
+    DPR = Math.min(2, devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight; cv.width = W * DPR; cv.height = H * DPR; ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  }
+  resize(); addEventListener('resize', resize);
+
+  let state = 'title'; // title | play | paused | over
+  let bub, snacks, hazards, floaters, stars, score, lives, invuln, combo, comboT, elapsed, spawnT, hazT, feature, featureT, nextFeatureT, shake;
+  let best = 0;
+  try { best = parseInt(localStorage.getItem('tadc-snack-best') || '0', 10) || 0; } catch (e) { /* storage blocked */ }
+  document.getElementById('best').textContent = best;
+  const target = { x: 0, y: 0, active: false };
+  const keys = {};
+
+  function reset() {
+    bub = { x: W / 2, y: H / 2, vx: 0, vy: 0, r: 26, eaten: 0, chomp: 0, face: 0 };
+    snacks = []; hazards = []; floaters = []; score = 0; lives = 3; invuln = 2; combo = 0; comboT = 0; elapsed = 0;
+    spawnT = 0; hazT = 3; feature = null; featureT = 0; nextFeatureT = 14; shake = 0;
+    stars = Array.from({ length: 160 }, () => ({ x: Math.random() * W, y: Math.random() * H, z: Math.random() }));
+    target.x = W / 2; target.y = H / 2;
+    for (let i = 0; i < 8; i++) spawnSnack();
+    updateHud();
+  }
+
+  // ═══ spawning ═══
+  function edgePoint() {
+    const side = Math.floor(Math.random() * 4), m = 40;
+    if (side === 0) return { x: Math.random() * W, y: -m };
+    if (side === 1) return { x: W + m, y: Math.random() * H };
+    if (side === 2) return { x: Math.random() * W, y: H + m };
+    return { x: -m, y: Math.random() * H };
+  }
+  function spawnSnack(fromTop = false) {
+    const pizza = Math.random() < 0.04;
+    const base = pizza ? { t: '🍕', pts: 100, col: '#fff', pizza: true } : pick(SNACKS);
+    const p = fromTop ? { x: Math.random() * W, y: -30 } : (Math.random() < 0.5 ? edgePoint() : { x: 60 + Math.random() * (W - 120), y: 90 + Math.random() * (H - 180) });
+    const a = Math.random() * Math.PI * 2, s = 0.3 + Math.random() * 0.9;
+    snacks.push({ ...base, x: p.x, y: p.y, vx: Math.cos(a) * s, vy: fromTop ? 1.5 + Math.random() * 2 : Math.sin(a) * s, rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.05, born: elapsed });
+  }
+  function spawnHazard(kind) {
+    const p = edgePoint();
+    if (kind === 'bug') hazards.push({ kind, x: p.x, y: p.y, vx: 0, vy: 0, r: 16, speed: 1.1 + Math.min(1.6, elapsed / 60) + Math.random() * 0.5, wig: Math.random() * 6, life: 18 });
+    else {
+      const a = Math.atan2(H / 2 - p.y + (Math.random() - 0.5) * H * 0.6, W / 2 - p.x + (Math.random() - 0.5) * W * 0.6);
+      const s = 2.2 + Math.random() * 1.8 + Math.min(2, elapsed / 50);
+      hazards.push({ kind: 'shard', x: p.x, y: p.y, vx: Math.cos(a) * s, vy: Math.sin(a) * s, r: 14, rot: 0, vr: (Math.random() - 0.5) * 0.3, col: pick(['#ff2a6d', '#05d9e8', '#b07cff']), life: 12 });
+    }
+  }
+
+  // ═══ input ═══
+  cv.addEventListener('pointermove', (e) => { target.x = e.clientX; target.y = e.clientY; target.active = true; });
+  cv.addEventListener('pointerdown', (e) => { target.x = e.clientX; target.y = e.clientY; target.active = true; });
+  addEventListener('keydown', (e) => {
+    keys[e.key.toLowerCase()] = true;
+    if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', ' '].includes(e.key.toLowerCase())) e.preventDefault();
+    if (e.key.toLowerCase() === 'p' && (state === 'play' || state === 'paused')) togglePause();
+    if (e.key === 'Enter' && state !== 'play') start();
+  });
+  addEventListener('keyup', (e) => { keys[e.key.toLowerCase()] = false; });
+  function togglePause() {
+    state = state === 'play' ? 'paused' : 'play';
+    if (state === 'paused') caine.talk("INTERMISSION! Bubble is digesting.", 2000);
+  }
+
+  // ═══ surprise features ═══
+  const featEl = document.getElementById('feature'), timerBar = document.getElementById('timerBar'), timerFill = document.getElementById('timerFill');
+  function startFeature() {
+    feature = pick(FEATURES.filter((f) => !feature || f.id !== feature.id));
+    featureT = feature.dur;
+    featEl.innerHTML = `🎩 SURPRISE FEATURE: ${feature.name}<small>${feature.sub}</small>`;
+    featEl.classList.add('show'); timerBar.classList.add('show');
+    setTimeout(() => featEl.classList.remove('show'), 2600);
+    caineEl.classList.add('announce'); setTimeout(() => caineEl.classList.remove('announce'), 900);
+    sfx('fanfare');
+    if (feature.id === 'bugparty') for (let i = 0; i < 6; i++) spawnHazard('bug');
+  }
+  function endFeature() {
+    feature = null; timerBar.classList.remove('show');
+    nextFeatureT = 12 + Math.random() * 8;
+  }
+
+  // ═══ game loop ═══
+  let last = performance.now();
+  function loop(now) {
+    const dt = Math.min(0.05, (now - last) / 1000); last = now;
+    if (state === 'play') update(dt);
+    draw(now / 1000);
+    requestAnimationFrame(loop);
+  }
+
+  function bubbleRadius() {
+    let r = 22 + Math.min(18, bub.eaten * 0.12);
+    if (feature && feature.id === 'giant') r *= 1.9;
+    if (feature && feature.id === 'tiny') r *= 0.55;
+    return r;
+  }
+
+  function update(dt) {
+    elapsed += dt;
+    const f = feature && feature.id;
+    // steering: keyboard overrides pointer when held
+    let ax = 0, ay = 0;
+    const kx = (keys.arrowright || keys.d ? 1 : 0) - (keys.arrowleft || keys.a ? 1 : 0);
+    const ky = (keys.arrowdown || keys.s ? 1 : 0) - (keys.arrowup || keys.w ? 1 : 0);
+    const rev = f === 'reverse' ? -1 : 1;
+    if (kx || ky) {
+      ax = kx * 0.9 * rev; ay = ky * 0.9 * rev; target.active = false;
+    } else if (target.active) {
+      let tx = target.x, ty = target.y;
+      if (f === 'reverse') { tx = W - tx; ty = H - ty; }
+      ax = (tx - bub.x) * 0.012; ay = (ty - bub.y) * 0.012;
+      const m = Math.hypot(ax, ay); if (m > 1.1) { ax *= 1.1 / m; ay *= 1.1 / m; }
+    }
+    const fric = f === 'slippery' ? 0.985 : 0.88;
+    bub.vx = (bub.vx + ax * 60 * dt) * fric; bub.vy = (bub.vy + ay * 60 * dt) * fric;
+    bub.x += bub.vx * 60 * dt; bub.y += bub.vy * 60 * dt;
+    bub.r = bubbleRadius();
+    if (bub.x < bub.r) { bub.x = bub.r; bub.vx *= -0.6; } if (bub.x > W - bub.r) { bub.x = W - bub.r; bub.vx *= -0.6; }
+    if (bub.y < bub.r) { bub.y = bub.r; bub.vy *= -0.6; } if (bub.y > H - bub.r) { bub.y = H - bub.r; bub.vy *= -0.6; }
+    if (Math.abs(bub.vx) > 0.2) bub.face = Math.sign(bub.vx);
+    bub.chomp = Math.max(0, bub.chomp - dt * 4);
+    invuln = Math.max(0, invuln - dt);
+    comboT = Math.max(0, comboT - dt); if (!comboT) combo = 0;
+    shake = Math.max(0, shake - dt * 30);
+
+    // spawn
+    spawnT -= dt;
+    const want = f === 'rain' ? 40 : 10 + Math.min(10, elapsed / 12);
+    if (spawnT <= 0 && snacks.length < want) { spawnSnack(f === 'rain'); spawnT = f === 'rain' ? 0.06 : 0.7; }
+    hazT -= dt;
+    if (hazT <= 0) {
+      spawnHazard(Math.random() < 0.55 ? 'bug' : 'shard');
+      hazT = Math.max(0.8, 3.2 - elapsed / 30) * (0.7 + Math.random() * 0.6);
+    }
+    // features
+    if (feature) { featureT -= dt; timerFill.style.width = (featureT / feature.dur * 100) + '%'; if (featureT <= 0) endFeature(); }
+    else { nextFeatureT -= dt; if (nextFeatureT <= 0) startFeature(); }
+
+    // snacks
+    for (const s of snacks) {
+      s.x += s.vx * 60 * dt; s.y += s.vy * 60 * dt; s.rot += s.vr;
+      if (f === 'rain') s.vy += 0.02;
+      // mild magnetism toward Bubble's mouth
+      const dx = bub.x - s.x, dy = bub.y - s.y, d = Math.hypot(dx, dy);
+      if (d < bub.r * 3) { s.x += dx / d * 1.2; s.y += dy / d * 1.2; }
+      if (d < bub.r + 12) eat(s);
+    }
+    snacks = snacks.filter((s) => !s.gone && s.x > -80 && s.x < W + 80 && s.y > -80 && s.y < H + 80);
+
+    // hazards
+    for (const h of hazards) {
+      h.life -= dt;
+      if (h.kind === 'bug') {
+        const dx = bub.x - h.x, dy = bub.y - h.y, d = Math.hypot(dx, dy) || 1;
+        h.wig += dt * 10;
+        h.vx = dx / d * h.speed + Math.cos(h.wig) * 0.6; h.vy = dy / d * h.speed + Math.sin(h.wig) * 0.6;
+        if (h.life < 2) { h.vx *= -1; h.vy *= -1; } // wander off when bored
+      } else h.rot += h.vr;
+      h.x += h.vx * 60 * dt; h.y += h.vy * 60 * dt;
+      if (!invuln && Math.hypot(bub.x - h.x, bub.y - h.y) < bub.r * 0.8 + h.r) hit(h);
+    }
+    hazards = hazards.filter((h) => !h.gone && h.life > 0 && h.x > -120 && h.x < W + 120 && h.y > -120 && h.y < H + 120);
+
+    // floaters
+    for (const fl of floaters) { fl.y -= 40 * dt; fl.life -= dt; }
+    floaters = floaters.filter((fl) => fl.life > 0);
+  }
+
+  let chompLineT = 0;
+  function eat(s) {
+    s.gone = true;
+    combo++; comboT = 1.6;
+    const mult = Math.min(5, 1 + Math.floor(combo / 5));
+    const pts = s.pts * mult;
+    score += pts; bub.eaten++; bub.chomp = 1;
+    floaters.push({ x: s.x, y: s.y, text: `+${pts}${mult > 1 ? ' x' + mult : ''}`, col: s.col, life: 0.9 });
+    sfx(s.pizza ? 'fanfare' : 'pop');
+    if (s.pizza) { confetti(s.x, s.y, 80, 1); floaters.push({ x: bub.x, y: bub.y - 50, text: pick(PIZZA), col: '#ffd34d', life: 1.6, big: true }); }
+    else if (performance.now() - chompLineT > 4000 && Math.random() < 0.25) {
+      chompLineT = performance.now();
+      floaters.push({ x: bub.x, y: bub.y - bub.r - 18, text: pick(CHOMP), col: '#fff', life: 1.3, big: true });
+    }
+    if (combo === 10 || combo === 25 || combo === 50) caine.talk(`${combo} SNACK COMBO! Bubble is UNSTOPPABLE! Bubble is a VACUUM!`, 2600);
+    updateHud();
+  }
+  function hit(h) {
+    h.gone = true; lives--; invuln = 2; combo = 0; shake = 14;
+    sfx('glitch'); sfx('honk');
+    confetti(bub.x, bub.y, 50, 0.9);
+    floaters.push({ x: bub.x, y: bub.y - 40, text: pick(OUCH), col: '#ff6b7d', life: 1.4, big: true });
+    updateHud();
+    if (lives <= 0) gameOver();
+  }
+  function updateHud() {
+    document.getElementById('score').textContent = score;
+    document.getElementById('lives').textContent = lives > 0 ? '🫧'.repeat(lives) : '💥';
+  }
+  function gameOver() {
+    state = 'over';
+    if (feature) endFeature();
+    if (score > best) {
+      best = score;
+      try { localStorage.setItem('tadc-snack-best', String(best)); } catch (e) { /* storage blocked */ }
+      document.getElementById('best').textContent = best;
+    }
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('overLine').textContent = pick(OVER).replace('{n}', bub.eaten) + (score === best && score > 0 ? ' 🏆 NEW BEST!' : '');
+    setTimeout(() => document.getElementById('overPanel').classList.remove('hidden'), 700);
+  }
+  function start() {
+    document.getElementById('startPanel').classList.add('hidden');
+    document.getElementById('overPanel').classList.add('hidden');
+    reset(); state = 'play';
+    sfx('fanfare');
+    caine.talk("Ladies and gentlemen! Bubble... is... HUNGRY! Let the SNACKING begin!", 3200);
+  }
+  document.getElementById('startBtn').addEventListener('click', start);
+  document.getElementById('againBtn').addEventListener('click', start);
+
+  // ═══ drawing ═══
+  function draw(t) {
+    ctx.save();
+    if (shake) ctx.translate((Math.random() - 0.5) * shake, (Math.random() - 0.5) * shake);
+    // void
+    const g = ctx.createRadialGradient(W / 2, H * 0.6, 0, W / 2, H * 0.6, Math.max(W, H) * 0.8);
+    g.addColorStop(0, '#1d0f3a'); g.addColorStop(1, '#05030b');
+    ctx.fillStyle = g; ctx.fillRect(-20, -20, W + 40, H + 40);
+    if (stars) for (const s of stars) {
+      ctx.fillStyle = `rgba(255,255,255,${0.3 + 0.7 * Math.abs(Math.sin(t * (0.5 + s.z) + s.x))})`;
+      ctx.fillRect(s.x, (s.y + t * 10 * s.z) % H, 1 + s.z * 1.5, 1 + s.z * 1.5);
+    }
+    // checkered floor strip
+    const fy = H - 46, tile = 46;
+    for (let x = -tile * 2 + (t * 20) % (tile * 2); x < W + tile; x += tile * 2) {
+      ctx.fillStyle = 'rgba(227,36,59,.35)'; ctx.fillRect(x, fy, tile, 46);
+      ctx.fillStyle = 'rgba(244,239,230,.15)'; ctx.fillRect(x + tile, fy, tile, 46);
+    }
+    if (state === 'title' || !bub) { ctx.restore(); return; }
+
+    // snacks
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const s of snacks) {
+      ctx.save(); ctx.translate(s.x, s.y); ctx.rotate(Math.sin(s.rot) * 0.4);
+      const pulse = 1 + Math.sin(t * 6 + s.x) * 0.06;
+      ctx.scale(pulse, pulse);
+      ctx.shadowColor = s.col; ctx.shadowBlur = 14;
+      ctx.font = s.pizza ? '34px serif' : "700 22px 'VT323', monospace";
+      if (!s.pizza) {
+        ctx.fillStyle = 'rgba(27,27,47,.75)';
+        ctx.beginPath(); ctx.roundRect(-20, -15, 40, 30, 8); ctx.fill();
+        ctx.strokeStyle = s.col; ctx.lineWidth = 2; ctx.stroke();
+      }
+      ctx.fillStyle = s.col; ctx.fillText(s.t, 0, 1);
+      ctx.restore();
+    }
+    // hazards
+    for (const h of hazards) {
+      ctx.save(); ctx.translate(h.x, h.y);
+      if (h.kind === 'bug') {
+        ctx.rotate(Math.atan2(h.vy, h.vx) + Math.PI / 2);
+        ctx.font = '30px serif'; ctx.fillText('🐛', 0, 0);
+      } else {
+        ctx.rotate(h.rot); ctx.shadowColor = h.col; ctx.shadowBlur = 16;
+        ctx.fillStyle = h.col;
+        ctx.beginPath(); ctx.moveTo(0, -h.r * 1.3); ctx.lineTo(h.r, h.r * 0.2); ctx.lineTo(h.r * 0.2, h.r); ctx.lineTo(-h.r, h.r * 0.6); ctx.lineTo(-h.r * 0.6, -h.r * 0.4); ctx.closePath(); ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.fillRect(-3, -3, 6, 6);
+      }
+      ctx.restore();
+    }
+    // Bubble
+    const blink = invuln && Math.floor(t * 12) % 2 === 0;
+    if (!blink && state !== 'over') {
+      const wob = Math.sin(t * 8) * 0.05 + bub.chomp * 0.15;
+      ctx.save(); ctx.translate(bub.x, bub.y);
+      ctx.scale((1 + wob) * (bub.face < 0 ? -1 : 1), 1 - wob);
+      ctx.shadowColor = '#6fb6ff'; ctx.shadowBlur = 20;
+      if (bubbleImg.complete) ctx.drawImage(bubbleImg, -bub.r * 1.15, -bub.r * 1.15, bub.r * 2.3, bub.r * 2.3);
+      ctx.restore();
+    }
+    if (state === 'over') {
+      ctx.save(); ctx.globalAlpha = 0.6; ctx.fillStyle = '#bfe9ff';
+      for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2; ctx.beginPath(); ctx.arc(bub.x + Math.cos(a) * 40, bub.y + Math.sin(a) * 40, 5, 0, 7); ctx.fill(); }
+      ctx.restore();
+    }
+    // combo meter
+    if (combo >= 5) {
+      ctx.font = "700 20px 'Fredoka', sans-serif"; ctx.fillStyle = '#ffd34d';
+      ctx.fillText(`COMBO x${Math.min(5, 1 + Math.floor(combo / 5))} (${combo})`, bub.x, bub.y + bub.r + 22);
+    }
+    // floaters
+    for (const fl of floaters) {
+      ctx.globalAlpha = Math.min(1, fl.life * 2);
+      ctx.font = fl.big ? "700 20px 'Fredoka', sans-serif" : "400 26px 'VT323', monospace";
+      ctx.lineWidth = 4; ctx.strokeStyle = '#1b1b2f'; ctx.strokeText(fl.text, fl.x, fl.y);
+      ctx.fillStyle = fl.col; ctx.fillText(fl.text, fl.x, fl.y);
+      ctx.globalAlpha = 1;
+    }
+    // lights out: a flashlight circle around Bubble
+    if (feature && feature.id === 'dark') {
+      const lg = ctx.createRadialGradient(bub.x, bub.y, bub.r * 2, bub.x, bub.y, bub.r * 6);
+      lg.addColorStop(0, 'rgba(0,0,0,0)'); lg.addColorStop(1, 'rgba(0,0,0,.96)');
+      ctx.fillStyle = lg; ctx.fillRect(-20, -20, W + 40, H + 40);
+    }
+    if (state === 'paused') {
+      ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, W, H);
+      ctx.font = "400 48px 'Rye', serif"; ctx.fillStyle = '#ffd34d'; ctx.fillText('INTERMISSION', W / 2, H / 2);
+      ctx.font = "600 16px 'Fredoka', sans-serif"; ctx.fillStyle = '#fff'; ctx.fillText('press P to resume', W / 2, H / 2 + 40);
+    }
+    ctx.restore();
+  }
+
+  requestAnimationFrame(loop);
+  setTimeout(() => caine.talk("Step right up for <b>BUBBLE'S SNACK ATTACK!</b> Bubble hasn't eaten in nearly six minutes!", 4200), 500);
+})();
+</script>
+</body>
+</html>

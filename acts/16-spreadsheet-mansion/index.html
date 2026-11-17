@@ -1,0 +1,1023 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Spreadsheet Mansion: Wobbly Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--void:#0b0718}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--void);color:#fff;font-family:'Fredoka',system-ui,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+  #game{position:fixed;inset:0;width:100%;height:100%;display:block}
+  #hud{position:fixed;top:10px;left:12px;right:12px;display:flex;gap:10px;justify-content:space-between;align-items:flex-start;pointer-events:none;z-index:5}
+  #hud .title{font-family:'Rye';font-size:clamp(15px,2.4vw,26px);color:var(--gold);text-shadow:0 2px 0 #8a0c1a,0 4px 0 var(--ink);line-height:1.1}
+  #hud .title small{display:block;font:600 clamp(11px,1.4vw,14px) 'Fredoka';color:#cbbff0;text-shadow:none;margin-top:3px}
+  #hud .stats{font:400 clamp(18px,2.2vw,24px)/1.05 'VT323',monospace;text-align:right;background:rgba(27,27,47,.8);border:3px solid var(--ink);box-shadow:3px 3px 0 #000;border-radius:10px;padding:6px 10px;white-space:nowrap}
+  #hud .stats b{color:var(--gold);font-weight:400}
+  #fx{position:fixed;left:50%;transform:translateX(-50%);top:62px;z-index:5;pointer-events:none;display:flex;align-items:stretch;
+    font:400 18px/1 'VT323',monospace;color:var(--ink);background:var(--cream);border:3px solid var(--ink);border-radius:8px;box-shadow:3px 3px 0 #000;max-width:min(560px,94vw);overflow:hidden}
+  #fx span{padding:4px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  #fx .ref{background:#e9e1c0;border-right:3px solid var(--ink);min-width:44px;text-align:center}
+  #fx .f{font-style:italic;color:#5c3a99;border-right:3px solid var(--ink)}
+  #banner{position:fixed;left:50%;top:40%;transform:translate(-50%,-50%) scale(.6);opacity:0;z-index:8;pointer-events:none;text-align:center;
+    font-family:'Rye';font-size:clamp(26px,5vw,52px);color:var(--gold);text-shadow:0 3px 0 var(--red),0 6px 0 var(--ink);white-space:nowrap;transition:all .35s cubic-bezier(.3,1.7,.5,1)}
+  #banner.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
+  #banner small{display:block;font:600 clamp(13px,1.8vw,17px) 'Fredoka';text-shadow:0 2px 0 var(--ink);color:#fff}
+  .panel{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:20;background:rgba(11,7,24,.78);backdrop-filter:blur(3px);padding:12px;overflow:auto}
+  .panel.hidden{display:none}
+  .card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 #8a0c1a;padding:20px 24px;max-width:min(540px,94vw);text-align:center;margin:auto}
+  .card h1,.card h2{font-family:'Rye';font-weight:400;margin:0 0 8px;font-size:clamp(24px,4.4vw,38px);line-height:1.1}
+  .card h1 em{display:block;font-style:normal;font-size:.55em;color:var(--red)}
+  .card p{margin:6px 0;line-height:1.45}
+  .card .keys{font-size:14px;color:#5c3a99;margin-top:10px}
+  .card .portraits{display:flex;justify-content:center;align-items:flex-end;gap:12px;margin-bottom:4px}
+  .card .portraits div{width:70px}
+  .card .portraits svg{width:100%;height:auto;display:block}
+  .card .stat{font:400 24px/1.2 'VT323',monospace;background:#fff;border:3px solid var(--ink);border-radius:10px;padding:6px 10px;margin:10px 0;text-align:left}
+  .card .stat b{color:var(--red);font-weight:400}
+  .card .quote{background:#ffe9ef;border:3px dashed var(--red);border-radius:12px;padding:8px 12px;font-weight:600}
+  .btn{font:700 16px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:10px 18px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block;margin:10px 4px 0}
+  .btn.red{background:var(--red);color:#fff}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  #back{position:fixed;left:12px;bottom:12px;z-index:30;margin:0;font-size:14px;padding:8px 14px}
+  #caine{position:fixed;right:10px;bottom:4px;width:clamp(70px,8vw,110px);z-index:8;pointer-events:none}
+  #caine svg{width:100%;height:auto;filter:drop-shadow(0 8px 8px rgba(0,0,0,.6))}
+  .anchor{position:fixed;width:24px;height:24px;margin:-12px 0 0 -12px;pointer-events:none;z-index:1}
+  .tadc-speech.cloud{background:#eef0ff;border-color:#2f5bd8;box-shadow:5px 5px 0 #2f5bd8}
+  .tadc-speech.cloud::after{border-top-color:#2f5bd8}
+  .tadc-speech.cloud.below::after{border-top-color:transparent;border-bottom-color:#2f5bd8}
+  /* dialogue */
+  #talk{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(640px,94vw);z-index:25;display:flex;gap:12px;align-items:flex-end;
+    background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:18px;box-shadow:6px 6px 0 #8a0c1a;padding:12px 14px;cursor:pointer}
+  #talk.hidden{display:none}
+  #talk .who{width:74px;flex:0 0 74px}
+  #talk .who svg{width:100%;height:auto;display:block}
+  #talk .who.shake{animation:shake .12s linear infinite}
+  #talk .who.red svg{filter:drop-shadow(0 0 8px #ff5a6f)}
+  #talk .name{font-family:'Rye';font-size:18px;color:var(--red)}
+  #talk .text{font-weight:600;font-size:clamp(15px,2vw,18px);line-height:1.35;min-height:2.7em}
+  #talk .text.honest{font-size:clamp(17px,2.4vw,21px);color:#8a0c1a}
+  #talk .text.strain{letter-spacing:.5px;animation:strain .5s ease-in-out infinite alternate}
+  #talk .next{font-size:12px;color:#5c3a99;text-align:right}
+  #talk .meter{height:10px;border:2px solid var(--ink);border-radius:6px;background:#fff;margin:4px 0;overflow:hidden}
+  #talk .meter i{display:block;height:100%;background:linear-gradient(90deg,#5fd38d,var(--gold),var(--red));transition:width .5s}
+  @keyframes shake{0%{transform:translate(0,0) rotate(0)}25%{transform:translate(-2px,1px) rotate(-2deg)}50%{transform:translate(2px,-1px) rotate(1deg)}75%{transform:translate(-1px,-1px) rotate(2deg)}}
+  @keyframes strain{to{transform:scale(1.02,.97)}}
+  /* touch */
+  #touch{position:fixed;left:0;right:0;bottom:0;height:116px;z-index:15;display:none;justify-content:space-between;align-items:center;padding:0 14px 14px;pointer-events:none}
+  #touch .pad{display:flex;gap:12px}
+  #touch button{pointer-events:auto;width:76px;height:76px;border-radius:50%;border:4px solid var(--ink);background:var(--cream);color:var(--ink);
+    font:700 28px 'Fredoka';box-shadow:4px 4px 0 #000;touch-action:none;opacity:.92}
+  #touch button.on{background:var(--gold);transform:translate(2px,2px);box-shadow:2px 2px 0 #000}
+  #touch #tJump{width:92px;height:92px;background:var(--red);color:#fff;font-size:20px}
+  body.touchy #touch{display:flex}
+  body.touchy #back{bottom:auto;top:64px;left:12px;font-size:12px;padding:5px 10px}
+  body.touchy #caine{display:none}
+  body.touchy #talk{bottom:126px}
+  @media (max-width:640px){
+    #hud .title small{display:none}
+    #fx{top:auto;bottom:122px;font-size:16px}
+    body:not(.touchy) #fx{bottom:56px}
+    #caine{display:none}
+  }
+</style>
+</head>
+<body>
+<canvas id="game" aria-label="Spreadsheet Mansion platformer"></canvas>
+<div id="hud">
+  <div class="title">Ep. 4 · Spreadsheet Mansion<small id="sheetName">Wobbly Edition</small></div>
+  <div class="stats">MASKS <b id="hp">🎭🎭🎭</b><br>DECIMALS <b id="dec">0</b></div>
+</div>
+<div id="fx"><span class="ref" id="fxRef">A1</span><span class="f">fx</span><span id="fxVal">=WELCOME()</span></div>
+<div id="banner"></div>
+<div class="anchor" id="cloudAnchor"></div>
+<div class="anchor" id="gangleAnchor"></div>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+<div id="caine"></div>
+
+<div id="touch" aria-hidden="true">
+  <div class="pad"><button id="tLeft">◀</button><button id="tRight">▶</button></div>
+  <button id="tJump">JUMP</button>
+</div>
+
+<div id="talk" class="hidden" role="dialog" aria-live="polite">
+  <div class="who" id="talkWho"></div>
+  <div style="flex:1;min-width:0">
+    <div class="name" id="talkName"></div>
+    <div class="meter" id="talkMeterWrap"><i id="talkMeter" style="width:0"></i></div>
+    <div class="text" id="talkText"></div>
+    <div class="next">tap / Space / Enter ▸</div>
+  </div>
+</div>
+
+<div class="panel" id="startPanel">
+  <div class="card">
+    <div class="portraits"><div id="startGangle"></div><div id="startCloud"></div></div>
+    <h1>Spreadsheet Mansion<em>~ Wobbly Edition ~</em></h1>
+    <p>Caine has built a <b>haunted mansion out of spreadsheet cells</b>, and every cell is whispering. Guide <b>Gangle</b> across four sheets to each glowing <b>=DONE()</b> cell.</p>
+    <p>Collect stray <b>decimal points</b>. Hop over <b style="color:#e3243b">#DIV/0!</b> spikes, and bop the <b>#N/A</b> ghosts on the head (they only want to be found). Wobbly cells sag. Sliding cells slide. A very nervous cloud is coming along.</p>
+    <div class="keys">⌨️ ← → / A D to run · Space / ↑ / W to jump (hold for higher) · 👆 on-screen buttons on phones</div>
+    <button class="btn red" id="startBtn">Open the workbook ▶</button>
+  </div>
+</div>
+
+<div class="panel hidden" id="donePanel">
+  <div class="card">
+    <div class="portraits"><div id="doneGangle"></div><div id="doneRagatha"></div><div id="doneCloud"></div></div>
+    <h2>Workbook Saved!</h2>
+    <div class="stat" id="doneStats"></div>
+    <p class="quote" id="doneRag"></p>
+    <p id="doneCloudLine"></p>
+    <button class="btn red" id="againBtn">Play again ▶</button>
+    <a class="btn" href="../../index.html">← back to the Big Top</a>
+  </div>
+</div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, pick, say, confetti, sfx, wireCaine } = window.TADC;
+
+  // ═════════════ sprites ═════════════
+  const sized = (svg, w, h) => svg.trim().replace('<svg ', `<svg width="${w}" height="${h}" `);
+  const toImg = (svg) => { const i = new Image(); i.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); return i; };
+  const GANGLE_SAD = CAST.gangle
+    .replace('<g class="mask-tragedy" style="display:none">', '<g class="mask-tragedy">')
+    .replace('<g class="mask-comedy">', '<g class="mask-comedy" style="display:none">');
+  const imgHappy = toImg(sized(CAST.gangle, 100, 160));
+  const imgSad = toImg(sized(GANGLE_SAD, 100, 160));
+  const imgRag = toImg(sized(CAST.ragatha, 100, 150));
+  const CLOUD_SVG = `<svg viewBox="0 0 120 90" xmlns="http://www.w3.org/2000/svg">
+    <g fill="#eef0ff" stroke="#1b1b2f" stroke-width="4"><circle cx="34" cy="50" r="22"/><circle cx="60" cy="36" r="28"/><circle cx="88" cy="50" r="22"/><rect x="30" y="48" width="62" height="24" rx="12"/></g>
+    <rect x="32" y="50" width="58" height="20" fill="#eef0ff"/>
+    <circle cx="50" cy="48" r="7" fill="#fff" stroke="#1b1b2f" stroke-width="2.5"/><circle cx="72" cy="48" r="7" fill="#fff" stroke="#1b1b2f" stroke-width="2.5"/>
+    <circle cx="50" cy="49" r="2.5" fill="#1b1b2f"/><circle cx="72" cy="49" r="2.5" fill="#1b1b2f"/>
+    <path d="M52 62 q4 -4 8 0 q4 4 8 0" fill="none" stroke="#1b1b2f" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M92 30 q4 8 0 10 q-4 -2 0 -10z" fill="#6fb6ff"/>
+    <g fill="#ffd34d"><rect x="40" y="80" width="5" height="8" transform="rotate(20 42 84)"/><rect x="62" y="82" width="5" height="8" fill="#e3243b"/><rect x="80" y="79" width="5" height="8" fill="#2f5bd8" transform="rotate(-25 82 83)"/></g></svg>`;
+
+  // ═════════════ original lines ═════════════
+  const WHISPERS = [
+    '=SUM(regrets)', '#REF! where did everyone go', 'psst... I used to be a pie chart', '=VLOOKUP(me, friends, FALSE)',
+    "don't sort me. please don't sort me", '=AVERAGE(feelings) rounds down', 'Ctrl+Z does not work in here',
+    "I'm merged with the cell next door. we don't talk", '=NOW() ...it is always now', 'I have a million rows of secrets',
+    '=IF(lonely, whisper, whisper)', 'who freezes panes at this hour?', 'my formula is just =HELP()',
+    "the hidden column knows what you did", '=COUNT(exits) returns 0', 'I was a pivot table once. I pivoted.',
+    'someone typed a date into me and I never recovered', '=CONCAT("boo")',
+  ];
+  const LABELS = ['42', '3.14', '0.00', '$4.20', 'TRUE', 'FALSE', '###', '1,000', '17', '-3', '9.99', '0', '88%', '12:00', 'boo', '7', '256', 'NULL?'];
+  const FORMULAS = ['=A1*2', '=PI()', '=RAND()', '=B7+B8', '=MAX(fear)', '=SQRT(-1)', '=LEN("ow")', '=TODAY()', '=1/3', '=ROUND(me)'];
+  const OUCH = ['Ow! Wrong mask! WRONG MASK!', 'That cell had an attitude.', 'It divided my feelings by zero...', "I'm okay! I'm just... recalculating.", 'Oh, I knew today would be a sad-mask day.'];
+  const STOMP = ['VALUE FOUND!', 'It was a zero all along!', 'Found! Shh, it is okay now.'];
+  const CLOUD_NERVES = [
+    "Oh no oh no oh no, there's a <b>hazard</b> right there!", "I'm fine! It's just confetti! It's ALWAYS confetti!",
+    'Is that a spike? That feels like a spike.', "Please be careful, I'm running out of sprinkles!", "Don't look at me, I'm precipitating!",
+  ];
+  const CLOUD_OUCH = ['GANGLE! Oh, my poor little ribbon!', 'Ahh! Sorry! I rained on it! That did not help!', 'Are you hurt? I am hurt. Emotionally. Confetti everywhere.'];
+  const CLOUD_FALL = ["Nooo, the void! I'll get you back! I don't know how I'm doing this!", 'Back to the checkpoint! I fluffed you up a little.'];
+
+  const RAG_SCENE = [
+    { who: 'ragatha', text: "Gangle! Oh, it's so good to see a friendly mask! Caine's twist card says I have to say <b>one honest complaint</b>. Out loud. With my actual mouth.", meter: 10 },
+    { who: 'gangle', text: "You don't have to if it's scary... it sounds scary.", mask: 'sad' },
+    { who: 'ragatha', text: "No, no, I can do this! One complaint. Here goes. I really, truly... dislike... how <i>lovely</i> this whispering mansion is!", meter: 30, cls: 'strain', shake: true },
+    { who: 'ragatha', text: "...That wasn't it. That was a compliment wearing a tiny hat.", meter: 35 },
+    { who: 'ragatha', text: 'Okay. A REAL one. Deep breaths. Hhhhhhh...', meter: 80, cls: 'strain', shake: true, red: true, nerves: 1.5 },
+    { who: 'ragatha', text: "I'm TIRED of sewing everybody's seams back together after every adventure, and nobody EVER asks how MY stuffing is doing!", meter: 100, cls: 'honest', shake: true, red: true, honest: true },
+    { who: 'cloud', text: "She SAID it! Oh, I'm so nervous for her I'm making it snow!" },
+    { who: 'ragatha', text: "I'm so sorry! That was so rude! Sorry to you, sorry to the mansion, sorry to my own stuffing! Sorry, stuffing!", meter: 20 },
+    { who: 'gangle', text: '...Ragatha? How IS your stuffing?', mask: 'happy' },
+    { who: 'ragatha', text: 'Lumpy! Thank you for asking! Wow. That felt like taking off a very tight sock. Sorry for bringing up socks!', meter: 0 },
+    { who: 'ragatha', text: "I'll wait right here as your checkpoint. Go on! Good luck! Sorry! You're doing great! Sorry!", meter: 0 },
+  ];
+
+  // ═════════════ world constants ═════════════
+  const CW = 64, CH = 28, ROWS = 14, WORLD_H = ROWS * CH;
+  const STEP = 1 / 120, GRAV = 1900, RUN = 240, ACC_G = 2400, ACC_A = 1500, FRIC = 2600, JUMP_V = 690, MAX_FALL = 900;
+  const COYOTE = 0.1, BUFFER = 0.13;
+
+  // ═════════════ levels ═════════════
+  const LEVELS = [
+    {
+      name: 'Sheet1 · The Foyer', width: 50, start: [2, 11],
+      build(b) {
+        b.F(0, 9); b.W(4, 12); b.W(7, 12); b.O(6, 10); b.O(8, 10);
+        b.F(12, 27); b.P(14, 9, 2, 'formula'); b.O(14, 7); b.O(15, 7); b.W(17, 12);
+        b.S(20, 12, 2); b.P(23, 9, 3); b.W(23, 9); b.W(24, 9); b.W(25, 9); b.O(24, 7);
+        b.F(30, 35); b.Gh(33, 11, 2); b.O(31, 10);
+        b.F(38, 49); b.F(42, 49, 11); b.O(40, 10); b.O(44, 8); b.W(45, 11); b.Goal(47, 10);
+      },
+      hints: [
+        [0, "H-hi! I'm the cloud. Caine calls me <b>Cumulo-Nervous</b>. The cells here whisper. Don't whisper back. Or do! I'm not your boss!"],
+        [17, "Th-those red ones say <b>#DIV/0!</b> They divide <i>you</i> by zero. Please jump. For me."],
+        [29, "A <b>#N/A</b> ghost! Hop on its head. It just wants to be found!"],
+        [40, 'See that gold cell? <b>=DONE()</b>! Touch it and the sheet saves!'],
+      ],
+    },
+    {
+      name: 'Sheet2 · The Wobbly Ledger', width: 60, start: [2, 11],
+      build(b) {
+        b.F(0, 7); b.O(5, 10); b.W(6, 12);
+        b.Wob(9, 11, 3); b.O(10, 9); b.Wob(14, 10, 3); b.O(15, 8);
+        b.F(19, 22, 11); b.W(20, 11); b.O(21, 9);
+        b.Sw(25, 10, 2, { amp: 1.2 * CW, speed: 1.3 }); b.Sw(31, 9, 2, { amp: 1.2 * CW, speed: 1.3, phase: Math.PI }); b.O(28, 7);
+        b.F(36, 40, 10); b.Gh(38, 9, 2); b.O(37, 7); b.W(36, 10);
+        b.Wob(42, 10, 2); b.Wob(46, 9, 2); b.Wob(50, 10, 2); b.O(46, 6); b.O(51, 8);
+        b.F(53, 59); b.O(55, 10); b.W(54, 12); b.Goal(57, 11);
+      },
+      hints: [
+        [0, 'This whole ledger is... wobbly. Wobbly is a feeling. I have it too. Constantly.'],
+        [22, "That cell <b>slides</b>! Wait for it to come close! I'm not waiting well! I'm raining!"],
+      ],
+    },
+    {
+      name: 'Sheet3 · The Pivot Table Parlor', width: 64, start: [2, 11],
+      build(b) {
+        b.F(0, 8); b.S(6, 12, 1); b.O(4, 10);
+        b.F(9, 10, 10); b.P(12, 7, 3, 'formula'); b.O(13, 5); b.P(17, 7, 2); b.W(17, 7); b.W(18, 7);
+        b.F(20, 30); b.S(23, 12, 2); b.S(27, 12, 1); b.P(23, 9, 2); b.O(23, 7); b.Gh(26, 10, 0.9); b.W(21, 12);
+        b.F(32, 38); b.Rag(35, 11); b.W(33, 12); b.O(37, 10);
+        b.Sw(41, 9, 2, { axis: 'y', amp: 2 * CH, speed: 1.1 }); b.O(41, 5);
+        b.P(44, 6, 4); b.W(45, 6); b.W(46, 6); b.W(47, 6); b.O(46, 4);
+        b.Wob(50, 8, 2); b.Wob(54, 10, 2); b.O(51, 6); b.O(55, 8);
+        b.F(58, 63); b.Gh(60, 10, 1); b.Goal(62, 11);
+      },
+      hints: [
+        [0, "Ragatha is somewhere on this sheet. Caine gave her a <b>twist card</b>. I'm nervous for her! I'm nervous for everyone!"],
+        [39, 'That cell goes UP and DOWN. Like my mood! Ride it!'],
+      ],
+    },
+    {
+      name: 'Sheet4 · Attic of Circular References', width: 70, start: [2, 11],
+      build(b) {
+        b.F(0, 20); b.S(7, 12, 8); b.O(3, 10); b.W(5, 12);
+        b.P(8, 9, 2); b.Wob(12, 8, 2); b.O(9, 7); b.O(13, 6);
+        b.Gh(18, 10, 2); b.W(16, 12);
+        b.Sw(23, 10, 2, { amp: 1.2 * CW, speed: 1.4 }); b.O(24, 7);
+        b.P(28, 8, 2, 'formula'); b.W(28, 8);
+        b.Sw(32, 8, 2, { axis: 'y', amp: 2 * CH, speed: 1.2 });
+        b.P(36, 5, 3); b.W(36, 5); b.W(38, 5); b.O(37, 3);
+        b.Wob(41, 6, 2); b.Wob(45, 7, 2); b.Wob(49, 8, 2); b.Gh(47, 4, 2); b.O(42, 4); b.O(50, 6);
+        b.F(53, 58, 10); b.S(55, 10, 1); b.W(57, 10); b.O(56, 7);
+        b.F(60, 69); b.Gh(64, 10, 2); b.O(62, 10); b.W(66, 12); b.Goal(67, 11);
+      },
+      hints: [
+        [0, 'The attic. Every formula up here refers to itself. I refer to myself too. Mostly as "oh no".'],
+        [6, 'A whole <b>floor</b> of #DIV/0! Stay on the high cells! Please! Please please!'],
+        [52, 'Almost done! I can see the gold cell! I am crying confetti of joy!'],
+      ],
+    },
+  ];
+
+  const colName = (c) => { let s = ''; c++; while (c > 0) { const m = (c - 1) % 26; s = String.fromCharCode(65 + m) + s; c = Math.floor((c - 1) / 26); } return s; };
+
+  let L = null, levelIdx = 0, whisperIdx = 0;
+  function buildLevel(i) {
+    const def = LEVELS[i];
+    const grid = Array.from({ length: ROWS }, () => Array(def.width).fill(null));
+    const lv = { def, grid, cols: def.width, worldW: def.width * CW, movers: [], ghosts: [], decimals: [], goal: null, rag: null,
+      hints: def.hints.map(([x, text]) => ({ x: x * CW, text, done: false })) };
+    const tile = (c, r, kind) => {
+      if (c < 0 || c >= def.width || r < 0 || r >= ROWS) return;
+      const h = (c * 31 + r * 17 + i * 7) % 97;
+      grid[r][c] = { kind, label: kind === 'formula' ? FORMULAS[h % FORMULAS.length] : LABELS[h % LABELS.length], whisper: null, heard: false };
+    };
+    const b = {
+      F: (x0, x1, row = 12) => { for (let c = x0; c <= x1; c++) for (let r = row; r < ROWS; r++) tile(c, r, 'cell'); },
+      P: (x, row, w, kind = 'cell') => { for (let c = x; c < x + w; c++) tile(c, row, kind); },
+      S: (x, row, w) => { for (let c = x; c < x + w; c++) tile(c, row, 'spike'); },
+      W: (c, r) => { const t = grid[r] && grid[r][c]; if (t) t.whisper = WHISPERS[whisperIdx++ % WHISPERS.length]; },
+      O: (c, r) => lv.decimals.push({ x: c * CW + CW / 2, y: r * CH + CH / 2, got: false, ph: Math.random() * 6 }),
+      Gh: (c, r, range) => lv.ghosts.push({ x0: c * CW + CW / 2, y0: r * CH + CH / 2, range: range * CW, x: 0, y: 0, ph: Math.random() * 6, dead: false, deadT: 0 }),
+      Wob: (x, row, w) => lv.movers.push({ type: 'wob', bx: x * CW, by: row * CH, x: x * CW, y: row * CH, w: w * CW, h: CH, sag: 0, sagV: 0, ph: Math.random() * 6, dx: 0, dy: 0, tilt: 0,
+        whisper: Math.random() < 0.5 ? WHISPERS[whisperIdx++ % WHISPERS.length] : null, heard: false, label: '~wobbly~' }),
+      Sw: (x, row, w, o) => lv.movers.push({ type: 'sway', bx: x * CW, by: row * CH, x: x * CW, y: row * CH, w: w * CW, h: CH, axis: o.axis || 'x', amp: o.amp, speed: o.speed, ph: o.phase || 0, dx: 0, dy: 0,
+        whisper: null, heard: false, label: o.axis === 'y' ? '⇕ =ELEVATE()' : '⇔ =SLIDE()' }),
+      Goal: (c, r) => { lv.goal = { x: c * CW, y: r * CH, w: CW, h: CH }; },
+      Rag: (c, r) => { lv.rag = { x: c * CW + CW / 2, feet: (r + 1) * CH, done: false, bob: 0 }; },
+    };
+    def.build(b);
+    lv.start = { x: def.start[0] * CW + CW / 2, feet: (def.start[1] + 1) * CH };
+    return lv;
+  }
+
+  // ═════════════ DOM refs ═════════════
+  const cv = document.getElementById('game'), ctx = cv.getContext('2d');
+  const $ = (id) => document.getElementById(id);
+  const cloudAnchor = $('cloudAnchor'), gangleAnchor = $('gangleAnchor');
+  const caineEl = $('caine'); caineEl.innerHTML = CAST.caine;
+  const caine = wireCaine(caineEl);
+  $('startGangle').innerHTML = CAST.gangle; $('startCloud').innerHTML = CLOUD_SVG;
+  $('doneGangle').innerHTML = CAST.gangle; $('doneRagatha').innerHTML = CAST.ragatha; $('doneCloud').innerHTML = CLOUD_SVG;
+  const caineTalk = (t, ms) => { if (caineEl.offsetParent !== null && getComputedStyle(caineEl).display !== 'none') caine.talk(t, ms); };
+
+  let W, H, DPR, scale = 1, oy = 0, viewW = 0;
+  const touchy = matchMedia('(pointer:coarse)').matches || 'ontouchstart' in window;
+  if (touchy) document.body.classList.add('touchy');
+  function resize() {
+    DPR = Math.min(2, devicePixelRatio || 1);
+    W = innerWidth; H = innerHeight; cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+    const top = touchy ? 110 : 96, bottom = touchy ? 124 : 52;
+    const avail = Math.max(200, H - top - bottom);
+    scale = Math.max(0.45, Math.min(avail / (WORLD_H + 26), W / 420, 1.6));
+    viewW = W / scale;
+    oy = top / scale + 22 + Math.max(0, (avail / scale - WORLD_H - 26) / (touchy ? 6 : 2));
+  }
+  resize(); addEventListener('resize', resize);
+
+  // ═════════════ input ═════════════
+  const input = { left: false, right: false, jump: false, jumpQueued: false };
+  const KEYMAP = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'jump', KeyW: 'jump', Space: 'jump' };
+  const keyName = (e) => e.code || ({ ' ': 'Space', a: 'KeyA', d: 'KeyD', w: 'KeyW' })[e.key] || e.key;
+  addEventListener('keydown', (e) => {
+    const k = KEYMAP[keyName(e)];
+    if (state === 'talk' && (e.code === 'Space' || e.code === 'Enter' || e.key === ' ' || e.key === 'Enter')) { e.preventDefault(); if (!e.repeat) advanceTalk(); return; }
+    if ((e.key === 'Enter') && state === 'title') { startGame(); return; }
+    if (!k) return;
+    e.preventDefault();
+    if (k === 'jump' && !input.jump && !e.repeat) input.jumpQueued = true;
+    input[k] = true;
+  });
+  addEventListener('keyup', (e) => { const k = KEYMAP[keyName(e)]; if (k) input[k] = false; });
+  addEventListener('blur', () => { input.left = input.right = input.jump = false; });
+  function bindTouch(id, k) {
+    const el = $(id);
+    const on = (e) => { e.preventDefault(); if (state === 'talk' && k === 'jump') { advanceTalk(); return; } if (k === 'jump' && !input.jump) input.jumpQueued = true; input[k] = true; el.classList.add('on'); };
+    const off = (e) => { e.preventDefault(); input[k] = false; el.classList.remove('on'); };
+    el.addEventListener('pointerdown', on); el.addEventListener('pointerup', off);
+    el.addEventListener('pointercancel', off); el.addEventListener('pointerleave', off);
+    el.addEventListener('contextmenu', (e) => e.preventDefault());
+  }
+  bindTouch('tLeft', 'left'); bindTouch('tRight', 'right'); bindTouch('tJump', 'jump');
+  $('talk').addEventListener('click', () => advanceTalk());
+
+  // ═════════════ state ═════════════
+  let state = 'title'; // title | play | talk | clear | done
+  let player, cloud, particles, floaters, camX, gameTime, levelTime, stats, checkpoint, clearT, t = 0;
+  const totalDecimals = LEVELS.reduce((n, _, i) => { const save = whisperIdx; const c = buildLevel(i).decimals.length; whisperIdx = save; return n + c; }, 0);
+
+  function newPlayer(x, feet) {
+    return { x: x - 11, y: feet - 40, w: 22, h: 40, vx: 0, vy: 0, ground: null, coyote: 0, buffer: 0, face: 1, inv: 0, sad: 0, hp: 3, squash: 0, run: 0, lastTile: null };
+  }
+  function loadLevel(i) {
+    levelIdx = i; whisperIdx = i * 5; L = buildLevel(i);
+    player = newPlayer(L.start.x, L.start.feet);
+    checkpoint = { x: L.start.x, feet: L.start.feet };
+    cloud = cloud || { x: player.x - 70, y: player.y - 110, nerves: 0, lineCD: 0, rainAcc: 0 };
+    cloud.x = player.x - 70; cloud.y = player.y - 110;
+    particles = []; floaters = []; camX = 0; levelTime = 0;
+    $('sheetName').textContent = L.def.name;
+    banner(L.def.name.split(' · ')[1], L.def.name.split(' · ')[0] + ' of 4');
+    updateHud();
+  }
+  function startGame() {
+    $('startPanel').classList.add('hidden'); $('donePanel').classList.add('hidden');
+    stats = { ouch: 0, decimals: 0, ghosts: 0, whispers: 0, falls: 0 };
+    gameTime = 0; cloud = null;
+    loadLevel(0); state = 'play';
+    sfx('fanfare');
+    caineTalk("Welcome to the <b>SPREADSHEET MANSION!</b> Every cell is haunted, every column is spooky, and every row is... also there!", 4200);
+  }
+  $('startBtn').addEventListener('click', startGame);
+  $('againBtn').addEventListener('click', startGame);
+
+  let bannerTO = 0;
+  function banner(big, small) {
+    const el = $('banner');
+    el.innerHTML = `${big}<small>${small || ''}</small>`;
+    el.classList.add('show'); clearTimeout(bannerTO);
+    bannerTO = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+  function updateHud() {
+    $('hp').textContent = player.hp > 0 ? '🎭'.repeat(player.hp) : '💧';
+    $('dec').textContent = `${stats.decimals}/${totalDecimals}`;
+  }
+  function setFx(ref, val) { $('fxRef').textContent = ref; $('fxVal').textContent = val; }
+
+  // ═════════════ physics helpers ═════════════
+  const tileAt = (c, r) => (r >= 0 && r < ROWS && c >= 0 && c < L.cols ? L.grid[r][c] : null);
+  function overlapTiles(x, y, w, h, fn) {
+    const c0 = Math.floor(x / CW), c1 = Math.floor((x + w - 0.01) / CW);
+    const r0 = Math.floor(y / CH), r1 = Math.floor((y + h - 0.01) / CH);
+    for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) { const tl = tileAt(c, r); if (tl) fn(tl, c, r); }
+  }
+
+  function updateMovers(dt) {
+    for (const m of L.movers) {
+      const px = m.x, py = m.y;
+      if (m.type === 'wob') {
+        const target = player.ground === m ? 22 : 0;
+        m.sagV += ((target - m.sag) * 70 - m.sagV * 7) * dt;
+        m.sag += m.sagV * dt;
+        m.x = m.bx + Math.sin(t * 2.3 + m.ph) * 5;
+        m.y = m.by + m.sag + Math.sin(t * 3.1 + m.ph) * 2;
+        m.tilt = Math.sin(t * 2.3 + m.ph) * 0.04 + (player.ground === m ? ((player.x + player.w / 2 - (m.x + m.w / 2)) / m.w) * 0.12 : 0);
+      } else {
+        const o = Math.sin(t * m.speed + m.ph) * m.amp;
+        if (m.axis === 'y') m.y = m.by + o; else m.x = m.bx + o;
+      }
+      m.dx = m.x - px; m.dy = m.y - py;
+    }
+  }
+
+  function step(dt) {
+    t += dt; levelTime += dt; gameTime += dt;
+    updateMovers(dt);
+    const p = player;
+    // ride moving platforms
+    if (p.ground && p.ground !== 'tile') { p.x += p.ground.dx; p.y += p.ground.dy; }
+    // horizontal
+    const dir = (input.right ? 1 : 0) - (input.left ? 1 : 0);
+    const onG = !!p.ground;
+    if (dir) {
+      p.vx += dir * (onG ? ACC_G : ACC_A) * dt;
+      if (Math.sign(p.vx) !== dir && onG) p.vx += dir * FRIC * dt; // snappy turn
+      p.face = dir;
+    } else if (onG) {
+      const f = FRIC * dt; p.vx = Math.abs(p.vx) <= f ? 0 : p.vx - Math.sign(p.vx) * f;
+    }
+    p.vx = Math.max(-RUN, Math.min(RUN, p.vx));
+    // jump buffer + coyote
+    if (input.jumpQueued) { p.buffer = BUFFER; input.jumpQueued = false; }
+    if (p.buffer > 0 && p.coyote > 0) {
+      const lift = p.ground && p.ground !== 'tile' ? Math.min(0, p.ground.dy / dt) : 0; // rising lifts give a boost
+      p.vy = -JUMP_V + lift * 0.6; p.buffer = 0; p.coyote = 0; p.ground = null; p.squash = -0.25;
+      sfx('boing');
+    }
+    p.buffer = Math.max(0, p.buffer - dt);
+    // gravity (heavier when jump released early → variable height)
+    p.vy += GRAV * (p.vy < 0 && !input.jump ? 2.2 : 1) * dt;
+    p.vy = Math.min(MAX_FALL, p.vy);
+
+    // move X vs solid tiles
+    p.x += p.vx * dt;
+    if (p.x < 0) { p.x = 0; p.vx = 0; }
+    if (p.x + p.w > L.worldW) { p.x = L.worldW - p.w; p.vx = 0; }
+    overlapTiles(p.x, p.y, p.w, p.h, (tl, c) => {
+      if (p.vx > 0 || (p.vx === 0 && p.x + p.w / 2 < c * CW + CW / 2)) p.x = Math.min(p.x, c * CW - p.w);
+      else p.x = Math.max(p.x, (c + 1) * CW);
+      p.vx = 0;
+    });
+    // move Y
+    const prevBottom = p.y + p.h;
+    p.y += p.vy * dt;
+    const wasGround = p.ground;
+    p.ground = null;
+    let landedTile = null;
+    overlapTiles(p.x, p.y, p.w, p.h, (tl, c, r) => {
+      if (p.vy >= 0) { p.y = Math.min(p.y, r * CH - p.h); p.vy = 0; p.ground = 'tile'; landedTile = { tl, c, r }; }
+      else { p.y = Math.max(p.y, (r + 1) * CH); p.vy = 0; }
+    });
+    // one-way moving cells
+    if (p.vy >= 0 && !p.ground) {
+      for (const m of L.movers) {
+        const bottom = p.y + p.h;
+        if (p.x + p.w > m.x + 4 && p.x < m.x + m.w - 4 && prevBottom <= m.y - m.dy + 4 && bottom >= m.y) {
+          p.y = m.y - p.h; p.vy = 0; p.ground = m; break;
+        }
+      }
+    }
+    // landing feedback
+    if (p.ground && !wasGround) { p.squash = 0.22; }
+    if (p.ground) p.coyote = COYOTE; else p.coyote = Math.max(0, p.coyote - dt);
+    p.squash *= Math.pow(0.0005, dt);
+    p.run += Math.abs(p.vx) * dt * 0.05;
+    p.inv = Math.max(0, p.inv - dt); p.sad = Math.max(0, p.sad - dt);
+
+    // what are we standing on?
+    if (landedTile) {
+      const { tl, c, r } = landedTile;
+      if (tl.kind === 'spike') { hurt('spike'); p.vy = -560; p.ground = null; p.coyote = 0; }
+      else if (p.lastTile !== tl) {
+        p.lastTile = tl;
+        setFx(colName(c) + (r + 1), tl.whisper ? tl.whisper : tl.label);
+        if (tl.whisper && !tl.heard) whisper(tl, c * CW + CW / 2, r * CH);
+      }
+    } else if (p.ground && p.ground !== 'tile') {
+      const m = p.ground;
+      if (p.lastTile !== m) {
+        p.lastTile = m; setFx(colName(Math.floor((m.x + m.w / 2) / CW)) + Math.floor(m.y / CH + 1), m.whisper || m.label);
+        if (m.whisper && !m.heard) whisper(m, m.x + m.w / 2, m.y);
+        if (m.type === 'wob') sfx('boing');
+      }
+    } else if (!p.ground) p.lastTile = null;
+
+    // decimals
+    for (const d of L.decimals) {
+      if (!d.got && Math.abs(d.x - (p.x + p.w / 2)) < 22 && Math.abs(d.y - (p.y + p.h / 2)) < 30) {
+        d.got = true; stats.decimals++; sfx('ding');
+        floaters.push({ x: d.x, y: d.y - 10, text: '+ .', col: '#ffd34d', life: 1 });
+        updateHud();
+      }
+    }
+    // ghosts
+    let nearHaz = 1e9;
+    for (const g of L.ghosts) {
+      if (g.dead) { g.deadT += dt; continue; }
+      g.x = g.x0 + Math.sin(t * 0.9 + g.ph) * g.range;
+      g.y = g.y0 + Math.sin(t * 2.6 + g.ph) * 6;
+      const cx = p.x + p.w / 2, cy = p.y + p.h / 2;
+      nearHaz = Math.min(nearHaz, Math.hypot(g.x - cx, g.y - cy));
+      if (Math.abs(g.x - cx) < 15 + p.w / 2 && Math.abs(g.y - cy) < 16 + p.h / 2) {
+        if (p.vy > 0 && p.y + p.h < g.y + 4) {
+          g.dead = true; p.vy = -520; stats.ghosts++; sfx('pop'); sfx('ding');
+          floaters.push({ x: g.x, y: g.y - 20, text: pick(STOMP), col: '#5fd38d', life: 1.4, big: true });
+          burst(g.x, g.y, 24);
+        } else hurt('ghost');
+      }
+    }
+    // nearby spikes make the cloud nervous
+    const pc = Math.floor((p.x + p.w / 2) / CW);
+    for (let c = pc - 2; c <= pc + 2; c++) for (let r = 0; r < ROWS; r++) {
+      const tl = tileAt(c, r);
+      if (tl && tl.kind === 'spike') nearHaz = Math.min(nearHaz, Math.hypot(c * CW + CW / 2 - (p.x + p.w / 2), r * CH - (p.y + p.h)));
+    }
+    // goal
+    if (L.goal && p.x + p.w > L.goal.x && p.x < L.goal.x + L.goal.w && p.y + p.h > L.goal.y && p.y < L.goal.y + L.goal.h) completeLevel();
+    // Ragatha
+    if (L.rag && !L.rag.done && Math.abs(p.x + p.w / 2 - L.rag.x) < 50 && p.ground) startTalk();
+    // hints
+    for (const h of L.hints) if (!h.done && p.x >= h.x) { h.done = true; cloudSay(h.text, 4600, true); }
+    // fall into the void
+    if (p.y > WORLD_H + 120) fell();
+
+    updateCloud(dt, nearHaz);
+    updateParticles(dt);
+  }
+
+  function whisper(tl, x, y) {
+    tl.heard = true; stats.whispers++; sfx('tick');
+    floaters.push({ x, y: y - 26, text: '“' + tl.whisper + '”', col: '#cbbff0', life: 2.6, whisper: true });
+  }
+  function hurt(kind) {
+    const p = player;
+    if (p.inv > 0 || state !== 'play') return;
+    p.hp--; stats.ouch++; p.inv = 1.4; p.sad = 1.8;
+    p.vx = -p.face * 220; if (kind !== 'spike') p.vy = -380;
+    sfx('glitch'); sfx('honk');
+    cloud.nerves = Math.min(3, cloud.nerves + 1.6);
+    const s = worldToScreen(p.x + p.w / 2, p.y);
+    confetti(s.x, s.y, 36, 0.7);
+    say(gangleAnchor, pick(OUCH), 1800);
+    if (Math.random() < 0.6) setTimeout(() => cloudSay(pick(CLOUD_OUCH), 2200), 400);
+    if (p.hp <= 0) setTimeout(() => respawn(true), 500);
+    updateHud();
+  }
+  function fell() {
+    stats.falls++; stats.ouch++;
+    player.hp--; cloud.nerves = 3; sfx('honk');
+    cloudSay(pick(CLOUD_FALL), 2600, true);
+    respawn(player.hp <= 0);
+  }
+  function respawn(refill) {
+    const hp = refill ? 3 : player.hp;
+    player = newPlayer(checkpoint.x, checkpoint.feet);
+    player.hp = hp; player.inv = 1; player.sad = refill ? 1.5 : 0.8;
+    if (refill) floaters.push({ x: checkpoint.x, y: checkpoint.feet - 70, text: '=RESTORE(masks)', col: '#ffd34d', life: 1.8, big: true });
+    updateHud();
+  }
+
+  let lastCloudSay = 0;
+  function cloudSay(text, ms = 3000, force = false) {
+    const now = performance.now();
+    if (!force && now - lastCloudSay < 2500) return;
+    lastCloudSay = now;
+    say(cloudAnchor, text, ms, { className: 'cloud' });
+  }
+  function updateCloud(dt, nearHaz) {
+    const p = player;
+    if (nearHaz < 120) cloud.nerves = Math.max(cloud.nerves, 0.55 + (120 - nearHaz) / 200);
+    cloud.nerves = Math.max(0, cloud.nerves - dt * 0.45);
+    const tx = p.x + p.w / 2 - p.face * 60, ty = Math.max(40, p.y - 100);
+    const k = 1 - Math.pow(0.02, dt);
+    cloud.x += (tx - cloud.x) * k; cloud.y += (ty - cloud.y) * k;
+    cloud.lineCD -= dt;
+    if (cloud.nerves > 0.6 && cloud.lineCD <= 0) { cloud.lineCD = 9; cloudSay(pick(CLOUD_NERVES), 2400); }
+    if (cloud.nerves > 0.35) {
+      cloud.rainAcc += dt * (12 + cloud.nerves * 40);
+      while (cloud.rainAcc > 1) { cloud.rainAcc--; rain(); }
+    }
+  }
+  const CONF = ['#e3243b', '#2f5bd8', '#ffd34d', '#5fd38d', '#ff7eb6', '#b07cff', '#ffffff'];
+  function rain() {
+    particles.push({ x: cloud.x + (Math.random() - 0.5) * 60, y: cloud.y + 16, vx: (Math.random() - 0.5) * 30, vy: 40 + Math.random() * 40,
+      rot: Math.random() * 6, vr: (Math.random() - 0.5) * 8, col: pick(CONF), life: 2.2, w: 4 + Math.random() * 4, h: 3 + Math.random() * 2 });
+  }
+  function burst(x, y, n) {
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, s = 80 + Math.random() * 160;
+      particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s - 80, rot: 0, vr: (Math.random() - 0.5) * 10, col: pick(CONF), life: 1.4, w: 5, h: 3 });
+    }
+  }
+  function updateParticles(dt) {
+    for (const q of particles) { q.vy += 220 * dt; q.x += (q.vx + Math.sin(q.rot) * 20) * dt; q.y += q.vy * dt; q.rot += q.vr * dt; q.life -= dt; }
+    if (particles.length > 500) particles.splice(0, particles.length - 500);
+    particles = particles.filter((q) => q.life > 0);
+    for (const f of floaters) { f.y -= (f.whisper ? 10 : 34) * dt; f.life -= dt; }
+    floaters = floaters.filter((f) => f.life > 0);
+  }
+
+  function completeLevel() {
+    if (state !== 'play') return;
+    state = 'clear'; clearT = 0;
+    sfx('fanfare');
+    const s = worldToScreen(L.goal.x + CW / 2, L.goal.y);
+    confetti(s.x, s.y, 90, 1.1);
+    banner('Sheet Saved!', levelIdx < LEVELS.length - 1 ? '=DONE() returned TRUE' : 'the whole workbook!');
+    cloudSay(levelIdx < LEVELS.length - 1 ? "We did it! I'm so relieved I'm only drizzling a <i>little</i>." : 'THE LAST SHEET! I am raining from pure happiness this time!', 2400, true);
+    const from = levelIdx;
+    setTimeout(() => {
+      if (state !== 'clear' || levelIdx !== from) return; // restarted meanwhile
+      if (levelIdx < LEVELS.length - 1) {
+        loadLevel(levelIdx + 1); state = 'play';
+        if (levelIdx === 1) caineTalk('Ooh, the <b>Wobbly Ledger!</b> I had the cells installed by a very confident jelly.', 3600);
+        if (levelIdx === 3) caineTalk('The ATTIC! Every formula up here refers to itself. Just like me! I am a wonderful formula!', 3600);
+      } else finish();
+    }, 2000);
+  }
+
+  function finish() {
+    state = 'done';
+    const mm = Math.floor(gameTime / 60), ss = Math.floor(gameTime % 60).toString().padStart(2, '0');
+    $('doneStats').innerHTML = `DECIMALS FOUND <b>${stats.decimals}/${totalDecimals}</b><br>#N/A GHOSTS FOUND <b>${stats.ghosts}</b><br>WHISPERS HEARD <b>${stats.whispers}</b><br>OUCHES <b>${stats.ouch}</b> · TIME <b>${mm}:${ss}</b>`;
+    $('doneRag').innerHTML = "Ragatha: “I only complained <b>once</b> today and I've already written it a thank-you note. And an apology note. To the note. Sorry!”";
+    $('doneCloudLine').innerHTML = stats.ouch === 0
+      ? 'Cumulo-Nervous: “Not ONE ouch?! I am so calm I could be fog!”'
+      : 'Cumulo-Nervous: “I only rained a normal amount. For me. Which is a lot. We did great!”';
+    $('donePanel').classList.remove('hidden');
+    caineTalk('SPECTACULAR! The mansion has been saved, sorted, and only <i>mildly</i> haunted! Applause! Applause, I say!', 4600);
+  }
+
+  // ═════════════ Ragatha's twist ═════════════
+  let talkI = 0;
+  const WHO = {
+    ragatha: { name: 'Ragatha', svg: () => CAST.ragatha },
+    gangle: { name: 'Gangle', svg: (mask) => (mask === 'sad' ? GANGLE_SAD : CAST.gangle) },
+    cloud: { name: 'Cumulo-Nervous', svg: () => CLOUD_SVG },
+  };
+  function startTalk() {
+    state = 'talk'; talkI = 0;
+    input.left = input.right = false; player.vx = 0;
+    L.rag.done = true;
+    checkpoint = { x: L.rag.x + 40, feet: L.rag.feet };
+    $('talk').classList.remove('hidden');
+    showLine();
+  }
+  function showLine() {
+    const ln = RAG_SCENE[talkI], who = WHO[ln.who];
+    const whoEl = $('talkWho');
+    whoEl.innerHTML = who.svg(ln.mask);
+    whoEl.className = 'who' + (ln.shake ? ' shake' : '') + (ln.red ? ' red' : '');
+    $('talkName').textContent = who.name;
+    $('talkText').innerHTML = ln.text;
+    $('talkText').className = 'text' + (ln.cls ? ' ' + ln.cls : '');
+    $('talkMeterWrap').style.display = ln.meter === undefined ? 'none' : '';
+    if (ln.meter !== undefined) { $('talkMeter').style.width = ln.meter + '%'; $('talkMeterWrap').title = 'Honesty strain'; }
+    if (ln.mask === 'sad') player.sad = 3; else if (ln.mask === 'happy') player.sad = 0;
+    if (ln.nerves) cloud.nerves = Math.max(cloud.nerves, ln.nerves);
+    if (ln.honest) {
+      sfx('honk'); cloud.nerves = 3;
+      const s = worldToScreen(L.rag.x, L.rag.feet - 60);
+      confetti(s.x, s.y, 70, 1);
+    } else sfx('tick');
+  }
+  let lastAdvance = 0;
+  function advanceTalk() {
+    if (state !== 'talk') return;
+    const now = performance.now();
+    if (now - lastAdvance < 250) return;
+    lastAdvance = now;
+    talkI++;
+    if (talkI >= RAG_SCENE.length) {
+      $('talk').classList.add('hidden'); state = 'play';
+      input.jump = false; input.jumpQueued = false;
+      sfx('ding');
+      floaters.push({ x: L.rag.x, y: L.rag.feet - 80, text: 'CHECKPOINT (with apologies)', col: '#ffd34d', life: 2, big: true });
+      return;
+    }
+    showLine();
+  }
+
+  // ═════════════ loop ═════════════
+  let last = performance.now(), acc = 0;
+  function loop(now) {
+    const dt = Math.min(0.1, (now - last) / 1000); last = now;
+    if (state === 'play') {
+      acc += dt;
+      let n = 0;
+      while (acc >= STEP && n < 12) { step(STEP); acc -= STEP; n++; }
+      if (n === 12) acc = 0;
+    } else {
+      acc = 0; t += dt;
+      if (L && (state === 'talk' || state === 'clear')) { updateMovers(dt); updateCloud(dt, 1e9); updateParticles(dt); }
+    }
+    if (L) updateCamera(dt);
+    draw();
+    requestAnimationFrame(loop);
+  }
+  function updateCamera(dt) {
+    const p = player;
+    let target = p.x + p.w / 2 - viewW / 2 + p.face * 40;
+    if (L.worldW <= viewW) target = (L.worldW - viewW) / 2;
+    else target = Math.max(0, Math.min(L.worldW - viewW, target));
+    camX += (target - camX) * (1 - Math.pow(0.004, dt));
+    if (L.worldW > viewW) camX = Math.max(0, Math.min(L.worldW - viewW, camX));
+    const g = worldToScreen(p.x + p.w / 2, p.y - 10);
+    gangleAnchor.style.left = g.x + 'px'; gangleAnchor.style.top = g.y + 'px';
+    const c = worldToScreen(cloud.x, cloud.y - 20);
+    cloudAnchor.style.left = c.x + 'px'; cloudAnchor.style.top = c.y + 'px';
+  }
+  const worldToScreen = (x, y) => ({ x: (x - camX) * scale, y: (y + oy) * scale });
+
+  // ═════════════ drawing ═════════════
+  function draw() {
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    ctx.fillStyle = '#0b0718'; ctx.fillRect(0, 0, W, H);
+    // haunted glow
+    const g = ctx.createRadialGradient(W / 2, H * 0.45, 0, W / 2, H * 0.45, Math.max(W, H) * 0.7);
+    g.addColorStop(0, 'rgba(60,30,110,.55)'); g.addColorStop(1, 'rgba(11,7,24,0)');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    if (!L) { drawTitleBg(); return; }
+
+    ctx.save();
+    ctx.scale(scale, scale);
+    ctx.translate(-camX, oy);
+    drawMansion();
+    drawGrid();
+    drawTiles();
+    drawMovers();
+    if (L.goal) drawGoal();
+    drawDecimals();
+    if (L.rag) drawRagatha();
+    drawGhosts();
+    drawPlayer();
+    drawCloud();
+    drawParticles();
+    drawFloaters();
+    ctx.restore();
+    drawHeaders();
+  }
+  function drawTitleBg() {
+    ctx.strokeStyle = 'rgba(203,191,240,.08)'; ctx.lineWidth = 1;
+    for (let x = 0; x < W; x += 64) { ctx.beginPath(); ctx.moveTo(x + 0.5, 0); ctx.lineTo(x + 0.5, H); ctx.stroke(); }
+    for (let y = 0; y < H; y += 28) { ctx.beginPath(); ctx.moveTo(0, y + 0.5); ctx.lineTo(W, y + 0.5); ctx.stroke(); }
+  }
+  function drawMansion() {
+    // parallax mansion silhouettes made of cells
+    ctx.save();
+    const par = camX * 0.55;
+    ctx.translate(par, 0);
+    for (let i = 0; i < Math.ceil(L.worldW / 380) + 2; i++) {
+      const bx = i * 380 - 60, bw = 260, by = 120 + (i % 2) * 30;
+      ctx.fillStyle = 'rgba(40,22,74,.75)';
+      ctx.fillRect(bx, by, bw, WORLD_H - by);
+      ctx.beginPath(); ctx.moveTo(bx - 20, by); ctx.lineTo(bx + bw / 2, by - 90); ctx.lineTo(bx + bw + 20, by); ctx.closePath(); ctx.fill();
+      ctx.fillRect(bx + bw - 60, by - 120, 26, 70); // chimney
+      for (let wy = by + 20; wy < WORLD_H - 40; wy += 48) for (let wx = bx + 22; wx < bx + bw - 30; wx += 56) {
+        const lit = Math.sin(wx * 0.37 + wy * 0.11 + Math.floor(t * 0.5 + i) * 1.7) > 0.3;
+        ctx.fillStyle = lit ? 'rgba(255,211,77,.35)' : 'rgba(10,6,20,.6)';
+        ctx.fillRect(wx, wy, 32, 20);
+        ctx.strokeStyle = 'rgba(203,191,240,.15)'; ctx.strokeRect(wx + 0.5, wy + 0.5, 32, 20);
+      }
+    }
+    ctx.restore();
+  }
+  function drawGrid() {
+    const c0 = Math.floor(camX / CW), c1 = Math.ceil((camX + viewW) / CW);
+    ctx.strokeStyle = 'rgba(203,191,240,.07)'; ctx.lineWidth = 1;
+    for (let c = c0; c <= c1; c++) { ctx.beginPath(); ctx.moveTo(c * CW, 0); ctx.lineTo(c * CW, WORLD_H); ctx.stroke(); }
+    for (let r = 0; r <= ROWS; r++) { ctx.beginPath(); ctx.moveTo(c0 * CW, r * CH); ctx.lineTo(c1 * CW, r * CH); ctx.stroke(); }
+  }
+  function cellBox(x, y, w, h, fill, stroke, label, labelCol, opts = {}) {
+    ctx.fillStyle = fill; ctx.fillRect(x, y, w, h);
+    ctx.lineWidth = opts.lw || 2.5; ctx.strokeStyle = stroke; ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+    if (label) {
+      ctx.fillStyle = labelCol; ctx.font = (opts.font || "400 17px 'VT323', monospace");
+      ctx.textAlign = opts.align || 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, opts.align === 'center' ? x + w / 2 : x + w - 6, y + h / 2 + 1, w - 8);
+    }
+  }
+  function drawTiles() {
+    const c0 = Math.max(0, Math.floor(camX / CW) - 1), c1 = Math.min(L.cols - 1, Math.ceil((camX + viewW) / CW) + 1);
+    for (let r = 0; r < ROWS; r++) for (let c = c0; c <= c1; c++) {
+      const tl = L.grid[r][c]; if (!tl) continue;
+      const x = c * CW, y = r * CH, top = !tileAt(c, r - 1);
+      if (tl.kind === 'spike') {
+        cellBox(x, y, CW, CH, '#ffd0d6', '#1b1b2f', '#DIV/0!', '#e3243b', { align: 'center' });
+        ctx.fillStyle = '#e3243b'; ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let i = 0; i < 4; i++) { const sx = x + i * 16; ctx.moveTo(sx, y); ctx.lineTo(sx + 8, y - 13); ctx.lineTo(sx + 16, y); }
+        ctx.fill(); ctx.stroke();
+      } else {
+        const deep = !top && r > 12;
+        const fill = tl.kind === 'formula' ? '#dfe7ff' : deep ? '#e9e1c0' : '#fff7d6';
+        cellBox(x, y, CW, CH, fill, '#1b1b2f', top || r <= 12 ? tl.label : '', tl.kind === 'formula' ? '#2f5bd8' : '#1b1b2f');
+        if (tl.whisper) {
+          const a = tl.heard ? 0.25 : 0.45 + Math.sin(t * 3 + c) * 0.25;
+          ctx.fillStyle = `rgba(176,124,255,${a})`; ctx.fillRect(x + 3, y + 3, CW - 6, CH - 6);
+          ctx.fillStyle = '#5c3a99'; ctx.font = "600 11px 'Fredoka', sans-serif"; ctx.textAlign = 'left';
+          ctx.fillText('≈', x + 6, y + CH / 2 + 1);
+        }
+        if (top) { ctx.fillStyle = 'rgba(255,255,255,.6)'; ctx.fillRect(x + 3, y + 3, CW - 6, 2); }
+      }
+    }
+  }
+  function drawMovers() {
+    for (const m of L.movers) {
+      ctx.save();
+      ctx.translate(m.x + m.w / 2, m.y + m.h / 2);
+      if (m.type === 'wob') {
+        ctx.rotate(m.tilt);
+        // squishy jelly cells
+        const sq = m.sag / 22 * 0.12;
+        ctx.scale(1 + sq * 0.4, 1 - sq);
+        ctx.fillStyle = '#fff1a8'; ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 3;
+        ctx.beginPath();
+        const w2 = m.w / 2, h2 = m.h / 2;
+        ctx.moveTo(-w2, -h2);
+        for (let i = 0; i <= 8; i++) ctx.lineTo(-w2 + (m.w * i) / 8, -h2 + Math.sin(t * 6 + i + m.ph) * 1.6);
+        ctx.lineTo(w2, h2);
+        for (let i = 8; i >= 0; i--) ctx.lineTo(-w2 + (m.w * i) / 8, h2 + Math.sin(t * 5 + i) * 1.6);
+        ctx.closePath(); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); for (let i = 1; i < m.w / CW; i++) { ctx.moveTo(-w2 + i * CW, -h2); ctx.lineTo(-w2 + i * CW, h2); } ctx.stroke();
+        ctx.fillStyle = '#b8901b'; ctx.font = "600 13px 'Fredoka', sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(m.label, 0, 1);
+        if (m.whisper && !m.heard) { ctx.fillStyle = `rgba(176,124,255,${0.3 + Math.sin(t * 3) * 0.2})`; ctx.fillRect(-w2 + 4, -h2 + 4, m.w - 8, m.h - 8); }
+      } else {
+        ctx.fillStyle = '#cfe0ff'; ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 3;
+        ctx.fillRect(-m.w / 2, -m.h / 2, m.w, m.h); ctx.strokeRect(-m.w / 2 + 1, -m.h / 2 + 1, m.w - 2, m.h - 2);
+        ctx.beginPath(); ctx.moveTo(0, -m.h / 2); ctx.lineTo(0, m.h / 2); ctx.stroke();
+        ctx.fillStyle = '#2f5bd8'; ctx.font = "700 13px 'Fredoka', sans-serif"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        ctx.fillText(m.label, 0, 1);
+        // guide rail
+        ctx.strokeStyle = 'rgba(111,182,255,.25)'; ctx.setLineDash([4, 6]); ctx.lineWidth = 2;
+        ctx.beginPath();
+        if (m.axis === 'y') { ctx.moveTo(0, m.by - m.y - m.amp); ctx.lineTo(0, m.by - m.y + m.amp + m.h); }
+        else { ctx.moveTo(m.bx - m.x - m.amp - m.w / 2, m.h / 2 + 6); ctx.lineTo(m.bx - m.x + m.amp + m.w / 2, m.h / 2 + 6); }
+        ctx.stroke(); ctx.setLineDash([]);
+      }
+      ctx.restore();
+    }
+  }
+  function drawGoal() {
+    const gl = L.goal, pulse = 0.5 + Math.sin(t * 4) * 0.5;
+    ctx.save();
+    ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 18 + pulse * 14;
+    cellBox(gl.x, gl.y, gl.w, gl.h, '#ffd34d', '#1b1b2f', '=DONE()', '#8a0c1a', { align: 'center', font: "700 14px 'Fredoka', sans-serif", lw: 3.5 });
+    ctx.restore();
+    ctx.fillStyle = `rgba(255,211,77,${0.15 + pulse * 0.15})`;
+    ctx.beginPath(); ctx.moveTo(gl.x + 6, gl.y); ctx.lineTo(gl.x + gl.w - 6, gl.y); ctx.lineTo(gl.x + gl.w + 10, gl.y - 90); ctx.lineTo(gl.x - 10, gl.y - 90); ctx.closePath(); ctx.fill();
+  }
+  function drawDecimals() {
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const d of L.decimals) {
+      if (d.got) continue;
+      const y = d.y + Math.sin(t * 3 + d.ph) * 4;
+      ctx.save(); ctx.shadowColor = '#ffd34d'; ctx.shadowBlur = 12;
+      ctx.fillStyle = '#ffd34d'; ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(d.x, y, 6.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.restore();
+      ctx.fillStyle = '#fff'; ctx.fillRect(d.x - 2.5, y - 3.5, 2, 2);
+    }
+  }
+  function drawGhosts() {
+    for (const g of L.ghosts) {
+      if (g.dead) {
+        if (g.deadT < 1.2) {
+          ctx.globalAlpha = 1 - g.deadT / 1.2;
+          ctx.fillStyle = '#5fd38d'; ctx.font = "400 22px 'VT323', monospace"; ctx.textAlign = 'center';
+          ctx.fillText('0', g.x, g.y - g.deadT * 30);
+          ctx.globalAlpha = 1;
+        }
+        continue;
+      }
+      const face = Math.cos(t * 0.9 + g.ph) >= 0 ? 1 : -1;
+      ctx.save(); ctx.translate(g.x, g.y);
+      ctx.fillStyle = 'rgba(240,236,255,.85)'; ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(-16, 16); ctx.lineTo(-16, -4); ctx.arc(0, -4, 16, Math.PI, 0); ctx.lineTo(16, 16);
+      for (let i = 0; i < 4; i++) { const x0 = 16 - i * 8; ctx.quadraticCurveTo(x0 - 4, 16 + (i % 2 ? -6 : 6) * Math.sin(t * 6), x0 - 8, 16); }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#1b1b2f';
+      ctx.beginPath(); ctx.ellipse(-5 + face * 2, -6, 3, 4.5, 0, 0, 7); ctx.ellipse(6 + face * 2, -6, 3, 4.5, 0, 0, 7); ctx.fill();
+      ctx.fillStyle = '#e3243b'; ctx.font = "400 15px 'VT323', monospace"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('#N/A', 0, 7);
+      ctx.restore();
+    }
+  }
+  function drawPlayer() {
+    const p = player;
+    if (p.inv > 0 && Math.floor(p.inv * 14) % 2 === 0 && state === 'play') return;
+    const img = p.sad > 0 ? imgSad : imgHappy;
+    if (!img.complete || !img.naturalWidth) return;
+    const cx = p.x + p.w / 2, feet = p.y + p.h;
+    const bob = p.ground && Math.abs(p.vx) > 20 ? Math.sin(p.run * 8) * 0.06 : 0;
+    const sy = 1 - p.squash + bob, sx = 1 + p.squash * 0.7 - bob;
+    ctx.save();
+    ctx.translate(cx, feet + 4);
+    ctx.scale(sx * p.face, sy);
+    ctx.rotate(Math.max(-0.15, Math.min(0.15, p.vx / 1600)) * p.face);
+    ctx.drawImage(img, -26, -82, 52, 83);
+    ctx.restore();
+  }
+  function drawRagatha() {
+    const r = L.rag;
+    if (!imgRag.complete || !imgRag.naturalWidth) return;
+    const talking = state === 'talk';
+    const shake = talking && RAG_SCENE[talkI] && RAG_SCENE[talkI].shake ? (Math.random() - 0.5) * 3 : 0;
+    const bob = Math.sin(t * 2) * 1.5;
+    ctx.save();
+    ctx.translate(r.x + shake, r.feet + bob * 0.3);
+    if (talking && RAG_SCENE[talkI] && RAG_SCENE[talkI].red) { ctx.shadowColor = '#ff5a6f'; ctx.shadowBlur = 18; }
+    ctx.drawImage(imgRag, -26, -76, 52, 78);
+    ctx.restore();
+    if (!r.done) {
+      ctx.fillStyle = '#ffd34d'; ctx.font = "700 12px 'Fredoka', sans-serif"; ctx.textAlign = 'center';
+      ctx.fillText('!', r.x, r.feet - 86 + Math.sin(t * 5) * 3);
+    }
+  }
+  function drawCloud() {
+    const n = cloud.nerves, nerv = n > 0.35;
+    const jx = nerv ? (Math.random() - 0.5) * Math.min(4, n * 2) : 0;
+    const x = cloud.x + jx, y = cloud.y + Math.sin(t * 1.7) * 4;
+    ctx.save(); ctx.translate(x, y);
+    ctx.fillStyle = nerv ? '#d7defb' : '#eef0ff'; ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 3;
+    const blobs = [[-20, 4, 15], [0, -6, 20], [20, 4, 15], [0, 8, 16]];
+    ctx.beginPath(); for (const [bx, by, br] of blobs) { ctx.moveTo(bx + br, by); ctx.arc(bx, by, br, 0, Math.PI * 2); } ctx.stroke();
+    for (const [bx, by, br] of blobs) { ctx.beginPath(); ctx.arc(bx, by, br - 1.2, 0, Math.PI * 2); ctx.fill(); }
+    // face
+    const er = nerv ? 5.5 : 4.5;
+    ctx.fillStyle = '#fff'; ctx.lineWidth = 2;
+    for (const ex of [-8, 8]) { ctx.beginPath(); ctx.arc(ex, 0, er, 0, 7); ctx.fill(); ctx.stroke(); }
+    ctx.fillStyle = '#1b1b2f';
+    const pdx = Math.max(-2, Math.min(2, (player.x - cloud.x) / 60));
+    for (const ex of [-8, 8]) { ctx.beginPath(); ctx.arc(ex + pdx, 1, nerv ? 1.6 : 2.2, 0, 7); ctx.fill(); }
+    ctx.beginPath(); ctx.lineWidth = 2;
+    if (nerv) { ctx.moveTo(-6, 11); for (let i = 1; i <= 4; i++) ctx.lineTo(-6 + i * 3, 11 + (i % 2 ? -2 : 2)); }
+    else { ctx.arc(0, 8, 4, 0.2, Math.PI - 0.2); }
+    ctx.stroke();
+    if (nerv) { ctx.fillStyle = '#6fb6ff'; ctx.beginPath(); ctx.moveTo(22, -14); ctx.quadraticCurveTo(27, -5, 22, -4); ctx.quadraticCurveTo(17, -5, 22, -14); ctx.fill(); }
+    ctx.restore();
+  }
+  function drawParticles() {
+    for (const q of particles) {
+      ctx.save(); ctx.globalAlpha = Math.min(1, q.life * 1.5);
+      ctx.translate(q.x, q.y); ctx.rotate(q.rot); ctx.fillStyle = q.col; ctx.fillRect(-q.w / 2, -q.h / 2, q.w, q.h);
+      ctx.restore();
+    }
+  }
+  function drawFloaters() {
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    for (const f of floaters) {
+      ctx.globalAlpha = Math.min(1, f.life * 1.6);
+      ctx.font = f.whisper ? "italic 600 14px 'Fredoka', sans-serif" : f.big ? "700 16px 'Fredoka', sans-serif" : "400 22px 'VT323', monospace";
+      if (f.whisper) { ctx.shadowColor = '#b07cff'; ctx.shadowBlur = 10; }
+      ctx.lineWidth = 4; ctx.strokeStyle = '#1b1b2f'; ctx.strokeText(f.text, f.x, f.y);
+      ctx.fillStyle = f.col; ctx.fillText(f.text, f.x, f.y);
+      ctx.shadowBlur = 0;
+    }
+    ctx.globalAlpha = 1;
+  }
+  function drawHeaders() {
+    // frozen column headers + row numbers, like a real (haunted) spreadsheet
+    const hy = (oy - 22) * scale, hh = 20;
+    ctx.fillStyle = 'rgba(233,225,192,.92)'; ctx.fillRect(0, hy, W, hh);
+    ctx.strokeStyle = '#1b1b2f'; ctx.lineWidth = 2; ctx.strokeRect(-2, hy, W + 4, hh);
+    ctx.font = "400 16px 'VT323', monospace"; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#1b1b2f';
+    const pc = Math.floor((player.x + player.w / 2) / CW);
+    for (let c = Math.floor(camX / CW); c <= Math.ceil((camX + viewW) / CW); c++) {
+      const sx = (c * CW - camX) * scale;
+      if (c === pc) { ctx.fillStyle = 'rgba(255,211,77,.9)'; ctx.fillRect(sx, hy + 2, CW * scale, hh - 4); ctx.fillStyle = '#1b1b2f'; }
+      ctx.fillText(colName(c), sx + (CW * scale) / 2, hy + hh / 2 + 1);
+      ctx.beginPath(); ctx.moveTo(sx, hy); ctx.lineTo(sx, hy + hh); ctx.stroke();
+    }
+    const rw = 22;
+    ctx.fillStyle = 'rgba(233,225,192,.85)'; ctx.fillRect(0, hy + hh, rw, WORLD_H * scale);
+    ctx.strokeRect(-2, hy + hh, rw + 2, WORLD_H * scale);
+    ctx.fillStyle = '#1b1b2f';
+    for (let r = 0; r < ROWS; r++) {
+      const sy = (r * CH + oy) * scale;
+      ctx.fillText(String(r + 1), rw / 2, sy + (CH * scale) / 2 + 1);
+      ctx.beginPath(); ctx.moveTo(0, sy); ctx.lineTo(rw, sy); ctx.stroke();
+    }
+  }
+
+  // ═════════════ debug hook (?debug) ═════════════
+  if (new URLSearchParams(location.search).has('debug')) {
+    window.mansionDebug = {
+      state: () => ({ mode: state, level: levelIdx, x: Math.round(player.x), y: Math.round(player.y), grounded: !!player.ground, hp: player.hp, decimals: stats.decimals, talk: talkI }),
+      skip: () => { if (state === 'play') completeLevel(); },
+      goTo: (i) => { loadLevel(i); state = 'play'; },
+      teleport: (c, r) => { player.x = c * CW + CW / 2 - 11; player.y = (r + 1) * CH - 40; player.vx = player.vy = 0; },
+      level: () => L,
+      // run the fixed-timestep simulation directly (for testing while the tab is hidden)
+      advance: (sec) => { for (let i = 0; i < sec / STEP && state === 'play'; i++) step(STEP); return window.mansionDebug.state(); },
+    };
+  }
+
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

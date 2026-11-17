@@ -1,0 +1,4 @@
+Experimental weights trained on a reviewed subset of OpenAssistant/oasst1 (Apache-2.0).
+Source: https://huggingface.co/datasets/OpenAssistant/oasst1
+Derived dataset review/provenance: datasets/openassistant-oasst1/.
+Not original circus dialogue; not a production assistant. Test split was not used.

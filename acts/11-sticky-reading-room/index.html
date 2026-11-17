@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sticky Reading Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--jello:#6fe08a;--wood:#6b3d22;--wood-d:#3f2212}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at 50% 0%,rgba(111,224,138,.18),transparent 55%),radial-gradient(ellipse at 50% 100%,rgba(47,91,216,.3),transparent 60%),#0b0718;padding-bottom:40px;overflow-x:hidden}
+  .wrap{width:min(1100px,calc(100vw - 32px));margin:0 auto}
+  header{display:flex;align-items:center;gap:12px;padding:14px 0 0}
+  header .titles{flex:1;text-align:center}
+  h1{font-family:'Rye';font-weight:400;margin:0;font-size:clamp(22px,4vw,44px);line-height:1.1;color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink)}
+  .sub{color:#cbbff0;margin:6px 0 0;font-size:15px}
+  .ep{display:inline-block;background:var(--red);color:#fff;border:3px solid var(--ink);border-radius:999px;padding:1px 10px;font-weight:700;font-size:13px;box-shadow:3px 3px 0 var(--ink);margin-bottom:6px}
+  #caine{width:clamp(48px,7vw,78px);flex:none;cursor:pointer}
+  #caine svg{width:100%;height:auto;display:block}
+
+  /* ── the reading room ── */
+  #scene{position:relative;margin-top:14px;height:420px;border:4px solid var(--ink);border-radius:18px 18px 0 0;overflow:hidden;box-shadow:6px 6px 0 var(--ink);
+    background:linear-gradient(#2a1636,#1a0e24)}
+  #scene::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 75%,rgba(255,211,77,.18),transparent 55%);pointer-events:none;z-index:3}
+  #stacks{position:absolute;left:10px;right:10px;top:12px;display:flex;flex-direction:column;gap:0}
+  .shelf{position:relative;height:84px;display:flex;align-items:flex-end;gap:3px;padding:0 6px;overflow:hidden;
+    border-bottom:12px solid var(--wood);box-shadow:0 6px 0 var(--wood-d);margin-bottom:6px;background:linear-gradient(#1f1029,#160b1f)}
+  .book{position:relative;flex:none;width:var(--w);height:var(--h);background:var(--c);border:2px solid var(--ink);border-bottom:none;border-radius:4px 4px 0 0;
+    transform-origin:50% 100%;transition:transform .25s cubic-bezier(.3,1.6,.5,1)}
+  .book::before{content:'';position:absolute;left:3px;right:3px;top:18%;height:5px;background:rgba(255,247,214,.55);border-radius:2px}
+  .book::after{content:'';position:absolute;left:3px;right:3px;bottom:16%;height:3px;background:rgba(27,27,47,.35);border-radius:2px}
+  .eyes{position:absolute;left:50%;top:38%;transform:translateX(-50%);display:flex;gap:2px;z-index:1}
+  .eye{position:relative;width:9px;height:9px;border-radius:50%;background:#fff;border:1.5px solid var(--ink);overflow:hidden;transition:transform .2s}
+  .pupil{position:absolute;left:50%;top:50%;width:4px;height:4px;margin:-2px 0 0 -2px;border-radius:50%;background:var(--ink)}
+  .lid{position:absolute;left:0;right:0;top:0;height:100%;background:var(--c);transition:height .18s;border-bottom:1.5px solid var(--ink)}
+  .book.peek .lid{height:0}
+  .book.peek{transform:translateY(-3px) rotate(var(--tilt,0deg))}
+  .book.glare .lid{height:55%}
+  .book.wide .eye{transform:scale(1.45)}
+  .book.wide .lid{height:0}
+  .book.wiggle{animation:wiggle .4s ease-in-out}
+  @keyframes wiggle{25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}}
+  .book.thump{animation:thump .35s cubic-bezier(.3,1.8,.5,1)}
+  @keyframes thump{0%{transform:translateY(-14px)}60%{transform:translateY(2px) scaleY(.9)}100%{transform:none}}
+  .book.flip{animation:flip .45s ease-in-out}
+  @keyframes flip{50%{transform:scaleX(.2) skewY(8deg)}}
+
+  /* ── Zooble parts disguised as scenery ── */
+  .part{cursor:pointer;flex:none;position:relative;transition:transform .15s}
+  .part:hover{transform:scale(1.08) rotate(-3deg)}
+  .part svg{display:block;width:100%;height:100%;overflow:visible}
+  .part.found{animation:yoink .7s cubic-bezier(.5,-.6,.6,1) forwards;pointer-events:none}
+  @keyframes yoink{30%{transform:scale(1.4) rotate(-15deg)}100%{transform:translateY(-60px) scale(0) rotate(200deg);opacity:0}}
+  .part.gone{visibility:hidden}
+  #p-head{width:44px;height:46px}
+  #p-cone{width:28px;height:62px}
+  #p-arm{position:absolute;left:50%;top:-16px;width:16px;height:28px;margin-left:-8px;z-index:2}
+  .book.bookmarked{overflow:visible}
+
+  /* ── the floor, desk, lamp ── */
+  #floor{position:absolute;left:0;right:0;bottom:0;height:120px;background:repeating-conic-gradient(#3a2547 0 25%,#24152f 0 50%) 0 0/40px 40px;border-top:4px solid var(--ink);z-index:1}
+  #desk{position:absolute;left:50%;bottom:24px;width:150px;margin-left:-75px;height:58px;z-index:4}
+  #desk .top{position:absolute;left:0;right:0;bottom:30px;height:16px;background:var(--wood);border:3px solid var(--ink);border-radius:5px}
+  #desk .leg{position:absolute;bottom:0;width:12px;height:32px;background:var(--wood-d);border:3px solid var(--ink)}
+  #desk .sign{position:absolute;left:-4px;z-index:2;bottom:46px;font:700 10px 'Fredoka';background:var(--cream);color:var(--ink);border:2px solid var(--ink);border-radius:4px;padding:1px 5px;white-space:nowrap}
+  #lamp{position:absolute;right:2px;bottom:46px;width:56px;height:118px}
+  #p-pipe{position:absolute;left:21px;bottom:0;width:14px;height:82px}
+  #p-torso{position:absolute;left:0;top:0;width:56px;height:44px}
+  #bulb{position:absolute;left:18px;top:34px;width:20px;height:20px;border-radius:50%;background:#fff3b0;box-shadow:0 0 22px 8px rgba(255,230,140,.55);transition:opacity .3s}
+  #lampBase{position:absolute;left:12px;bottom:-4px;width:32px;height:8px;border-radius:4px;background:#444;border:2px solid var(--ink)}
+
+  /* ── stars of the show ── */
+  .actor{position:absolute;bottom:14px;z-index:5;cursor:pointer;transform-origin:50% 100%}
+  .actor svg{display:block;width:100%;height:auto;filter:drop-shadow(0 6px 4px rgba(0,0,0,.5))}
+  #jax{left:3%;width:clamp(78px,11vw,112px)}
+  #gloop{right:3%;width:clamp(100px,13vw,140px)}
+  .actor.hop{animation:hop .4s cubic-bezier(.3,1.8,.5,1)}
+  @keyframes hop{0%{transform:scale(1.12,.88)}45%{transform:translateY(-16px) scale(.94,1.06)}100%{transform:none}}
+  .actor.shrug{animation:shrug .6s ease-in-out}
+  @keyframes shrug{30%{transform:rotate(-6deg)}60%{transform:rotate(5deg)}}
+  #gloop .jelly{transform-origin:70px 170px;transform-box:view-box}
+  #gloop.wobble .jelly{animation:jelly .9s cubic-bezier(.3,1.4,.5,1)}
+  #gloop.bigwobble .jelly{animation:jelly 1.6s cubic-bezier(.3,1.4,.5,1)}
+  #gloop.idle .jelly{animation:breathe 3s ease-in-out infinite}
+  @keyframes jelly{0%{transform:scale(1,1)}12%{transform:scale(1.18,.8) skewX(4deg)}26%{transform:scale(.86,1.16) skewX(-6deg)}40%{transform:scale(1.1,.9) skewX(4deg)}
+    55%{transform:scale(.95,1.06) skewX(-2deg)}70%{transform:scale(1.03,.97)}100%{transform:scale(1,1)}}
+  @keyframes breathe{50%{transform:scale(1.02,.98)}}
+  #gloop .sword{transform-origin:112px 120px;transform-box:view-box;transition:transform .3s}
+  #gloop.salute .sword{transform:rotate(-40deg)}
+  #honor{position:absolute;right:2%;bottom:4px;z-index:6;font:700 11px 'Fredoka';background:var(--ink);color:var(--jello);border:2px solid var(--jello);border-radius:999px;padding:1px 8px;white-space:nowrap}
+
+  .fx{position:absolute;z-index:8;pointer-events:none;font-size:26px;animation:fx 1.1s ease-out forwards}
+  @keyframes fx{from{transform:translate(-50%,0) scale(.5);opacity:1}to{transform:translate(calc(-50% + var(--dx)),-90px) scale(1.3) rotate(var(--r));opacity:0}}
+  #shushWave{position:absolute;inset:0;z-index:7;pointer-events:none;background:radial-gradient(circle at 50% 30%,rgba(120,180,255,.35),transparent 60%);opacity:0}
+  #shushWave.on{animation:wave 1.2s ease-out}
+  @keyframes wave{0%{opacity:0}20%{opacity:1}100%{opacity:0}}
+  #scene.shake{animation:shake .35s}
+  @keyframes shake{25%{transform:translate(-4px,2px)}50%{transform:translate(4px,-2px)}75%{transform:translate(-2px,1px)}}
+
+  /* ── control strip ── */
+  #bar{background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-top:none;padding:10px 12px;display:flex;flex-wrap:wrap;gap:8px;align-items:center;box-shadow:6px 6px 0 var(--ink)}
+  .btn{font:700 14px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:7px 13px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.red{background:var(--red);color:#fff}
+  .btn.blue{background:var(--blue);color:#fff}
+  .btn.rec{animation:recblink 1s steps(2) infinite}
+  @keyframes recblink{50%{background:#fff;color:var(--red)}}
+  .btn:focus-visible,.pad:focus-visible{outline:3px dashed var(--red);outline-offset:3px}
+  #tray{display:flex;align-items:center;gap:6px;margin-left:auto;font-weight:700;font-size:14px}
+  .slot{width:30px;height:30px;border:3px dashed #b8a98a;border-radius:8px;display:grid;place-items:center;font-size:16px;background:#fff}
+  .slot.got{border:3px solid var(--ink);background:#c9f5d6}
+  #zoobleWhole{width:0;overflow:hidden;transition:width .6s}
+  #zoobleWhole.on{width:40px}
+  #zoobleWhole svg{width:40px;height:auto;display:block}
+
+  /* ── the soundboard ── */
+  h2{font-family:'Rye';font-weight:400;color:var(--gold);margin:22px 0 4px;font-size:22px;text-shadow:0 2px 0 var(--red-d)}
+  .hint{color:#cbbff0;font-size:14px;margin:0 0 10px}
+  .pads{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+  .pad{position:relative;text-align:left;font-family:'Fredoka';color:var(--ink);background:var(--pc,var(--cream));border:4px solid var(--ink);border-radius:16px;padding:10px 12px 12px;
+    cursor:pointer;box-shadow:5px 5px 0 var(--ink);min-height:116px;transition:transform .08s,box-shadow .08s}
+  .pad:hover{transform:translate(-1px,-1px);box-shadow:6px 6px 0 var(--ink)}
+  .pad.hit,.pad:active{transform:translate(4px,4px);box-shadow:1px 1px 0 var(--ink)}
+  .pad .em{font-size:28px;line-height:1}
+  .pad .name{display:block;font-weight:700;font-size:16px;margin-top:4px}
+  .pad .cap{display:block;font-weight:500;font-size:12.5px;line-height:1.3;margin-top:3px;opacity:.85}
+  .pad kbd{position:absolute;right:8px;top:8px;font:700 12px 'Fredoka';background:var(--ink);color:var(--cream);border-radius:6px;padding:1px 7px}
+  .pad.locked{background:repeating-linear-gradient(45deg,#3a2a50 0 10px,#2d2040 10px 20px);color:#b9add6;cursor:not-allowed;box-shadow:5px 5px 0 #000}
+  .pad.locked kbd{background:#5c4d78}
+  .pad.fresh{animation:fresh .9s cubic-bezier(.3,1.8,.5,1)}
+  @keyframes fresh{0%{transform:scale(.6) rotate(-8deg)}100%{transform:none}}
+  #back{margin-top:22px}
+  footer{color:#8f84b3;font-size:12px;margin-top:16px}
+
+  @media (max-width:600px){
+    #scene{height:400px}
+    .shelf{height:76px}
+    #desk{width:110px;margin-left:-55px}
+    #lamp{right:-8px;transform:scale(.85);transform-origin:50% 100%}
+    #desk .sign{font-size:9px}
+    .pads{grid-template-columns:repeat(2,1fr);gap:10px}
+    .pad{min-height:122px;padding:8px 9px 10px}
+    .pad .name{font-size:14.5px}
+    .pad .cap{font-size:11.5px}
+    #tray{margin-left:0;width:100%}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="titles">
+    <span class="ep">Episode 3 · a soundboard</span>
+    <h1>A Very Gloriously Sticky Night at the Reading Room</h1>
+    <p class="sub">The books are reading <i>you</i> tonight. Press pads (or keys) to make noise in the quietest room in the circus.</p>
+  </div>
+  <div id="caine" title="Caine, visiting librarian"></div>
+</header>
+
+<div id="scene">
+  <div id="stacks"></div>
+  <div id="floor"></div>
+  <div id="desk">
+    <div class="sign">RETURNS: YOU</div>
+    <div id="lamp">
+      <div id="bulb"></div>
+      <div id="lampBase"></div>
+    </div>
+    <div class="top"></div>
+    <div class="leg" style="left:10px"></div><div class="leg" style="right:10px"></div>
+  </div>
+  <div class="actor" id="jax" title="Jax"></div>
+  <div class="actor idle" id="gloop" title="Sir Gloopington"></div>
+  <div id="honor">Honor: 74%</div>
+  <div id="shushWave"></div>
+</div>
+<div id="bar">
+  <button class="btn red" id="recBtn">⏺ Record</button>
+  <button class="btn blue" id="remixBtn">🎲 Random remix</button>
+  <button class="btn" id="hintBtn">🧩 Ask Zooble (somewhere)</button>
+  <div id="tray" aria-label="Zooble's lost and found">
+    <span>Zooble's parts:</span>
+    <span class="slot" data-part="head">?</span><span class="slot" data-part="cone">?</span><span class="slot" data-part="pipe">?</span>
+    <span class="slot" data-part="torso">?</span><span class="slot" data-part="arm">?</span>
+    <span id="zoobleWhole"></span>
+  </div>
+</div>
+
+<h2>The Soundboard</h2>
+<p class="hint">Keys <b>1–4, Q–R, A–F</b> play the main pads. Zooble's parts are hiding in the scenery; each one you click unlocks a bonus pad (<b>Z–B</b>). Find all five for something special.</p>
+<div class="pads" id="pads"></div>
+
+<h2>Lost &amp; Found Pads</h2>
+<p class="hint">Unlocked by rescuing Zooble from the furniture.</p>
+<div class="pads" id="bonusPads"></div>
+
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+<footer>Fan-made adventure. All dialogue, art, and sounds are original and synthesized on the spot. No books were harmed. Several were mildly embarrassed.</footer>
+</div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(function () {
+  'use strict';
+  const { CAST, say, confetti, pick, wireCaine, clickable } = window.TADC;
+  const $ = (s) => document.querySelector(s);
+  const scene = $('#scene'), stacks = $('#stacks'), jaxEl = $('#jax'), gloopEl = $('#gloop'), honorEl = $('#honor');
+
+  // ═══ cast on stage ═══
+  jaxEl.innerHTML = CAST.jax;
+  const caineEl = $('#caine');
+  caineEl.innerHTML = CAST.caine;
+  const caine = wireCaine(caineEl);
+  clickable(caineEl, 'Caine');
+  clickable(jaxEl, 'Jax');
+  clickable(gloopEl, 'Sir Gloopington');
+
+  // Sir Gloopington: an original gelatin knight. Bucket helm, spoon sword, plate shield, suspended fruit.
+  gloopEl.innerHTML = `
+<svg viewBox="0 0 140 175" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="glJello" cx=".38" cy=".3"><stop offset="0" stop-color="#c8ffd2" stop-opacity=".95"/><stop offset=".5" stop-color="#6fe08a" stop-opacity=".85"/><stop offset="1" stop-color="#2f9a52" stop-opacity=".9"/></radialGradient>
+    <linearGradient id="glHelm" x1="0" x2="1"><stop offset="0" stop-color="#8e93a8"/><stop offset=".45" stop-color="#e4e7f2"/><stop offset="1" stop-color="#7a7f94"/></linearGradient>
+  </defs>
+  <ellipse cx="70" cy="170" rx="50" ry="5" fill="#000" opacity=".35"/>
+  <g class="jelly">
+    <!-- plate shield -->
+    <g>
+      <circle cx="22" cy="118" r="20" fill="#fff7d6" stroke="#1b1b2f" stroke-width="3"/>
+      <circle cx="22" cy="118" r="13" fill="none" stroke="#e3243b" stroke-width="2" stroke-dasharray="3 3"/>
+      <path d="M22 108 V128 M13 116 H31" stroke="#2f5bd8" stroke-width="3" stroke-linecap="round"/>
+    </g>
+    <!-- gelatin body (fluted mould shape) -->
+    <path d="M28 168 Q24 120 34 92 Q40 72 70 70 Q100 72 106 92 Q116 120 112 168 Z" fill="url(#glJello)" stroke="#1b6b38" stroke-width="3"/>
+    <path d="M46 168 Q42 124 50 82 M70 168 V72 M94 168 Q98 124 90 82" stroke="#2f9a52" stroke-width="2" fill="none" opacity=".55"/>
+    <ellipse cx="50" cy="96" rx="7" ry="14" fill="#fff" opacity=".5" transform="rotate(18 50 96)"/>
+    <!-- suspended fruit -->
+    <circle cx="86" cy="140" r="6" fill="#e3243b" opacity=".75"/><path d="M86 134 q3 -6 7 -7" stroke="#1b6b38" stroke-width="1.5" fill="none" opacity=".75"/>
+    <circle cx="52" cy="150" r="4.5" fill="#ffd34d" opacity=".7"/>
+    <!-- eyes visible through the jelly -->
+    <circle cx="58" cy="112" r="8" fill="#fff" stroke="#1b1b2f" stroke-width="2"/><circle cx="82" cy="112" r="8" fill="#fff" stroke="#1b1b2f" stroke-width="2"/>
+    <circle cx="59" cy="113" r="3.4" fill="#1b1b2f"/><circle cx="81" cy="113" r="3.4" fill="#1b1b2f"/>
+    <path d="M58 128 Q70 136 82 128" stroke="#1b1b2f" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    <!-- bucket helm, slightly askew -->
+    <g transform="rotate(-7 70 56)">
+      <path d="M44 74 L48 34 Q70 24 92 34 L96 74 Z" fill="url(#glHelm)" stroke="#1b1b2f" stroke-width="3"/>
+      <rect x="52" y="50" width="36" height="6" rx="3" fill="#1b1b2f"/>
+      <path d="M70 34 V74" stroke="#5d6276" stroke-width="2"/>
+      <path d="M70 30 Q62 6 78 2 Q74 14 86 10 Q78 22 70 30 Z" fill="#e3243b" stroke="#8a0c1a" stroke-width="2"/>
+    </g>
+    <!-- spoon sword -->
+    <g class="sword">
+      <rect x="108" y="78" width="7" height="58" rx="3" fill="#c8ccd9" stroke="#1b1b2f" stroke-width="2"/>
+      <ellipse cx="111.5" cy="70" rx="11" ry="15" fill="#e4e7f2" stroke="#1b1b2f" stroke-width="2.5"/>
+      <ellipse cx="108" cy="66" rx="3" ry="6" fill="#fff"/>
+      <rect x="102" y="118" width="20" height="6" rx="3" fill="#ffd34d" stroke="#1b1b2f" stroke-width="2"/>
+    </g>
+  </g>
+</svg>`;
+
+  // ═══ Zooble parts (original simple shapes, disguised as furniture) ═══
+  const PART_SVG = {
+    head: `<svg viewBox="0 0 44 46"><rect x="3" y="5" width="38" height="38" rx="4" fill="#5fd38d" stroke="#1b1b2f" stroke-width="3" transform="rotate(-8 22 24)"/>
+      <circle cx="16" cy="22" r="6" fill="#fff" stroke="#1b1b2f" stroke-width="2"/><circle cx="17" cy="23" r="2.6" fill="#1b1b2f"/>
+      <path d="M26 18 H34" stroke="#1b1b2f" stroke-width="3" stroke-linecap="round"/><path d="M14 34 L30 32" stroke="#1b1b2f" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+    cone: `<svg viewBox="0 0 28 62"><path d="M14 4 L26 60 L2 60 Z" fill="#ffd34d" stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M9 30 H19 M6 44 H22" stroke="#b8901b" stroke-width="3"/></svg>`,
+    pipe: `<svg viewBox="0 0 14 82" preserveAspectRatio="none"><rect x="1.5" y="1.5" width="11" height="79" rx="5.5" fill="#2f5bd8" stroke="#1b1b2f" stroke-width="3"/>
+      <rect x="4" y="8" width="3" height="60" rx="1.5" fill="#8fb0ff" opacity=".7"/></svg>`,
+    torso: `<svg viewBox="0 0 56 44"><path d="M4 40 L52 40 L42 4 L14 4 Z" fill="#ff7eb6" stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round"/>
+      <path d="M16 16 H40" stroke="#a03b6c" stroke-width="2"/></svg>`,
+    arm: `<svg viewBox="0 0 16 28"><path d="M8 26 Q2 14 10 4" fill="none" stroke="#1b1b2f" stroke-width="7" stroke-linecap="round"/>
+      <path d="M8 26 Q2 14 10 4" fill="none" stroke="#ffd34d" stroke-width="4" stroke-linecap="round"/><circle cx="10" cy="4" r="3.5" fill="#b07cff" stroke="#1b1b2f" stroke-width="1.5"/></svg>`,
+  };
+  const PART_INFO = {
+    head:  { label: 'a suspiciously green book', emoji: '🟩', name: 'head',
+      found: "That's my head. Someone shelved it under Self-Help. I'm choosing not to read into that.",
+      hint: "My head is on a shelf pretending to be a book. It's the green one with only one eye. Classic me." },
+    cone:  { label: 'a yellow bookend', emoji: '🔺', name: 'cone leg',
+      found: "My cone leg. It was propping up the poetry section. It's never going to recover.",
+      hint: "One of the bookends is my leg. The pointy yellow one at the end of a shelf. I can feel the poetry." },
+    pipe:  { label: 'the reading lamp pole', emoji: '🟦', name: 'pipe leg',
+      found: "Pipe leg, back. I've been a lamp before. I didn't like it then either.",
+      hint: "The lamp on the desk? That pole is my other leg. Somebody plugged me in. Rude." },
+    torso: { label: 'the pink lampshade', emoji: '🩷', name: 'torso',
+      found: "Torso recovered. My brief career as a lampshade is over. No encore.",
+      hint: "The lampshade. The pink one. That's my torso. It's been warm in there for an hour." },
+    arm:   { label: 'a yellow bookmark', emoji: '〰️', name: 'arm',
+      found: "That's my arm, not a bookmark. Whoever lost their page: not my problem.",
+      hint: "Some book is using my arm as a bookmark. Little yellow squiggle sticking out the top." },
+  };
+
+  // ═══ build the stacks (randomly shuffled: Zooble's parts land in different spots each visit) ═══
+  const BOOK_COLORS = ['#e3243b', '#2f5bd8', '#b07cff', '#ff7eb6', '#e88a2f', '#4fb3c9', '#c94f6d', '#7a5cd6', '#d9b44a', '#3d8f6e', '#a23b3b', '#5a7be0'];
+  const SHELVES = 3, BOOKS_PER_SHELF = 26;
+  const books = [];
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const ri = (a, b) => Math.floor(rand(a, b + 1));
+  const shelfEls = [];
+  for (let s = 0; s < SHELVES; s++) {
+    const sh = document.createElement('div'); sh.className = 'shelf'; stacks.appendChild(sh); shelfEls.push(sh);
+    for (let i = 0; i < BOOKS_PER_SHELF; i++) {
+      const b = document.createElement('div'); b.className = 'book';
+      const c = pick(BOOK_COLORS);
+      b.style.cssText = `--w:${ri(22, 36)}px;--h:${ri(70, 92)}%;--c:${c};--tilt:${rand(-4, 4).toFixed(1)}deg`;
+      b.innerHTML = '<div class="eyes"><span class="eye"><span class="pupil"></span><span class="lid"></span></span><span class="eye"><span class="pupil"></span><span class="lid"></span></span></div>';
+      sh.appendChild(b); books.push(b);
+    }
+  }
+  // Shuffle the twist: which shelf gets the head, the bookend, and the bookmark.
+  const shelfOrder = [0, 1, 2].sort(() => Math.random() - 0.5);
+  function makePart(id) {
+    const el = document.createElement('div');
+    el.className = 'part'; el.id = 'p-' + id; el.dataset.part = id; el.innerHTML = PART_SVG[id];
+    clickable(el, PART_INFO[id].label);
+    el.addEventListener('click', (e) => { e.stopPropagation(); findPart(id, el); });
+    return el;
+  }
+  { // head hides among the books on one shelf, early enough to be visible on a phone
+    const sh = shelfEls[shelfOrder[0]];
+    sh.insertBefore(makePart('head'), sh.children[ri(2, 6)]);
+  }
+  { // cone leg is a bookend at the start of another shelf
+    const sh = shelfEls[shelfOrder[1]];
+    sh.insertBefore(makePart('cone'), sh.firstChild);
+  }
+  { // arm pokes out of a book on the third shelf as a bookmark
+    const sh = shelfEls[shelfOrder[2]];
+    const host = sh.querySelectorAll('.book')[ri(3, 7)];
+    host.style.setProperty('--h', '74%'); host.classList.add('bookmarked');
+    host.appendChild(makePart('arm'));
+  }
+  { // lamp on the desk: pipe-leg pole + torso shade
+    const lamp = $('#lamp');
+    lamp.appendChild(makePart('pipe'));
+    lamp.appendChild(makePart('torso'));
+  }
+
+  // ═══ books watching you ═══
+  const visibleBooks = () => books.filter((b) => {
+    const r = b.getBoundingClientRect(), sr = b.parentElement.getBoundingClientRect();
+    return r.right <= sr.right - 2 && r.left >= sr.left;
+  });
+  let ptr = { x: innerWidth / 2, y: innerHeight / 2 }, eyeRaf = 0;
+  function aimEyes() {
+    eyeRaf = 0;
+    for (const b of books) {
+      if (!b.classList.contains('peek') && !b.classList.contains('glare') && !b.classList.contains('wide')) continue;
+      const r = b.getBoundingClientRect();
+      const a = Math.atan2(ptr.y - (r.top + r.height * 0.4), ptr.x - (r.left + r.width / 2));
+      const tx = (Math.cos(a) * 2.2).toFixed(1) + 'px', ty = (Math.sin(a) * 2.2).toFixed(1) + 'px';
+      b.querySelectorAll('.pupil').forEach((p) => { p.style.transform = `translate(${tx},${ty})`; });
+    }
+  }
+  addEventListener('pointermove', (e) => { ptr = { x: e.clientX, y: e.clientY }; if (!eyeRaf) eyeRaf = requestAnimationFrame(aimEyes); });
+  function moodBooks(cls, count, ms) {
+    const pool = visibleBooks().sort(() => Math.random() - 0.5).slice(0, count);
+    pool.forEach((b, i) => setTimeout(() => {
+      b.classList.add(cls, 'peek');
+      aimEyes();
+      setTimeout(() => b.classList.remove(cls, 'peek'), ms + rand(0, 400));
+    }, i * 25));
+    return pool;
+  }
+  function allBooks(cls, ms) {
+    const vis = visibleBooks();
+    vis.forEach((b) => b.classList.add(cls));
+    aimEyes();
+    setTimeout(() => vis.forEach((b) => b.classList.remove(cls)), ms);
+  }
+  const BOOK_REMARKS = [
+    "Hmm. Chapter Two: The Visitor Hovers Over A Button For Too Long.",
+    "Plot's thin, but the protagonist has excellent cursor work.",
+    "I've read you twice now. You get funnier on the reread.",
+    "Spoiler: you press the squelch pad again. Everyone does.",
+    "Shh. I'm at the good part. You're about to do something.",
+    "Four stars. Would be five if you blinked less.",
+    "Ooh, a cliffhanger! Will they find the leg? Turn the page.",
+    "Footnote: visitor smells faintly of coffee and unfinished tabs.",
+    "I'm skimming you. No offense. You have a lot of margins.",
+    "Your font is lovely. Is that a sans-serif personality?",
+    "I've dog-eared your elbow. Hope that's fine.",
+    "We've formed a book club about you. Attendance is mandatory.",
+  ];
+  let lastRemark = -1;
+  function bookRemark(force) {
+    const vis = visibleBooks();
+    if (!vis.length) return;
+    const b = pick(vis);
+    b.classList.add('peek', 'wiggle');
+    aimEyes();
+    setTimeout(() => b.classList.remove('peek', 'wiggle'), 3400);
+    if (force || Math.random() < 0.55) {
+      let i; do { i = ri(0, BOOK_REMARKS.length - 1); } while (i === lastRemark && BOOK_REMARKS.length > 1);
+      lastRemark = i;
+      say(b, '📖 ' + BOOK_REMARKS[i], 3600);
+    }
+  }
+  (function ambient() {
+    setTimeout(() => { if (!document.hidden && !looping) { moodBooks('peek', ri(1, 3), 1800); if (Math.random() < 0.5) bookRemark(); } ambient(); }, rand(5500, 9500));
+  })();
+
+  // ═══ audio engine (pure WebAudio synthesis, no files) ═══
+  let ac, master, noiseBuf;
+  function ensureAudio() {
+    if (ac) { if (ac.state !== 'running') ac.resume(); return true; }
+    const ua = navigator.userActivation;
+    if (ua && !ua.hasBeenActive) return false;
+    ac = new (window.AudioContext || window.webkitAudioContext)();
+    master = ac.createGain(); master.gain.value = 0.8;
+    const comp = ac.createDynamicsCompressor();
+    master.connect(comp); comp.connect(ac.destination);
+    noiseBuf = ac.createBuffer(1, ac.sampleRate * 2, ac.sampleRate);
+    const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return true;
+  }
+  function gainEnv(t, a, peak, dur, dest) {
+    const g = ac.createGain();
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    g.connect(dest || master);
+    return g;
+  }
+  function tone(type, f0, f1, t, dur, vol, a = 0.008, dest) {
+    const o = ac.createOscillator(); o.type = type;
+    o.frequency.setValueAtTime(f0, t);
+    if (f1 && f1 !== f0) o.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const g = gainEnv(t, a, vol, dur, dest);
+    o.connect(g); o.start(t); o.stop(t + dur + 0.05);
+    return o;
+  }
+  function noise(t, dur, vol, ftype, f0, f1, q = 1, a = 0.005, dest) {
+    const s = ac.createBufferSource(); s.buffer = noiseBuf;
+    s.playbackRate.value = rand(0.9, 1.1);
+    const f = ac.createBiquadFilter(); f.type = ftype; f.Q.value = q;
+    f.frequency.setValueAtTime(f0, t);
+    if (f1 && f1 !== f0) f.frequency.exponentialRampToValueAtTime(f1, t + dur);
+    const g = gainEnv(t, a, vol, dur, dest);
+    s.connect(f); f.connect(g);
+    const off = rand(0, 1.4);
+    s.start(t, off); s.stop(t + dur + 0.05);
+    return f;
+  }
+  function vibrato(o, t, rate, depth, dur) {
+    const l = ac.createOscillator(), lg = ac.createGain();
+    l.frequency.value = rate; lg.gain.value = depth;
+    l.connect(lg); lg.connect(o.frequency); l.start(t); l.stop(t + dur + 0.05);
+  }
+
+  const SYN = {
+    squelch(t) {
+      noise(t, 0.32, 0.5, 'lowpass', 2600, 180, 6);
+      const o = tone('sine', 220, 60, t, 0.3, 0.35);
+      vibrato(o, t, 38, 40, 0.3);
+      noise(t + 0.12, 0.18, 0.25, 'bandpass', 500, 1800, 12);
+    },
+    jiggle(t) {
+      [196, 294].forEach((f, i) => {
+        const o = tone('sine', f, f * 0.94, t, 1.1, 0.22 - i * 0.07, 0.01);
+        vibrato(o, t, 13 + i * 3, 28, 1.1);
+      });
+      noise(t, 0.2, 0.12, 'lowpass', 600, 200, 4);
+    },
+    pageflip(t) {
+      for (let i = 0; i < 4; i++) {
+        const s = t + i * 0.07 + rand(0, 0.02);
+        noise(s, 0.09, 0.35, 'highpass', 2500, 5200, 0.7, 0.003);
+        noise(s, 0.06, 0.18, 'bandpass', 900, 1600, 2, 0.002);
+      }
+    },
+    shush(t) {
+      noise(t, 1.3, 0.55, 'bandpass', 3800, 2600, 1.6, 0.18);
+      noise(t, 1.3, 0.2, 'highpass', 5000, 5000, 0.5, 0.2);
+    },
+    thump(t) {
+      tone('sine', 130, 38, t, 0.45, 0.85, 0.003);
+      noise(t, 0.12, 0.45, 'lowpass', 500, 120, 1, 0.002);
+      noise(t + 0.03, 0.25, 0.12, 'bandpass', 300, 200, 3);
+    },
+    slowclap(t) {
+      const gaps = [0, 0.55, 1.15, 1.85, 2.65];
+      gaps.forEach((g, i) => {
+        const v = 0.7 - i * 0.08;
+        noise(t + g, 0.11, v, 'bandpass', 1300 + rand(-150, 150), 900, 0.9, 0.002);
+        noise(t + g + 0.008, 0.05, v * 0.6, 'highpass', 3000, 3000, 0.7, 0.001);
+      });
+    },
+    gasp(t) {
+      noise(t, 0.45, 0.4, 'bandpass', 600, 2600, 2, 0.05);
+      tone('sine', 520, 1500, t + 0.05, 0.4, 0.12, 0.05);
+      tone('sine', 1500, 1450, t + 0.45, 0.25, 0.08);
+    },
+    fanfare(t) {
+      const notes = [392, 523, 659, 784];
+      notes.forEach((f, i) => {
+        const s = t + i * 0.17, last = i === notes.length - 1;
+        const dur = last ? 0.8 : 0.15;
+        const sag = last ? f * 0.82 : f * rand(0.97, 1.02);
+        const flt = ac.createBiquadFilter(); flt.type = 'lowpass'; flt.frequency.value = 2200; flt.Q.value = 2; flt.connect(master);
+        const o = tone('sawtooth', f * rand(0.98, 1.02), sag, s, dur, 0.13, 0.02, flt);
+        vibrato(o, s, last ? 9 : 6, last ? 22 : 8, dur);
+      });
+      noise(t + 0.75, 0.35, 0.18, 'lowpass', 1200, 200, 5);
+    },
+    scoff(t) {
+      noise(t, 0.16, 0.5, 'lowpass', 1800, 400, 1, 0.002);
+      tone('square', 260, 120, t + 0.04, 0.18, 0.06);
+    },
+    creak(t) {
+      const flt = ac.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 900; flt.Q.value = 5; flt.connect(master);
+      const o = ac.createOscillator(); o.type = 'sawtooth';
+      for (let i = 0; i < 22; i++) o.frequency.setValueAtTime(70 + Math.sin(i * 0.7) * 25 + rand(-15, 15), t + i * 0.04);
+      const g = gainEnv(t, 0.05, 0.45, 0.95, flt);
+      o.connect(g); o.start(t); o.stop(t + 1);
+    },
+    drip(t) {
+      [0, 0.28, 0.48].forEach((d, i) => {
+        tone('sine', 1500 - i * 150, 380, t + d + rand(0, 0.04), 0.12, 0.35, 0.002);
+      });
+    },
+    bell(t) {
+      const base = 1650;
+      [[1, 0.25, 1.6], [2.76, 0.1, 1.1], [5.4, 0.05, 0.7], [8.93, 0.03, 0.4]].forEach(([m, v, d]) => tone('sine', base * m, base * m, t, d, v, 0.002));
+      noise(t, 0.03, 0.2, 'highpass', 4000, 4000, 1, 0.001);
+    },
+    // Zooble's bonus parts
+    clunk(t) {
+      const flt = ac.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 420; flt.Q.value = 9; flt.connect(master);
+      tone('triangle', 170, 140, t, 0.3, 0.9, 0.002, flt);
+      noise(t, 0.08, 0.7, 'bandpass', 420, 380, 8, 0.001);
+      tone('triangle', 170, 150, t + 0.16, 0.22, 0.5, 0.002, flt);
+    },
+    toot(t) {
+      const flt = ac.createBiquadFilter(); flt.type = 'bandpass'; flt.frequency.value = 1100; flt.Q.value = 3; flt.connect(master);
+      const o = tone('sawtooth', 240, 300, t, 0.42, 0.45, 0.02, flt);
+      vibrato(o, t, 7, 6, 0.42);
+    },
+    bonk(t) {
+      [[523, 0.2, 1.4], [1312, 0.1, 1.0], [2291, 0.06, 0.7], [3170, 0.03, 0.4]].forEach(([f, v, d]) => tone('sine', f, f * 0.995, t, d, v, 0.002));
+      noise(t, 0.04, 0.3, 'highpass', 3000, 3000, 1, 0.001);
+    },
+    rattle(t) {
+      for (let i = 0; i < 12; i++) noise(t + i * 0.045 + rand(0, 0.02), 0.035, rand(0.2, 0.45), 'bandpass', rand(1800, 4200), 2000, 3, 0.001);
+    },
+    twang(t) {
+      const flt = ac.createBiquadFilter(); flt.type = 'lowpass'; flt.Q.value = 6;
+      flt.frequency.setValueAtTime(5000, t); flt.frequency.exponentialRampToValueAtTime(350, t + 0.7); flt.connect(master);
+      const o = tone('sawtooth', 220, 205, t, 0.8, 0.35, 0.002, flt);
+      vibrato(o, t + 0.1, 6, 5, 0.7);
+    },
+    sigh(t) {
+      noise(t, 1.4, 0.4, 'lowpass', 1400, 180, 2, 0.25);
+      tone('sine', 230, 110, t + 0.1, 1.2, 0.18, 0.2);
+    },
+  };
+
+  // ═══ the pads ═══
+  const PADS = [
+    { id: 'squelch', key: '1', em: '🟢', name: 'Gloopy Footstep', cap: 'Sir Gloopington takes one bold step. The carpet will never be the same.', who: 'gloop', sound: 'squelch', color: '#c9f5d6',
+      lines: ['A knight advances! Mostly on purpose!', 'Do not mind the trail. It is a trail of VALOR.'] },
+    { id: 'jiggle', key: '2', em: '🍮', name: 'Gelatin Jiggle', cap: 'An entire suit of armor, wobbling with feeling.', who: 'gloop', sound: 'jiggle', color: '#b6f0c3',
+      lines: ['I am not trembling. I am RESONATING.', 'Every knight wobbles. Few wobble with such conviction.'] },
+    { id: 'flip', key: '3', em: '📄', name: 'Page Flip', cap: 'The books turn to a fresh chapter of you.', who: 'books', sound: 'pageflip', color: '#fff7d6',
+      lines: ['New chapter: The Visitor Presses Three.', "Ooh, you're more interesting in the middle."] },
+    { id: 'shush', key: '4', em: '🤫', name: 'Library Shush', cap: 'Every spine on every shelf, glaring in unison.', who: 'books', sound: 'shush', color: '#cfe0ff',
+      lines: ['SHHHHH. We are READING you.', "Inside voices. Inside sound effects. Inside everything."] },
+    { id: 'thump', key: 'Q', em: '📕', name: 'Book Thump', cap: 'A very heavy encyclopedia drops its opinion.', who: 'books', sound: 'thump', color: '#ffc9cf',
+      lines: ['Volume Twelve has made its point.', 'That was the dictionary. It had a word for you.'] },
+    { id: 'clap', key: 'W', em: '👏', name: 'Slow Clap', cap: "Jax applauds. Each clap is somehow less sincere than the last.", who: 'jax', sound: 'slowclap', color: '#e4d2ff',
+      lines: ['Wow. Bravo. I am so moved. Physically, toward the door that does not exist.', 'Standing ovation. Well, leaning ovation. Sitting, actually.'] },
+    { id: 'gasp', key: 'E', em: '😮', name: 'Book Gasp', cap: 'The shelves just read something shocking. About you.', who: 'books', sound: 'gasp', color: '#ffe8a8',
+      lines: ['GASP. You did WHAT on page forty?', 'Plot twist! The reader has been the main character all along!'] },
+    { id: 'honor', key: 'R', em: '🎺', name: 'Fanfare of Honor', cap: "Gloopington's personal theme. It starts proud and ends soggy.", who: 'gloop', sound: 'fanfare', color: '#ffe08a',
+      lines: ['ON MY HONOR! ...Which has slid somewhat to the left.', 'A knight must announce himself! Even if he melts a little doing it.'] },
+    { id: 'scoff', key: 'A', em: '🙄', name: 'Jax Scoffs', cap: 'The tiniest, rudest puff of air in the library.', who: 'jax', sound: 'scoff', color: '#d9c4ff',
+      lines: ['Pfft. A knight made of dessert. Sure. Why not.', "The books are reviewing you. I've read the reviews. Mixed."] },
+    { id: 'creak', key: 'S', em: '🪜', name: 'Spine Creak', cap: 'An ancient hardback stretches its binding. Ominously.', who: 'books', sound: 'creak', color: '#e9d0b6',
+      lines: ["Oof. Don't mind me. I haven't been opened since the last update.", 'My binding has seen things. Mostly you.'] },
+    { id: 'drip', key: 'D', em: '💧', name: 'Sticky Drip', cap: 'Something is dripping from the top shelf. It is lime-flavored.', who: 'gloop', sound: 'drip', color: '#c3f2e3',
+      lines: ['That is not me. That is... the ceiling. A gelatin ceiling. Totally normal.', 'Pay no attention to the puddle! It is a moat! A tactical moat!'] },
+    { id: 'bell', key: 'F', em: '🛎️', name: 'Overdue Bell', cap: "Ding! The front desk has decided you're late. For what? Unclear.", who: 'jax', sound: 'bell', color: '#ffd9a8',
+      lines: ["You're overdue. I checked. The fine is one entire personality.", 'Ding. That means I win. I made the rules just now.'] },
+  ];
+  const BONUS = [
+    { id: 'clunk', key: 'Z', part: 'head', em: '🟩', name: 'Head Clunk', cap: "Zooble knocks on their own head. Hollow. As suspected.", who: 'zooble', sound: 'clunk', color: '#b5f0cc',
+      lines: ["Knock knock. No one's home. I'm out being scenery."] },
+    { id: 'toot', key: 'X', part: 'cone', em: '🔺', name: 'Cone Toot', cap: 'A leg, but make it a megaphone.', who: 'zooble', sound: 'toot', color: '#ffeaa0',
+      lines: ['Yes, it toots. No, I will not explain how.'] },
+    { id: 'bonk', key: 'C', part: 'pipe', em: '🟦', name: 'Pipe Bonk', cap: 'A metal leg, gently struck, ringing with resentment.', who: 'zooble', sound: 'bonk', color: '#c2d3ff',
+      lines: ['That is my shin. Please stop playing my shin.'] },
+    { id: 'rattle', key: 'V', part: 'torso', em: '🩷', name: 'Torso Rattle', cap: "Shake Zooble's torso. Find out what's been rattling around in there.", who: 'zooble', sound: 'rattle', color: '#ffd0e6',
+      lines: ['Something in there is a library card. I do not own a library card.'] },
+    { id: 'twang', key: 'B', part: 'arm', em: '〰️', name: 'Arm Twang', cap: 'One springy arm, plucked like a very tired guitar.', who: 'zooble', sound: 'twang', color: '#fff0b8',
+      lines: ['I have one note. This is it. Enjoy.'] },
+    { id: 'sigh', key: 'N', part: 'all', em: '🧩', name: 'Whole-Zooble Sigh', cap: 'Fully assembled and fully unimpressed. A sigh with every part attached.', who: 'zooble', sound: 'sigh', color: '#e0c8ff',
+      lines: ['Every part of me is sighing right now. Even the leg that used to be a bookend.'] },
+  ];
+  const ALL = [...PADS, ...BONUS];
+  const padEls = {};
+  function renderPad(p, host) {
+    const b = document.createElement('button');
+    b.type = 'button'; b.className = 'pad'; b.style.setProperty('--pc', p.color);
+    b.innerHTML = `<kbd>${p.key}</kbd><span class="em">${p.em}</span><span class="name">${p.name}</span><span class="cap">${p.cap}</span>`;
+    b.addEventListener('click', () => trigger(p.id));
+    host.appendChild(b); padEls[p.id] = b;
+  }
+  PADS.forEach((p) => renderPad(p, $('#pads')));
+  BONUS.forEach((p) => renderPad(p, $('#bonusPads')));
+  const unlocked = new Set(PADS.map((p) => p.id));
+  function paintLocks() {
+    BONUS.forEach((p) => {
+      const el = padEls[p.id], open = unlocked.has(p.id);
+      el.classList.toggle('locked', !open);
+      el.setAttribute('aria-disabled', open ? 'false' : 'true');
+      el.querySelector('.name').textContent = open ? p.name : '🔒 Locked';
+      el.querySelector('.cap').textContent = open ? p.cap
+        : p.part === 'all' ? 'Find all five of Zooble’s parts.' : `Find Zooble’s ${PART_INFO[p.part].name} somewhere in the room.`;
+      el.querySelector('.em').textContent = open ? p.em : '❔';
+    });
+  }
+  paintLocks();
+
+  // ═══ reactions ═══
+  function fx(anchor, emoji, n = 3) {
+    const sr = scene.getBoundingClientRect(), r = anchor.getBoundingClientRect();
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement('div'); s.className = 'fx'; s.textContent = emoji;
+      s.style.left = (r.left - sr.left + r.width / 2 + rand(-20, 20)) + 'px';
+      s.style.top = (r.top - sr.top + rand(0, r.height * 0.4)) + 'px';
+      s.style.setProperty('--dx', rand(-50, 50) + 'px'); s.style.setProperty('--r', rand(-40, 40) + 'deg');
+      s.style.animationDelay = (i * 0.09) + 's';
+      scene.appendChild(s); setTimeout(() => s.remove(), 1400);
+    }
+  }
+  function retrigger(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+  let honor = 74;
+  function wobbleHonor() {
+    honor = Math.max(3, Math.min(128, Math.round(honor + rand(-26, 24))));
+    const mood = honor > 100 ? 'overflowing' : honor > 70 ? 'mostly solid' : honor > 35 ? 'wobbling' : 'puddle-adjacent';
+    honorEl.textContent = `Honor: ${honor}% (${mood})`;
+  }
+  function gloopWobble(big) {
+    gloopEl.classList.remove('idle', 'wobble', 'bigwobble'); void gloopEl.offsetWidth;
+    gloopEl.classList.add(big ? 'bigwobble' : 'wobble');
+    clearTimeout(gloopEl._t); gloopEl._t = setTimeout(() => { gloopEl.classList.remove('wobble', 'bigwobble'); gloopEl.classList.add('idle'); }, big ? 1700 : 1000);
+  }
+  const REACT = {
+    squelch: () => { gloopWobble(); fx(gloopEl, '💚', 3); wobbleHonor(); },
+    jiggle: () => { gloopWobble(true); fx(gloopEl, '〰️', 2); wobbleHonor(); },
+    pageflip: () => { moodBooks('flip', 8, 500); fx(stacks, '📄', 4); },
+    shush: () => { allBooks('glare', 1500); retrigger($('#shushWave'), 'on'); setTimeout(() => $('#shushWave').classList.remove('on'), 1300); jaxEl.classList.add('shrug'); setTimeout(() => jaxEl.classList.remove('shrug'), 650); },
+    thump: () => { moodBooks('thump', 6, 450); retrigger(scene, 'shake'); setTimeout(() => scene.classList.remove('shake'), 400); gloopWobble(); },
+    slowclap: () => { [0, 550, 1150, 1850, 2650].forEach((d) => setTimeout(() => { retrigger(jaxEl, 'hop'); fx(jaxEl, '👏', 1); }, d)); },
+    gasp: () => { allBooks('wide', 1400); fx(stacks, '❗', 3); },
+    fanfare: () => { gloopEl.classList.add('salute'); setTimeout(() => gloopEl.classList.remove('salute'), 1200); setTimeout(() => gloopWobble(true), 700); fx(gloopEl, '🎺', 2); wobbleHonor(); },
+    scoff: () => { retrigger(jaxEl, 'shrug'); fx(jaxEl, '💨', 1); },
+    creak: () => { moodBooks('wiggle', 3, 900); moodBooks('glare', 4, 1100); },
+    drip: () => { fx(gloopEl, '💧', 3); gloopWobble(); wobbleHonor(); },
+    bell: () => { retrigger(jaxEl, 'hop'); fx($('#desk'), '🛎️', 1); moodBooks('peek', 6, 1200); },
+    clunk: () => { fx(stacks, '🟩', 2); }, toot: () => { fx(stacks, '📢', 2); },
+    bonk: () => { fx($('#desk'), '🔔', 2); }, rattle: () => { fx($('#desk'), '🎫', 3); },
+    twang: () => { fx(stacks, '🎸', 2); },
+    sigh: () => { fx($('#tray'), '😮‍💨', 1); allBooks('peek', 1500); },
+  };
+  const whoAnchor = (who) => who === 'jax' ? jaxEl : who === 'gloop' ? gloopEl : who === 'zooble' ? $('#tray') : null;
+  const PREFIX = { gloop: '🛡️ <b>Sir Gloopington:</b> ', jax: '🐰 <b>Jax:</b> ', zooble: '🧩 <b>Zooble:</b> ', books: '📚 <b>The Books:</b> ' };
+
+  function trigger(id, opts = {}) {
+    const p = ALL.find((x) => x.id === id);
+    if (!p) return;
+    const el = padEls[id];
+    if (!unlocked.has(id)) {
+      if (!opts.quiet) { retrigger(el, 'fresh'); say(el, '🔒 Zooble says: find my ' + (p.part === 'all' ? 'whole self' : PART_INFO[p.part].name) + ' first.', 2200); }
+      return;
+    }
+    if (ensureAudio()) SYN[p.sound](ac.currentTime + 0.01);
+    REACT[p.sound]();
+    retrigger(el, 'hit'); setTimeout(() => el.classList.remove('hit'), 160);
+    if (!opts.quiet) {
+      let anchor = whoAnchor(p.who);
+      if (p.who === 'books') {
+        const vis = visibleBooks(); anchor = pick(vis.slice(0, Math.max(1, Math.floor(vis.length * 0.7))));
+        anchor.classList.add('peek'); setTimeout(() => anchor.classList.remove('peek'), 2600);
+      }
+      say(anchor, PREFIX[p.who] + pick(p.lines), 3200);
+    }
+    if (recording && !opts.fromLoop) recorded.push({ id, t: performance.now() - recStart });
+  }
+
+  addEventListener('keydown', (e) => {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    const tag = (e.target && e.target.tagName) || '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+    const k = e.key.length === 1 ? e.key.toUpperCase() : e.key;
+    const p = ALL.find((x) => x.key === k);
+    if (p) { e.preventDefault(); trigger(p.id); }
+  });
+
+  // ═══ the twist: Zooble's parts in the furniture ═══
+  const found = new Set();
+  function findPart(id, el) {
+    if (found.has(id)) return;
+    found.add(id);
+    if (ensureAudio()) { SYN.bonk(ac.currentTime); SYN.pageflip(ac.currentTime + 0.1); }
+    el.classList.add('found');
+    setTimeout(() => el.classList.add('gone'), 720);
+    if (id === 'torso') $('#bulb').style.boxShadow = '0 0 30px 14px rgba(255,230,140,.75)';
+    if (id === 'pipe') $('#bulb').style.opacity = '.25';
+    const r = el.getBoundingClientRect();
+    confetti(r.left + r.width / 2, r.top + r.height / 2, 30, 0.7);
+    const slot = document.querySelector(`.slot[data-part="${id}"]`);
+    slot.classList.add('got'); slot.textContent = PART_INFO[id].emoji;
+    const bonus = BONUS.find((b) => b.part === id);
+    unlocked.add(bonus.id); paintLocks(); retrigger(padEls[bonus.id], 'fresh');
+    say($('#tray'), '🧩 <b>Zooble:</b> ' + PART_INFO[id].found + ` <i>(Unlocked pad ${bonus.key}!)</i>`, 4200);
+    moodBooks('wide', 5, 1000);
+    if (found.size === 5) setTimeout(reassemble, 1400);
+  }
+  function reassemble() {
+    unlocked.add('sigh'); paintLocks(); retrigger(padEls.sigh, 'fresh');
+    const z = $('#zoobleWhole'); z.innerHTML = CAST.zooble; z.classList.add('on');
+    if (ensureAudio()) {
+      const t = ac.currentTime;
+      ['clunk', 'toot', 'bonk', 'rattle', 'twang'].forEach((s, i) => SYN[s](t + i * 0.22));
+      SYN.bell(t + 1.2); SYN.fanfare(t + 1.4);
+    }
+    const sr = scene.getBoundingClientRect();
+    confetti(sr.left + sr.width / 2, sr.top + sr.height / 3, 140, 1.3);
+    allBooks('wide', 2500);
+    gloopWobble(true);
+    say($('#tray'), "🧩 <b>Zooble:</b> ...Okay. I'm whole again. Some of me still smells like old paperbacks. Thanks, I guess. Pad N is yours.", 5200);
+    setTimeout(() => say(jaxEl, "🐰 <b>Jax:</b> Great, the furniture's a person again. I was just getting attached to that lamp.", 4200), 1600);
+    setTimeout(() => say(gloopEl, '🛡️ <b>Sir Gloopington:</b> HUZZAH! The lost limbs are restored! I helped! Spiritually! From over here!', 4200), 3200);
+    setTimeout(() => caine.talk('A RE-ASSEMBLY! Marvelous! Let\'s have the books write a sequel about it! It\'ll be called "Zooble: Fully Furnished!"', 4800), 5000);
+  }
+  let hintIdx = 0;
+  $('#hintBtn').addEventListener('click', () => {
+    const left = Object.keys(PART_INFO).filter((k) => !found.has(k));
+    if (!left.length) { say($('#tray'), "🧩 <b>Zooble:</b> I'm all here. Don't jinx it.", 2600); return; }
+    const k = left[hintIdx++ % left.length];
+    say($('#tray'), '🧩 <b>Zooble (somewhere):</b> ' + PART_INFO[k].hint, 4200);
+  });
+
+  // ═══ record & loop ═══
+  let recording = false, looping = false, recStart = 0, recorded = [], loopLen = 0, loopTimers = [], loopCycle = 0;
+  const recBtn = $('#recBtn');
+  function stopLoop() {
+    looping = false; loopTimers.forEach(clearTimeout); loopTimers = []; clearTimeout(loopCycle);
+    recBtn.textContent = '⏺ Record'; recBtn.classList.remove('rec');
+  }
+  function runLoop() {
+    if (!looping) return;
+    loopTimers = recorded.map((ev) => setTimeout(() => trigger(ev.id, { quiet: true, fromLoop: true }), ev.t));
+    loopCycle = setTimeout(runLoop, loopLen);
+  }
+  recBtn.addEventListener('click', () => {
+    if (looping) { stopLoop(); say(jaxEl, '🐰 <b>Jax:</b> Oh thank goodness. I was about to start enjoying it.', 2800); return; }
+    if (!recording) {
+      recording = true; recorded = []; recStart = performance.now();
+      recBtn.textContent = '⏹ Stop & loop'; recBtn.classList.add('rec');
+      say(jaxEl, '🐰 <b>Jax:</b> Recording. Make it good. Or at least make it short.', 2600);
+      return;
+    }
+    recording = false;
+    loopLen = Math.max(1000, performance.now() - recStart);
+    if (!recorded.length) { stopLoop(); say(jaxEl, '🐰 <b>Jax:</b> You recorded silence. Honestly? Best track tonight.', 2800); return; }
+    looping = true; recBtn.classList.remove('rec'); recBtn.textContent = '⏸ Stop loop';
+    say(gloopEl, '🛡️ <b>Sir Gloopington:</b> A ballad, looping for ETERNITY! Or until thou pressest the button.', 3000);
+    runLoop();
+  });
+
+  // ═══ random remix ═══
+  let remixing = false;
+  $('#remixBtn').addEventListener('click', () => {
+    if (remixing) return;
+    remixing = true;
+    const pool = [...unlocked];
+    const steps = 8, gap = 300;
+    for (let i = 0; i < steps; i++) setTimeout(() => trigger(pick(pool), { quiet: true }), i * gap);
+    setTimeout(() => {
+      remixing = false;
+      say(jaxEl, '🐰 <b>Jax:</b> ' + pick(['That was a remix. I hated it, but rhythmically.', 'Ah yes. The sound of a library losing a fight.', 'Play it again and I walk. Into a wall. There is no exit.']), 3200);
+      bookRemark(true);
+    }, steps * gap + 200);
+  });
+
+  // ═══ clicking the stars ═══
+  const JAX_POKES = [
+    'A library where the books read you. Finally, critics with lower standards than me.',
+    "Don't poke me. Poke the knight. He's basically a snack with a sword.",
+    "I'm not here for the books. I'm here because there's nowhere else to be.",
+    'Hey Gloopy, your honor is dripping on my shoe.',
+  ];
+  const GLOOP_POKES = [
+    'Halt! Who goes there? Oh, a patron! Welcome! Please keep your spoons holstered.',
+    'I swore an oath to protect these books. They swore an oath to read me. It is very awkward.',
+    'My honor is unshakable! *wobbles* Mostly unshakable!',
+    'A knight never retreats. He merely slides backward with dignity.',
+  ];
+  jaxEl.addEventListener('click', () => { retrigger(jaxEl, 'hop'); if (ensureAudio()) SYN.scoff(ac.currentTime); say(jaxEl, '🐰 <b>Jax:</b> ' + pick(JAX_POKES), 3400); });
+  gloopEl.addEventListener('click', () => { gloopWobble(true); wobbleHonor(); if (ensureAudio()) SYN.jiggle(ac.currentTime); say(gloopEl, '🛡️ <b>Sir Gloopington:</b> ' + pick(GLOOP_POKES), 3600); });
+  caineEl.addEventListener('click', () => caine.talk(pick([
+    "Welcome to the Reading Room! Tonight's theme: STICKY! Don't ask who chose it! It was me!",
+    'Shh! This is a library! I can only be TWICE as loud as usual in here!',
+    "The books have read everyone! Kinger got a five-star review! Jax got a strongly worded pamphlet!",
+  ]), 4200));
+
+  // Opening act
+  setTimeout(() => caine.talk('WELCOME to the Reading Room, where the books get to read YOU for once! Mind the gelatin!', 4200), 600);
+  setTimeout(() => say(jaxEl, '🐰 <b>Jax:</b> Great. A quiet room. Let\'s ruin it. Pads are below.', 3400), 3600);
+  setTimeout(() => bookRemark(true), 6500);
+
+  // Test hook (handy for poking every pad from the console)
+  window.READING_ROOM = { trigger, findPart: (id) => { const el = document.getElementById('p-' + id); if (el) findPart(id, el); }, pads: ALL.map((p) => p.id) };
+})();
+</script>
+</body>
+</html>

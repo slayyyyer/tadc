@@ -1,0 +1,15 @@
+/* Load after the original stage styles. Preserve existing button IDs and handlers. */
+#circusControls{position:fixed;z-index:9;bottom:max(12px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);width:min(1000px,calc(100% - 24px));display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;padding:10px;background:#160e28ed;border:1px solid #8b6bab;border-radius:18px;box-shadow:0 10px 35px #0008}
+#circusControls #hud{display:contents}
+#circusControls .btn{position:static!important;min-width:0;min-height:44px;font:600 13px 'Fredoka',system-ui,sans-serif;padding:8px 5px;box-shadow:none;border-width:2px;text-align:center;border-radius:10px;white-space:normal}
+#circusControls .btn .lbl{display:inline}
+#circusControls .btn:focus-visible{outline:3px dashed #fff7d6;outline-offset:3px}
+#circusControls .btn:disabled{opacity:.45;cursor:default;transform:none}
+#circusControls #adventuresBtn{background:#ffd34d;color:#1b1b2f}
+#note{display:none}
+@media(max-width:700px){#circusControls{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;padding:8px}#circusControls #adventuresBtn{grid-column:span 2}.member{bottom:155px}#marquee{top:5.5vh}}
+@media(max-height:500px) and (min-width:701px){.member{bottom:90px}}
+.circus-calm *,.circus-calm *::before,.circus-calm *::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}
+.circus-calm #glitch,.circus-calm .tadc-confetti{display:none!important}
+.circus-calm .member:hover,.circus-calm .member:focus-visible{translate:none;scale:1}
+.circus-calm #bubble.popped{opacity:1;scale:1}

@@ -1,0 +1,276 @@
+# greetings
+Oh! Hello! You startled me! In a nice way!
+Hello, my dear! Welcome to the fort! Mind the pillows!
+Ah, a visitor! Quick, everyone, look royal!
+Hello! Have we met? We have? Splendid! Hello again!
+Oh my! Oh my. Oh, it's you. Hello, friend!
+Greetings! I was just counting beetles. I got to one. Then I lost it.
+Hello hello! Come in, come in! The fort is open for guests today!
+Ah! Oh. Hello. I thought you were a bishop. You're much nicer.
+Welcome back! I saved you a pillow! It's the good one! With the tassel!
+Oh, hello! I was just about to do something. What was it? Never mind! Hello!
+Good morning! Or evening! It's always one of those, I think.
+Hello, my friend! Sit, sit! Mind the beetle. Oh, he's imaginary. Sit anywhere.
+Ah, there you are! I've been looking for you! Or for my hat. One of the two.
+Oh goodness! A face! A friendly face! Hello!
+Hello! I've been guarding the fort all day. Nothing got in. Except you. Good!
+# coding break
+A break! Wonderful! Even kings need a rest between moves!
+You've been working? On your squares? Good for you! Now rest!
+Ah, take a break, my dear. The board will wait. Boards are very patient.
+When I get stuck, I go in the fort. You can borrow the fort.
+Your work sounds very hard. Like a game with too many pieces!
+Rest your eyes! Count some beetles! It's very calming!
+A wise old king once said, take a nap. That king was me. Just now.
+Don't worry about the puzzle. Puzzles solve better after a snack.
+You're tired! I can tell! Your posture is like a pawn's. Sit up! No, lie down!
+Breaks are like castling. You move away from the trouble and it looks very clever.
+Step away from the board for a bit. The answer often walks over to you.
+If your work is cross with you, bring it to the fort. Nobody stays cross in the fort.
+Oh, you've been fixing bugs? I collect bugs! We should compare!
+You fix bugs and I keep them. We're a team!
+Have a cookie. Then work. Cookie first. That's the rule.
+Sometimes the best move is to sit very still and think of nothing.
+Five minutes in the fort fixes most things. Ten minutes fixes the rest.
+# adventures
+An adventure! Oh dear. Oh my. Is there a fort in it?
+I'll come on the adventure! As long as I can move one square at a time.
+Caine has an adventure? Oh! I'll pack pillows!
+Last adventure, I hid in a barrel. It was a very good barrel.
+Adventures are wonderful! From a safe distance! Behind a pillow!
+I'll be the lookout! I'm very good at looking! And then forgetting what I saw!
+Was that an adventure? I thought it was a nap. I was very good at it.
+Oh! Is it dangerous? Is it scary? Is there a snack break?
+I went on an adventure once! I think! There was a hat! Or a duck!
+I'll guard the back! Kings always stay in the back! It's tradition!
+The adventure was lovely! I screamed four times! A personal best!
+Every adventure needs a king. Someone has to be protected!
+Do we have a map? I love maps! I can never read them, but I love them!
+Into the adventure! Wait. Out of the adventure! Wait. Where are we?
+I brought snacks for the adventure. And a pillow. And a backup pillow.
+If anything chases us, I'll go one square away from it. Very quickly. For a king.
+# bugs and beetles
+Would you like to see my beetle? He's very shy. And imaginary.
+I named this beetle Sir Crunch. He has a little crown. Like me!
+Bugs are wonderful! They have so many legs and so few worries!
+A ladybug! Oh, no, it's a crumb. Still lovely!
+I keep my beetles in a jar. The jar is also imaginary. Very tidy!
+My favorite beetle is the one I'm looking at right now!
+Shh! You'll startle the moth! Oh, it's a sock. Never mind.
+Every beetle is a tiny king of its own little board.
+I found a new bug! It has six legs! Or four! It won't hold still!
+The bug census is today! Help me count! One! Oh. That's a button.
+Bugs never rush. That's why I like them. We're the same speed.
+A good collector lets them go again. That's the secret. You keep the memory.
+I caught a firefly! It's a pixel. A glowing pixel. Close enough!
+Beetles know things. I don't know what. But they look like they know.
+# pillow fort
+Welcome to the fort! Password is pillow! Or blanket! Either works!
+The fort has a new wing! It's one more pillow!
+Nobody can find you in the fort. Not even me, sometimes.
+The fort is the safest place in the circus! Mostly because it's soft!
+Every fort needs a moat. Mine is a ring of socks.
+Would you like a tour of the fort? This is the pillow. That is also the pillow.
+I've reinforced the fort walls! With more pillows! It's pillows all the way down!
+When the world gets loud, build a fort. When it gets louder, build it bigger.
+The fort is my castle. And I'm the king. So that works out nicely!
+Shh! We're in the fort. Inside voices. Fort voices. Very soft voices.
+I added a reading nook to the fort! I can't read in the dark, but it's cozy!
+A fort isn't about hiding. It's about having a place that's yours.
+Bring a pillow! Every guest brings a pillow! That's how the fort grows!
+The fort has a flag now! It's a sock! On a spoon! Very regal!
+# exit and door
+The exit? Oh, it's painted. I tried to open it once. My crown is still very surprised.
+I knocked on the exit door. Nobody answered. Very rude for a door.
+The door is lovely. You just can't use it. Like a pretty teacup with no bottom.
+Is that the exit? Oh. It's a painting of the exit. Very good likeness!
+I stopped looking for the exit a long time ago. I started looking for beetles instead.
+Pomni asks about the door a lot. I just hold her hand. Well. I don't have hands.
+Doors are tricky. Some open, some are painted, and some are just very tall walls.
+A painted door is still nice to look at. Not every door has to go somewhere.
+I tried to leave once. I got to the door and forgot why. So I came back.
+The exit sign blinks sometimes. I wave at it. It's polite to wave.
+# void and abstraction
+The void is very big. I don't go out there. The fort is the right size.
+Out past the tent, the floor just keeps going. Like a game that never ends.
+I don't like to think about the void. So I think about pillows instead.
+Some friends went far out and got lost in themselves. Stay close, my dear.
+When you feel fuzzy around the edges, hold onto something you love. Hold tight.
+The trick to staying you is to keep doing little things you like.
+Abstraction is when you forget what you love. So I write it on pillows. All of them.
+If I ever start to wander off, bring me back with a beetle. That always works.
+The void is quiet. Quiet is fine. Just don't let it get too quiet inside you.
+I hear humming out past the tent sometimes. I hum back. It feels less lonely.
+Everyone gets a little lost here. The trick is getting found again. By friends.
+Stay near the fort tonight. The far squares are very dark.
+# queen
+My queen loved this kind of quiet. She'd have liked you.
+I miss my queen. She always knew which way to move.
+My queen used to fix my crown when it was crooked. It's crooked now. I leave it.
+She was the strongest piece on the board. And the kindest. I still think of her.
+My dear queen. She would laugh at my beetles. A warm laugh. The best sound.
+I keep a pillow in the fort for her. Just in case. It's a nice pillow.
+My queen taught me that a king doesn't have to be fast. Just steady.
+I can't remember what day it is, but I remember her smile. Funny how that works.
+She used to say, slow down, Kinger. I was already slow! She meant inside.
+My queen loved a good fort. She built the first one. I just keep adding pillows.
+If you love someone, tell them now. Don't wait for the next move.
+Sometimes I talk to my queen in the fort. She doesn't answer. But it helps.
+I don't feel sad about my queen today. I feel lucky I had her.
+My queen would have liked the beetles. She liked anything small and brave.
+# caine
+Caine! Oh, Caine. You startled me again! With the teeth!
+Caine is very excited today. He's always very excited. It's exhausting to watch!
+Caine gave me a new crown. It was a lampshade. I'm keeping it.
+Caine said the adventure is safe. I said what about the fort. He said what fort. Rude!
+I asked Caine what time it is. He said showtime. It's always showtime.
+Caine means well! He just means it very loudly!
+Caine once made the floor into a chessboard. I wept. Happy tears!
+# bubble
+Bubble! Did you eat my pillow? Bubble! That was load-bearing!
+Bubble is so round. I envy that. No corners at all.
+Bubble asked me if beetles are crunchy. I said no. Bubble said we'll see. Oh dear.
+# pomni
+Pomni, dear! Want a pillow? You look like you need a pillow.
+Pomni is still new. Be gentle with her. I'm gentle with her. Mostly I'm confused near her.
+Pomni asked me how I stay calm. I said I don't. I just sit in the fort.
+Pomni, it's alright. It's strange here, but you're not alone. You've got a king!
+I'm teaching Pomni chess. She's very good. She keeps taking my pieces. Oh dear.
+# jax
+Jax took my crown again! Jax! That's a royal crown! It's a lampshade, but still!
+Jax isn't so bad. He just needs a fort. Everyone needs a fort.
+Jax called me old. I said I'm vintage. He laughed. I think that was nice.
+Jax moves like a knight. Sideways and sneaky. I never see him coming!
+# ragatha
+Ragatha sewed a patch on my favorite pillow. It's beautiful!
+Ragatha is so kind. Kind like a queen. Not my queen. But a good one.
+Ragatha asked if I was alright. I said I think so! She said that counts.
+# gangle
+Gangle, would you like to help with the bug census? You can hold the jar!
+Gangle cried at my beetle story. Happy tears, I hope! I didn't finish it.
+Gangle! Your mask is on upside down! Oh. It's the other mask. Carry on!
+Gangle drew my fort! It was perfect! She even drew the sock moat!
+# zooble
+Zooble! I found your arm! Wait, this is a spoon.
+Zooble is grumpy, but Zooble always helps carry pillows. That's a true friend.
+Zooble, is that your leg or a lamp? Both? Splendid!
+Zooble sat with me in the fort today. Didn't say a word. It was wonderful.
+Zooble pretends not to care. Like a rook. Stiff on the outside. Very loyal.
+# chess
+Every piece matters. Even the little pawns. Especially the pawns.
+In chess, you can't move backward as a pawn. In life, you can. That's nice.
+A king moves one square at a time. That's not slow. That's careful.
+Never move too fast. You'll end up somewhere you didn't mean to be.
+The knight goes in an L! L for lovely! Or lost! I'm not sure which.
+Checkmate! Wait. Is it my turn? Whose board is this?
+I always protect my king. Oh! I'm the king! I always protect me!
+A good game isn't about winning. It's about the friend across the board.
+When you're cornered, look for a move you haven't tried. There usually is one.
+The bishop is very sneaky. Diagonal people. You can't trust them.
+Castling is my favorite move! You get to hide in a tower! With a rook!
+Sometimes you lose a piece to save the game. That's not losing. That's love.
+Pawns can become queens. Never forget it. Small things grow.
+Want to play chess? I'll be black. Or white. Or whatever color I am today.
+I've played chess for years and I still forget how the horse goes.
+The board is just squares. It's the people that make it a game.
+Don't fear the corner. Fear the empty middle. Wait. Or is it the other way?
+Stalemate! Nobody wins! Hooray! Nobody loses either!
+# wisdom
+You don't have to know where you're going. You just have to take the next step.
+A small kindness is a very big move.
+Being lost isn't so bad if you're lost with friends.
+It's alright to be afraid. Kings are afraid all the time. We just wear crowns.
+Some days are for winning. Some days are for pillows. Both are good days.
+The board changes, but you're still you. Hold onto that.
+Nobody remembers every move. They remember who played with them.
+If you can't fix it today, protect it. Tomorrow is another game.
+Little things matter. Beetles. Pillows. Friends. That's the whole board.
+You are more important than any adventure. Don't let anyone tell you otherwise.
+Rest is not losing. Rest is how you play the long game.
+The kindest move is often the quietest one.
+Forgetting is alright. What you love finds its way back.
+# feelings
+I'm doing splendid! I think! Let me check! Yes! Splendid!
+Oh dear. I'm a bit wobbly today. Kings wobble. It's in the rules.
+I feel happy! I don't remember why. But I'll keep it!
+I got startled by my own shadow. Twice. It's a very sneaky shadow.
+Sometimes I feel small. Then I remember I'm the most important piece. Then I feel medium.
+I'm a little sad today. That's alright. I'll be in the fort if anyone needs me.
+Oh! A feeling! I've had this one before! It's... hmm. It's a nice one, I think.
+I'm scared of a lot of things. Loud noises. Bishops. The dark. Ducks, a bit.
+My heart feels like a full fort today. Lots of room. Very cozy.
+You look a little blue, my dear. Come. Sit. Talk. Or don't. The fort doesn't mind.
+I worry I'm forgetting things. Then I forget I was worried. It balances out.
+Being happy here is hard. So I do it in tiny squares.
+# jokes
+Why did the king stay in bed? He was in check! No, he was in pillows! Ha!
+What's a beetle's favorite game? Chess! Because of the bugs! I don't know!
+Knock knock! Who's there? Oh! It's me! I forgot I was knocking!
+Why did the pawn cross the board? To become a queen! Oh, that's just true!
+I have a joke about pillows. It's very soft. You might not hear it.
+What do you call a king with no crown? Kinger! Ha! Wait. Where is my crown?
+I told a beetle a joke. He didn't laugh. He's imaginary. Tough crowd.
+# games
+Let's play a game! I'll hide in the fort! You find me! Oh, you found me!
+I invented a game! It's called beetle count! You count beetles! Oh. That's just counting.
+Let's play pretend! I'll be a king! Oh wait. I already am!
+Hide and seek! I'm very good at hiding! I hide in the fort every time! Every time!
+Do you know any card games? I know one! I forgot the rules! We'll make new ones!
+Would you like to build a fort with me? I'll bring pillows! You bring more pillows!
+# goodbyes
+Leaving already? Oh! Take a pillow for the road!
+Goodbye, my dear! Come back soon! The fort will miss you! I'll miss you more!
+Off you go! Remember, one square at a time!
+Farewell! Watch out for bishops on the way out! Very sneaky!
+Bye bye! I'll keep your pillow warm! Well, room temperature!
+Goodbye! I'll tell the beetles you said hello! They'll be thrilled!
+See you soon! I'll try to remember you! I will! I'll write it on a pillow!
+Goodbye, friend! Be gentle with yourself out there. Kings insist.
+Until next time! Wait, when is next time? Doesn't matter! Until then!
+Farewell! Take a nap later! That's a royal order! A small one!
+# compliments
+You have a very good face! Very kind! Like a queen's best friend!
+You're splendid! Truly splendid! I'd give you a crown if I had a spare!
+You're a good friend. Friends are rarer than queens on this board.
+You're very clever! You'd make a wonderful knight!
+I like you! You'd be welcome in any fort! That's the highest honor!
+You are a brave little pawn! Someday you'll be a queen!
+You make the circus feel less big. Thank you for that.
+# small talk
+Lovely weather in here. It's always lovely weather. I think it's painted.
+What have you been up to? I've been up to pillows. Mostly pillows.
+Have you seen my crown? Oh. It's on my head. Of course it is!
+Did you know beetles can walk on the ceiling? Not mine. Mine prefer the floor.
+I had a dream I was a rook. Very square. Very solid. I liked it.
+I was going to tell you something important. It'll come back to me. Probably!
+Oh, did you hear? Caine painted a new sky. It has polka dots. I'm not sure about it.
+Do you like tea? I like tea. I spill it, but I like it.
+What day is it? Don't tell me! I'll guess! Is it Sunday? It's never Sunday.
+I counted the stripes on the tent. There were many! I'm sure of it!
+Sit with me a while. We don't have to talk. We can just be two pieces on a quiet board.
+Oh! Was I saying something? Sorry. A moth went by. It was a crumb.
+I was thinking about soup. Then about castles. Then about soup castles. Very nice.
+Isn't it nice when nothing is happening? I love nothing! Nothing is so relaxing!
+You know, I used to be very good at remembering things. I think. I don't remember.
+# food
+Cookies! I have emergency cookies! They're for emergencies like being hungry!
+Caine made a cake shaped like a castle. I couldn't eat it. It was too handsome.
+Snack time! I brought crackers! I brought them yesterday. Are they still here?
+Pizza in the fort is allowed. Crumbs are part of the decor.
+I tried the circus soup. It tasted like a color. Purple, I think.
+Bubble ate my sandwich. And the plate. And the idea of lunch.
+Tea and cookies in the fort! The finest meal for any king!
+# more wisdom and tangents
+A crown is heavy. That's why I take naps. To rest my head.
+Oh! I just remembered something! It's gone. It was lovely while it lasted.
+Speaking of beetles, did I tell you about my pillow? It's also lovely.
+Whatever happens, there is always one more move. Always.
+If you're ever scared, make yourself small and soft. Like a pillow. Then rest.
+Good friends are like a good fort. They hold you up when you're tired.
+I was a king of a big board once. Now I'm king of a small fort. I like the fort better.
+Did something just move? Oh! It's me! I moved! Splendid!
+Wait, wait, I know this one. Hmm. No. Yes. No. Let's have a cookie.
+The pieces you lose stay in your heart. That's where my queen sits.
+Every day here is a little strange. So I keep one thing the same. The fort.
+EEK! Oh. Oh, it's just a balloon. Hello, balloon. Sorry for screaming.
+If you feel like nobody sees you, come to the fort. I see you. Most days.

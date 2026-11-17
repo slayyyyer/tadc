@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Caine's Pinball Spectacular</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--void:#0b0718}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--void);color:#fff;font-family:'Fredoka',system-ui,sans-serif;user-select:none;-webkit-user-select:none;touch-action:none}
+  body{display:flex;flex-direction:column;height:100dvh}
+  #top{display:flex;align-items:center;gap:8px;padding:8px 10px 4px;flex-wrap:wrap;justify-content:space-between}
+  #top .left{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  #top h1{font:400 clamp(15px,2.4vw,24px) 'Rye';margin:0;color:var(--gold);text-shadow:0 2px 0 #8a0c1a,0 4px 0 var(--ink);white-space:nowrap}
+  #stats{font:400 22px/1 'VT323',monospace;background:var(--ink);border:3px solid var(--gold);border-radius:12px;padding:4px 10px;display:flex;gap:12px}
+  #stats b{color:var(--gold);font-weight:400}
+  #stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;position:relative}
+  #table{display:block;box-sizing:content-box;border:4px solid var(--ink);border-radius:22px;box-shadow:0 0 0 3px var(--gold),8px 8px 0 3px #8a0c1a;background:#1a0f33;touch-action:none}
+  #bottom{display:flex;align-items:flex-end;justify-content:center;gap:6px;padding:4px 10px 8px;flex-wrap:nowrap}
+  .head{width:42px;height:58px;flex:0 0 auto;filter:drop-shadow(0 4px 4px rgba(0,0,0,.6))}
+  .head svg{width:100%;height:100%}
+  .btn{font:700 15px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:7px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block}
+  .btn.red{background:var(--red);color:#fff}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  #launch{margin-left:8px;align-self:center;font-family:'Rye';font-weight:400;letter-spacing:.5px}
+  #launch.pulling{background:var(--red);color:#fff}
+  .panel{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:50;background:rgba(11,7,24,.72);backdrop-filter:blur(3px);padding:16px}
+  .panel.hidden{display:none}
+  .card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:18px;box-shadow:8px 8px 0 #8a0c1a;padding:20px 22px;max-width:min(460px,100%);text-align:center}
+  .card h2{font:400 clamp(24px,6vw,36px) 'Rye';margin:0 0 6px;color:var(--red)}
+  .card p{margin:6px 0;line-height:1.4}
+  .card .keys{font-size:14px;color:#5c3a99;margin-top:8px}
+  .card .big{font:400 56px/1 'VT323',monospace;color:var(--red)}
+  .card .btn{margin-top:12px}
+  @media (max-width:520px){ #top h1{display:none} #stats{font-size:19px;gap:8px} .head{width:34px;height:48px} #launch{padding:7px 10px} }
+  @media (max-height:640px){ .head{width:30px;height:42px} }
+  .tadc-speech{max-width:min(240px,70vw);font-size:13px;padding:9px 12px}
+  .tadc-speech.caine{font-size:14px}
+  .tadc-speech.show{opacity:.88}
+  @media (min-width:900px){
+    #bottom{position:fixed;left:16px;top:50%;transform:translateY(-50%);flex-direction:column;align-items:center;gap:10px;padding:0}
+    .head{width:54px;height:74px}
+    #launch{margin:6px 0 0}
+  }
+</style>
+</head>
+<body>
+<div id="top">
+  <div class="left">
+    <a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+    <h1>Caine's Pinball Spectacular</h1>
+  </div>
+  <div id="stats">SCORE <b id="score">0</b> BALL <b id="ball">1</b> BEST <b id="best">0</b></div>
+</div>
+<div id="stage"><canvas id="table" aria-label="Pinball table. Left and right arrows flip, space launches."></canvas></div>
+<div id="bottom">
+  <div class="head" id="h-pomni" title="Pomni"></div>
+  <div class="head" id="h-jax" title="Jax"></div>
+  <div class="head" id="h-ragatha" title="Ragatha"></div>
+  <div class="head" id="h-kinger" title="Kinger"></div>
+  <div class="head" id="h-zooble" title="Zooble"></div>
+  <div class="head" id="h-caine" title="Caine"></div>
+  <button class="btn" id="launch" type="button">LAUNCH</button>
+</div>
+
+<div class="panel" id="startPanel">
+  <div class="card">
+    <h2>Pinball Spectacular!</h2>
+    <p>Three balls. Pop bumpers. Slingshots. A pillow fort. And a genuine, authentic, <b>totally real EXIT door</b>.</p>
+    <p>Knock down <b>E-X-I-T</b> to open it. Rip up the right lane for a <b>ZOOBLE BONUS</b>. Spin Kinger's fort on the left.</p>
+    <div class="keys">⌨️ ← / → (or Z / M) flip · hold Space or ↓ to pull the plunger, release to launch<br>👆 tap left / right half to flip · hold LAUNCH</div>
+    <button class="btn red" id="startBtn" type="button">STEP RIGHT UP ▶</button>
+  </div>
+</div>
+<div class="panel hidden" id="overPanel">
+  <div class="card">
+    <h2>Game Over!</h2>
+    <div class="big" id="finalScore">0</div>
+    <p id="bestLine"></p>
+    <p id="overLine"></p>
+    <button class="btn red" id="againBtn" type="button">Play again ▶</button>
+  </div>
+</div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, pick, say, confetti, sfx, wireCaine } = window.TADC;
+  const $ = (id) => document.getElementById(id);
+
+  // ═══ cast heads ═══
+  ['pomni', 'jax', 'ragatha', 'kinger', 'zooble', 'caine'].forEach((k) => { $('h-' + k).innerHTML = CAST[k]; });
+  const caine = wireCaine($('h-caine'));
+  const svgImg = (svg, w, h) => {
+    const img = new Image();
+    img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg.trim().replace('<svg ', `<svg width="${w}" height="${h}" `));
+    return img;
+  };
+  const caineImg = svgImg(CAST.caine, 140, 190);
+  const bubbleImg = svgImg(CAST.bubble, 60, 60);
+
+  // ═══ original lines ═══
+  const LINES = {
+    pomni: ["No no no NO, where did it GO?!", "It fell into the void! Is the void okay?!", "I blinked and it was gone. That's fine. That's FINE.",
+      "Can a ball feel fear? Because I can, on its behalf.", "Okay. New plan: we never let that happen again.", "Why is there a hole in the floor?! Who DESIGNED this?!"],
+    jax: ["Wow. You flipped at absolutely nothing. Bold.", "The ball's over there, champ.", "That flipper missed so hard it filed a complaint.",
+      "I've seen better aim from Kinger. Asleep.", "Gravity: one. You: zero.", "Nice launch. Very... polite.", "Big swing. No ball. Classic you."],
+    ragatha: ["Look at you go! That's a COMBO, sweetie!", "Keep it bouncing! I'm so proud I could unravel!", "That was gorgeous! Do it again! Only if you want to!",
+      "Combo! I'm cheering with both button eyes!", "You and that ball are a TEAM! I made you matching scarves in my head!"],
+    kinger: ["THE PILLOW FORT SPINS! The enemy will never find us now!", "Fort integrity: excellent. Fort direction: all of them!",
+      "Wheee! I mean... tactical rotation!", "Who's knocking on my fort? Friend or bishop?!"],
+    zooble: ["Zooble bonus. Yay. I'm thrilled. Visibly.", "You rode my lane. Cool. Don't make it weird.", "Sure, take the points. Take my left arm too, it's loose.",
+      "Oh good, they named a bonus after me. Again."],
+    caineExit: ["You opened the EXIT! And behind it... a WALL! A lovely painted wall! Fifty thousand points for optimism!",
+      "Freedom at last! Freedom is, apparently, bricks. Hand-painted bricks! By ME!", "Congratulations! You've unlocked the door to MORE CIRCUS!",
+      "Ha-HA! Did you think it went somewhere? It goes somewhere! It goes to POINTS!"],
+    caineStart: ["Welcome to my PINBALL SPECTACULAR! Every bumper hand-polished by me, with my teeth!",
+      "Step right up! The ball is round, the table is tilted, and the fun is MANDATORY!"],
+    caineSave: ["Ball save! Nothing leaves the circus. Not even a ball!", "Ah-ah! That one's coming right back. House rules!"],
+    caineOver: ["Game over? Nonsense! It's merely an intermission with a scoreboard!", "What a show! Same time forever? Wonderful!"],
+  };
+  const heads = { pomni: $('h-pomni'), jax: $('h-jax'), ragatha: $('h-ragatha'), kinger: $('h-kinger'), zooble: $('h-zooble') };
+  const lastSay = {};
+  function speak(who, force) {
+    const now = performance.now();
+    if (!force && lastSay[who] && now - lastSay[who] < 4000) return;
+    lastSay[who] = now;
+    say(heads[who], pick(LINES[who]), 3000);
+  }
+  let lastCaine = 0;
+  function caineSay(list, force) {
+    const now = performance.now();
+    if (!force && now - lastCaine < 3000) return;
+    lastCaine = now;
+    caine.talk(pick(LINES[list]), 4200);
+  }
+
+  // ═══ table geometry (logical units) ═══
+  const W = 480, H = 880, R = 10;
+  const G = 1000;                 // tilted-table gravity, px/s²
+  const MAXV = 2800;
+  const walls = [];
+  const seg = (ax, ay, bx, by, o = {}) => { const s = { ax, ay, bx, by, e: 0.45, ...o }; walls.push(s); return s; };
+  const chain = (pts, o) => { for (let i = 0; i < pts.length - 1; i++) seg(pts[i][0], pts[i][1], pts[i + 1][0], pts[i + 1][1], o); };
+
+  // Dome: arc centred (240,240), r 220, from the right outer wall over to the left wall.
+  const dome = [];
+  for (let i = 0; i <= 48; i++) { const a = -i / 48 * Math.PI; dome.push([240 + 220 * Math.cos(a), 240 + 220 * Math.sin(a)]); }
+  chain(dome, { e: 0.35, art: 'dome' });
+  seg(460, 240, 460, 880, { art: 'outer' });        // right outer wall (plunger lane)
+  seg(20, 240, 20, 640, { art: 'outer' });          // left wall
+  seg(420, 290, 420, 880, { art: 'lane' });         // plunger-lane separator
+  seg(20, 640, 136, 766, { art: 'guide' });         // left inlane guide
+  seg(420, 640, 304, 766, { art: 'guide' });        // right inlane guide
+  // one-way gate at the top of the plunger lane: solid only from above
+  seg(420, 290, 460, 252, { oneWay: true, n0: norm(-38, -40), art: 'gate', e: 0.3 });
+  // Kinger's pillow-fort lane (left) and Zooble lane (right)
+  seg(72, 300, 72, 440, { art: 'guide' });
+  seg(368, 310, 368, 450, { art: 'guide' });
+  // Slingshots (kick face is the long inner edge)
+  const slings = [];
+  function sling(pts, kickIdx) {
+    for (let i = 0; i < 3; i++) {
+      const a = pts[i], b = pts[(i + 1) % 3];
+      const s = seg(a[0], a[1], b[0], b[1], { art: 'sling', e: 0.4 });
+      if (i === kickIdx) { s.kick = 650; s.flash = 0; }
+    }
+    slings.push({ pts, edge: walls[walls.length - 3 + kickIdx] });
+  }
+  sling([[70, 560], [118, 698], [70, 646]], 0);
+  sling([[370, 560], [370, 646], [322, 698]], 2);
+
+  function norm(x, y) { const l = Math.hypot(x, y) || 1; return { x: x / l, y: y / l }; }
+
+  // Pop bumpers
+  const bumpers = [
+    { x: 220, y: 236, r: 28, kind: 'caine', pts: 250, flash: 0 },
+    { x: 150, y: 318, r: 25, kind: 'bubble', pts: 100, flash: 0 },
+    { x: 292, y: 318, r: 25, kind: 'hat', pts: 100, flash: 0 },
+  ];
+  // E-X-I-T drop targets
+  const targets = 'EXIT'.split('').map((ch, i) => ({ ch, x: 160 + i * 40, y: 486, half: 15, down: false, flash: 0 }));
+  // Flippers
+  const FL = 66, FR = 9, FSPEED = 30;
+  const flippers = [
+    { px: 140, py: 770, rest: 0.52, up: -0.52, a: 0.52, w: 0, on: false, side: 'L' },
+    { px: 300, py: 770, rest: Math.PI - 0.52, up: Math.PI + 0.52, a: Math.PI - 0.52, w: 0, on: false, side: 'R' },
+  ];
+  // Plunger
+  const plunger = { pull: 0, pulling: false, y0: 832 };
+  const plungerY = () => plunger.y0 + plunger.pull * 34;
+  // Spinner (Kinger) + door
+  const spinner = { x: 46, y: 360, ang: 0, w: 0, halves: 0, burst: 0 };
+  const door = { x: 212, y: 70, w: 56, h: 78, open: 0, phase: 'closed', t: 0 };
+
+  // ═══ state ═══
+  let state = 'title', score = 0, balls = 3, ballNo = 1, best = 0, t = 0;
+  let ball = null, saveUntil = 0, saveArmed = false, launched = false, stillT = 0, exitCount = 0;
+  let combo = 0, comboT = -9, zoobleLevel = 1, respawnAt = 0, popups = [], scoreThisBall = 0;
+  try { best = parseInt(localStorage.getItem('tadc-pinball-best') || '0', 10) || 0; } catch (e) { /* storage blocked */ }
+  $('best').textContent = best.toLocaleString();
+
+  function newBall() { ball = { x: 440, y: plungerY() - R - 1, vx: 0, vy: 0, alive: true }; launched = false; saveArmed = false; stillT = 0; }
+  function resetGame() {
+    score = 0; balls = 3; ballNo = 1; combo = 0; zoobleLevel = 1; exitCount = 0; popups = []; scoreThisBall = 0;
+    targets.forEach((tg) => { tg.down = false; }); door.phase = 'closed'; door.open = 0;
+    newBall(); updateHud();
+  }
+  function updateHud() {
+    $('score').textContent = score.toLocaleString();
+    $('ball').textContent = state === 'over' ? '-' : `${ballNo}/3`;
+    $('best').textContent = Math.max(best, score).toLocaleString();
+  }
+  function award(pts, x, y, label, isCombo = true) {
+    if (state !== 'play') return;
+    score += pts; scoreThisBall += pts;
+    popups.push({ x, y, text: label ? `${label} +${pts.toLocaleString()}` : `+${pts}`, life: 0, big: !!label });
+    if (isCombo) {
+      combo = t - comboT < 1.6 ? combo + 1 : 1; comboT = t;
+      if (combo > 0 && combo % 7 === 0) { speak('ragatha', true); award(1000 * (combo / 7), x, y - 20, 'COMBO', false); }
+    }
+    updateHud();
+  }
+  const toScreen = (x, y) => { const r = cv.getBoundingClientRect(); return { x: r.left + x / W * r.width, y: r.top + y / H * r.height }; };
+
+  // ═══ physics ═══
+  function closest(px, py, ax, ay, bx, by) {
+    const dx = bx - ax, dy = by - ay, l2 = dx * dx + dy * dy;
+    let u = l2 ? ((px - ax) * dx + (py - ay) * dy) / l2 : 0;
+    u = Math.max(0, Math.min(1, u));
+    return { x: ax + dx * u, y: ay + dy * u, u };
+  }
+  // Push the ball out along n and reflect its velocity relative to a (possibly moving) surface.
+  function resolve(nx, ny, pen, e, svx = 0, svy = 0) {
+    ball.x += nx * pen; ball.y += ny * pen;
+    const rvx = ball.vx - svx, rvy = ball.vy - svy, vn = rvx * nx + rvy * ny;
+    if (vn < 0) {
+      ball.vx -= (1 + e) * vn * nx; ball.vy -= (1 + e) * vn * ny;
+      // a touch of rolling friction along the surface
+      const tx = -ny, ty = nx, vt = (ball.vx - svx) * tx + (ball.vy - svy) * ty;
+      ball.vx -= vt * 0.015 * tx; ball.vy -= vt * 0.015 * ty;
+      return -vn;
+    }
+    return 0;
+  }
+  function collideSeg(s) {
+    const q = closest(ball.x, ball.y, s.ax, s.ay, s.bx, s.by);
+    const dx = ball.x - q.x, dy = ball.y - q.y, d = Math.hypot(dx, dy);
+    if (d >= R || d === 0) return 0;
+    let nx = dx / d, ny = dy / d;
+    if (s.oneWay) {
+      if ((ball.x - s.ax) * s.n0.x + (ball.y - s.ay) * s.n0.y < 0) return 0;  // below the gate: pass through
+      if (ball.vx * s.n0.x + ball.vy * s.n0.y > 0) return 0;
+    }
+    const imp = resolve(nx, ny, R - d, s.e);
+    if (s.kick && imp > 40) {
+      ball.vx += nx * s.kick; ball.vy += ny * s.kick; s.flash = 1;
+      sfx('boing'); award(50, q.x, q.y);
+    }
+    return imp;
+  }
+  function stepFlipper(f, h) {
+    const target = f.on ? f.up : f.rest;
+    const prev = f.a, dir = Math.sign(target - f.a), maxStep = FSPEED * h;
+    f.a = Math.abs(target - f.a) <= maxStep ? target : f.a + dir * maxStep;
+    f.w = (f.a - prev) / h;
+  }
+  function collideFlipper(f) {
+    const tx = f.px + Math.cos(f.a) * FL, ty = f.py + Math.sin(f.a) * FL;
+    const q = closest(ball.x, ball.y, f.px, f.py, tx, ty);
+    const dx = ball.x - q.x, dy = ball.y - q.y, d = Math.hypot(dx, dy), rr = R + FR - q.u * 3;
+    if (d >= rr || d === 0) return;
+    const rx = q.x - f.px, ry = q.y - f.py;
+    const imp = resolve(dx / d, dy / d, rr - d, 0.3, -f.w * ry, f.w * rx);
+    if (imp > 500 && f.w !== 0) sfx('pop');
+  }
+  function collideBumper(b) {
+    const dx = ball.x - b.x, dy = ball.y - b.y, d = Math.hypot(dx, dy);
+    if (d >= b.r + R || d === 0) return;
+    const nx = dx / d, ny = dy / d;
+    resolve(nx, ny, b.r + R - d, 0.6);
+    const out = ball.vx * nx + ball.vy * ny;
+    const kick = Math.max(520, 900 - out);
+    ball.vx += nx * kick; ball.vy += ny * kick;
+    if (b.flash < 0.6) {
+      sfx(b.kind === 'bubble' ? 'pop' : 'honk');
+      award(b.pts, b.x, b.y - b.r);
+    }
+    b.flash = 1;
+  }
+  function collideTarget(tg) {
+    if (tg.down) return;
+    const q = closest(ball.x, ball.y, tg.x - tg.half, tg.y, tg.x + tg.half, tg.y);
+    const dx = ball.x - q.x, dy = ball.y - q.y, d = Math.hypot(dx, dy);
+    if (d >= R + 5 || d === 0) return;
+    resolve(dx / d, dy / d, R + 5 - d, 0.35);
+    tg.down = true; tg.flash = 1; sfx('ding');
+    award(500, tg.x, tg.y - 14, tg.ch);
+    if (targets.every((x) => x.down)) openExit();
+  }
+  function openExit() {
+    exitCount++;
+    window.TADC.mystery && window.TADC.mystery.find('stub-7'); // 🎟️ mystery clue: E-X-I-T opened the door
+    door.phase = 'opening'; door.t = 0;
+    const pts = 50000 * Math.min(exitCount, 4);
+    setTimeout(() => {
+      award(pts, 240, 140, 'EXIT', false);
+      sfx('fanfare');
+      const p = toScreen(240, 80); confetti(p.x, p.y, 120, 1.2);
+      caineSay('caineExit', true);
+    }, 450);
+  }
+  function crossings(px, py) {
+    // Kinger spinner: any pass across y=360 inside the left lane
+    if (ball.x > 20 && ball.x < 72 && (py - spinner.y) * (ball.y - spinner.y) < 0) {
+      spinner.w += Math.min(60, Math.abs(ball.vy) * 0.03);
+      spinner.burst = 0;
+    }
+    // Zooble lane: upward pass across y=330
+    if (ball.x > 368 && ball.x < 420 && py >= 330 && ball.y < 330 && ball.vy < 0) {
+      const pts = 5000 * zoobleLevel;
+      award(pts, 394, 300, 'ZOOBLE BONUS');
+      zoobleLevel = Math.min(5, zoobleLevel + 1);
+      sfx('fanfare'); speak('zooble', true);
+      const p = toScreen(394, 320); confetti(p.x, p.y, 40, 0.8);
+    }
+  }
+  function physicsStep(dt) {
+    // flipper motion is integrated per substep so fast swings never skip over the ball
+    const speed = ball && ball.alive ? Math.hypot(ball.vx, ball.vy) : 0;
+    const n = Math.max(10, Math.min(48, Math.ceil(speed * dt / 3)));
+    const h = dt / n;
+    for (let i = 0; i < n; i++) {
+      flippers.forEach((f) => stepFlipper(f, h));
+      if (!ball || !ball.alive) continue;
+      const px = ball.x, py = ball.y;
+      ball.vy += G * h;
+      ball.x += ball.vx * h; ball.y += ball.vy * h;
+      for (const s of walls) collideSeg(s);
+      for (const b of bumpers) collideBumper(b);
+      for (const tg of targets) collideTarget(tg);
+      for (const f of flippers) collideFlipper(f);
+      // plunger tip
+      if (ball.x > 420 && ball.y + R > plungerY()) { ball.y = plungerY() - R; if (ball.vy > 0) ball.vy = -ball.vy * 0.2; if (Math.abs(ball.vy) < 30) ball.vy = 0; }
+      const sp = Math.hypot(ball.vx, ball.vy);
+      if (sp > MAXV) { ball.vx *= MAXV / sp; ball.vy *= MAXV / sp; }
+      crossings(px, py);
+    }
+  }
+
+  // ═══ game loop ═══
+  function update(dt) {
+    t += dt;
+    if (plunger.pulling) plunger.pull = Math.min(1, plunger.pull + dt * 1.3);
+    physicsStep(dt);
+    bumpers.forEach((b) => { b.flash = Math.max(0, b.flash - dt * 4); });
+    walls.forEach((s) => { if (s.flash) s.flash = Math.max(0, s.flash - dt * 4); });
+    targets.forEach((tg) => { tg.flash = Math.max(0, tg.flash - dt * 3); });
+    // spinner
+    spinner.ang += spinner.w * dt; spinner.w *= Math.pow(0.4, dt);
+    if (spinner.w < 0.3) spinner.w = 0;
+    const halves = Math.floor(spinner.ang / Math.PI);
+    if (halves > spinner.halves) {
+      const k = halves - spinner.halves; spinner.halves = halves; spinner.burst += k;
+      sfx('tick'); award(100 * k, 46, 330, null, false);
+      if (spinner.burst === 6) { speak('kinger', true); award(2000, 46, 300, 'PILLOW FORT', true); }
+    }
+    // door sequence
+    if (door.phase === 'opening') { door.open = Math.min(1, door.open + dt * 1.6); if (door.open === 1) { door.phase = 'open'; door.t = 0; } }
+    else if (door.phase === 'open') { door.t += dt; if (door.t > 3.4) door.phase = 'closing'; }
+    else if (door.phase === 'closing') {
+      door.open = Math.max(0, door.open - dt * 1.2);
+      if (door.open === 0 && (!ball || ball.y > 530 || ball.y < 440)) { door.phase = 'closed'; targets.forEach((tg) => { tg.down = false; tg.flash = 1; }); }
+    }
+    popups.forEach((p) => { p.life += dt; }); popups = popups.filter((p) => p.life < 1.2);
+
+    if (state !== 'play' || !ball) return;
+    if (ball.alive) {
+      if (ball.x < 416 && !saveArmed && launched) { saveArmed = true; saveUntil = t + 8; }
+      // weak plunge or ball rolled back into the lane
+      if (launched && saveArmed && ball.x > 422 && ball.y > 700) { launched = false; speak('jax'); }
+      // anti-stuck nudge
+      if (ball.x < 420 && Math.hypot(ball.vx, ball.vy) < 15) { stillT += dt; if (stillT > 2.5) { ball.vy = -500; ball.vx = (Math.random() - 0.5) * 400; stillT = 0; } } else stillT = 0;
+      if (ball.y > H + 20) drain();
+    } else if (respawnAt && t >= respawnAt) {
+      respawnAt = 0; newBall();
+    }
+  }
+  function drain() {
+    ball.alive = false;
+    if (balls <= 0) return;
+    if (saveArmed && t < saveUntil) {
+      respawnAt = t + 0.8; caineSay('caineSave', true); sfx('boing');
+      popups.push({ x: 220, y: 700, text: 'BALL SAVED!', life: 0, big: true });
+      return;
+    }
+    sfx('glitch'); speak('pomni', true);
+    if (scoreThisBall < 2000) setTimeout(() => speak('jax'), 1200);
+    balls--; scoreThisBall = 0;
+    if (balls <= 0) { setTimeout(gameOver, 1400); return; }
+    ballNo++; updateHud(); respawnAt = t + 1.2;
+  }
+  function gameOver() {
+    if (state !== 'play') return;
+    state = 'over';
+    const newBest = score > best;
+    if (newBest) { best = score; try { localStorage.setItem('tadc-pinball-best', String(best)); } catch (e) { /* storage blocked */ } }
+    $('finalScore').textContent = score.toLocaleString();
+    $('bestLine').textContent = newBest ? '🎉 NEW HIGH SCORE! 🎉' : `Best: ${best.toLocaleString()}`;
+    $('overLine').textContent = pick(LINES.caineOver);
+    $('overPanel').classList.remove('hidden');
+    updateHud(); sfx(newBest ? 'fanfare' : 'honk');
+    if (newBest) confetti(innerWidth / 2, innerHeight / 3, 140, 1.2);
+  }
+
+  // ═══ input ═══
+  function flip(side, on) {
+    const f = flippers[side === 'L' ? 0 : 1];
+    if (f.on === on) return;
+    f.on = on;
+    if (on && state === 'play') {
+      sfx('tick');
+      if (ball && ball.alive && ball.x < 420 && ball.y < 520 && Math.random() < 0.3) speak('jax');
+    }
+  }
+  function pullStart() { if (state === 'play') { plunger.pulling = true; $('launch').classList.add('pulling'); } }
+  function pullRelease() {
+    if (!plunger.pulling) return;
+    plunger.pulling = false; $('launch').classList.remove('pulling');
+    if (state === 'play' && ball && ball.alive && ball.x > 420 && ball.y > plunger.y0 - R - 6) {
+      ball.vy = -(700 + 1900 * plunger.pull); launched = true; sfx('boing');
+    }
+    plunger.pull = 0;
+  }
+  const KEYS_L = ['ArrowLeft', 'KeyZ', 'ShiftLeft'], KEYS_R = ['ArrowRight', 'KeyM', 'Slash', 'ShiftRight'], KEYS_P = ['Space', 'ArrowDown', 'Enter'];
+  addEventListener('keydown', (e) => {
+    if (e.code === 'Enter' && state !== 'play') return;
+    if (KEYS_L.includes(e.code)) { flip('L', true); e.preventDefault(); }
+    else if (KEYS_R.includes(e.code)) { flip('R', true); e.preventDefault(); }
+    else if (KEYS_P.includes(e.code)) { if (!e.repeat) pullStart(); e.preventDefault(); }
+  });
+  addEventListener('keyup', (e) => {
+    if (KEYS_L.includes(e.code)) flip('L', false);
+    else if (KEYS_R.includes(e.code)) flip('R', false);
+    else if (KEYS_P.includes(e.code)) pullRelease();
+  });
+  addEventListener('blur', () => { flip('L', false); flip('R', false); pullRelease(); });
+  const cv = $('table'), ctx = cv.getContext('2d');
+  const touches = new Map();
+  cv.addEventListener('pointerdown', (e) => {
+    const r = cv.getBoundingClientRect(), side = e.clientX - r.left < r.width / 2 ? 'L' : 'R';
+    touches.set(e.pointerId, side); flip(side, true);
+    try { cv.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    e.preventDefault();
+  });
+  const endTouch = (e) => {
+    const side = touches.get(e.pointerId); if (!side) return;
+    touches.delete(e.pointerId);
+    if (![...touches.values()].includes(side)) flip(side, false);
+  };
+  ['pointerup', 'pointercancel'].forEach((ev) => cv.addEventListener(ev, endTouch));
+  const lb = $('launch');
+  lb.addEventListener('pointerdown', (e) => { e.preventDefault(); pullStart(); try { lb.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ } });
+  ['pointerup', 'pointercancel'].forEach((ev) => lb.addEventListener(ev, pullRelease));
+  lb.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'Enter') e.stopPropagation(); });
+
+  function start() {
+    $('startPanel').classList.add('hidden'); $('overPanel').classList.add('hidden');
+    state = 'play'; resetGame(); caineSay('caineStart', true); sfx('fanfare');
+  }
+  $('startBtn').addEventListener('click', start);
+  $('againBtn').addEventListener('click', start);
+
+  // ═══ sizing ═══
+  let scale = 1, DPR = 1;
+  function resize() {
+    const st = $('stage');
+    const aw = Math.min(innerWidth - 16, st.clientWidth) - 22, ah = st.clientHeight - 22;
+    scale = Math.max(0.2, Math.min(aw / W, ah / H));
+    DPR = Math.min(2, devicePixelRatio || 1);
+    cv.style.width = Math.floor(W * scale) + 'px'; cv.style.height = Math.floor(H * scale) + 'px';
+    cv.width = Math.floor(W * scale * DPR); cv.height = Math.floor(H * scale * DPR);
+  }
+  addEventListener('resize', resize);
+  if (window.ResizeObserver) new ResizeObserver(resize).observe($('stage'));
+  if (document.fonts && document.fonts.ready) document.fonts.ready.then(resize).catch(() => {});
+
+  // ═══ drawing ═══
+  const INK = '#1b1b2f';
+  function line(ax, ay, bx, by, w, col) { ctx.strokeStyle = col; ctx.lineWidth = w; ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); }
+  function drawBackground() {
+    const g = ctx.createRadialGradient(240, 200, 40, 240, 420, 640);
+    g.addColorStop(0, '#3a1f6e'); g.addColorStop(1, '#120a26');
+    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+    // tent rays from the door
+    ctx.save(); ctx.globalAlpha = 0.13;
+    for (let i = 0; i < 14; i++) {
+      const a0 = Math.PI * (0.05 + i / 14 * 0.9), a1 = a0 + Math.PI * 0.9 / 28;
+      ctx.fillStyle = i % 2 ? '#e3243b' : '#ffd34d';
+      ctx.beginPath(); ctx.moveTo(240, 80); ctx.lineTo(240 + Math.cos(a0) * 900, 80 + Math.sin(a0) * 900); ctx.lineTo(240 + Math.cos(a1) * 900, 80 + Math.sin(a1) * 900); ctx.fill();
+    }
+    ctx.restore();
+    // checkered floor near the flippers
+    ctx.save(); ctx.globalAlpha = 0.12;
+    for (let y = 560; y < H; y += 24) for (let x = 20; x < 420; x += 24) if (((x + y) / 24) % 2 === 0) { ctx.fillStyle = '#fff'; ctx.fillRect(x, y, 24, 24); }
+    ctx.restore();
+    // logo
+    ctx.save(); ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(255,211,77,.22)'; ctx.font = "26px Rye, serif";
+    ctx.fillText('SPECTACULAR', 220, 620); ctx.font = "15px Rye, serif"; ctx.fillText("CAINE'S PINBALL", 220, 592); ctx.restore();
+    // plunger lane
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.fillRect(420, 260, 40, H - 260);
+  }
+  function drawDoor() {
+    const { x, y, w, h } = door;
+    // painted wall behind the door
+    ctx.save();
+    ctx.fillStyle = '#b5523b'; ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#7a2f22'; ctx.lineWidth = 1.5;
+    for (let r = 0; r < 8; r++) {
+      const yy = y + r * (h / 8); line(x, yy, x + w, yy, 1.5, '#7a2f22');
+      for (let c = (r % 2) * 7; c < w; c += 14) line(x + c, yy, x + c, yy + h / 8, 1.5, '#7a2f22');
+    }
+    if (door.open > 0.6) { ctx.fillStyle = '#fff7d6'; ctx.font = "bold 10px Fredoka, sans-serif"; ctx.textAlign = 'center'; ctx.fillText('(painted)', x + w / 2, y + h / 2 + 3); }
+    // the door itself swings on its left hinge
+    const sw = Math.cos(door.open * Math.PI * 0.48);
+    ctx.fillStyle = door.open > 0 ? '#c41d31' : '#e3243b';
+    ctx.fillRect(x, y, w * sw, h);
+    ctx.strokeStyle = INK; ctx.lineWidth = 3; ctx.strokeRect(x, y, w * sw, h);
+    if (sw > 0.2) {
+      ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.arc(x + w * sw - 9 * sw, y + h / 2 + 6, 3.5, 0, 7); ctx.fill();
+      ctx.strokeStyle = '#8a0c1a'; ctx.lineWidth = 2; ctx.strokeRect(x + 7 * sw, y + 8, (w - 14) * sw, h / 2 - 12);
+    }
+    ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.strokeRect(x - 3, y - 3, w + 6, h + 3);
+    // EXIT sign
+    const lit = targets.filter((tg) => tg.down).length;
+    ctx.fillStyle = INK; ctx.fillRect(x - 4, y - 22, w + 8, 18);
+    ctx.font = "bold 14px Fredoka, sans-serif"; ctx.textAlign = 'center';
+    'EXIT'.split('').forEach((ch, i) => {
+      const on = door.phase !== 'closed' ? (Math.floor(t * 6) % 2 === 0) : i < 4 && targets[i].down;
+      ctx.fillStyle = on ? '#5dff8c' : 'rgba(93,255,140,.25)';
+      ctx.fillText(ch, x + 10 + i * 12, y - 8);
+    });
+    ctx.restore();
+    return lit;
+  }
+  function drawWalls() {
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    // dome as one path
+    ctx.beginPath(); dome.forEach((p, i) => (i ? ctx.lineTo(p[0], p[1]) : ctx.moveTo(p[0], p[1])));
+    ctx.strokeStyle = INK; ctx.lineWidth = 12; ctx.stroke(); ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 4; ctx.stroke();
+    for (const s of walls) {
+      if (s.art === 'dome' || s.art === 'sling') continue;
+      line(s.ax, s.ay, s.bx, s.by, s.art === 'gate' ? 6 : 11, INK);
+      line(s.ax, s.ay, s.bx, s.by, s.art === 'gate' ? 2 : 4, s.art === 'guide' ? '#e3243b' : s.art === 'gate' ? '#cbbff0' : '#ffd34d');
+    }
+    // slings
+    for (const sl of slings) {
+      const p = sl.pts, f = sl.edge.flash;
+      ctx.beginPath(); ctx.moveTo(p[0][0], p[0][1]); ctx.lineTo(p[1][0], p[1][1]); ctx.lineTo(p[2][0], p[2][1]); ctx.closePath();
+      ctx.fillStyle = f > 0 ? `rgba(255,211,77,${0.4 + f * 0.6})` : '#2f5bd8'; ctx.fill();
+      ctx.strokeStyle = INK; ctx.lineWidth = 5; ctx.stroke();
+      line(sl.edge.ax, sl.edge.ay, sl.edge.bx, sl.edge.by, 5, f > 0 ? '#fff' : '#e3243b');
+    }
+  }
+  function drawLanes() {
+    ctx.save(); ctx.textAlign = 'center';
+    // Kinger's pillow fort
+    ctx.fillStyle = 'rgba(255,255,255,.08)'; ctx.fillRect(22, 300, 48, 140);
+    const sx = spinner.x, sy = spinner.y, c = Math.cos(spinner.ang);
+    ctx.fillStyle = '#f2e6ff'; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(sx - 20, sy - 12 * Math.abs(c) - 1, 40, 24 * Math.abs(c) + 2, 8); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = c > 0 ? '#8a5fd1' : '#ffd34d'; ctx.beginPath(); ctx.arc(sx, sy, 4, 0, 7); ctx.fill();
+    line(sx - 24, sy, sx + 24, sy, 3, INK);
+    ctx.fillStyle = '#cbbff0'; ctx.font = "bold 9px Fredoka, sans-serif";
+    ctx.save(); ctx.translate(46, 410); ctx.rotate(-Math.PI / 2); ctx.fillText('PILLOW FORT', 0, 3); ctx.restore();
+    // Zooble lane
+    ctx.fillStyle = 'rgba(93,255,140,.10)'; ctx.fillRect(370, 312, 48, 138);
+    for (let i = 0; i < 3; i++) {
+      const yy = 430 - i * 30, lit = Math.floor(t * 3 - i) % 3 === 0;
+      ctx.fillStyle = lit ? '#5dff8c' : 'rgba(93,255,140,.3)';
+      ctx.beginPath(); ctx.moveTo(394, yy - 10); ctx.lineTo(404, yy + 4); ctx.lineTo(384, yy + 4); ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#5dff8c'; ctx.font = "bold 9px Fredoka, sans-serif";
+    ctx.save(); ctx.translate(394, 350); ctx.rotate(-Math.PI / 2); ctx.fillText(`ZOOBLE x${zoobleLevel}`, 0, 3); ctx.restore();
+    ctx.restore();
+  }
+  function drawBumpers() {
+    for (const b of bumpers) {
+      const s = 1 + b.flash * 0.12;
+      ctx.save(); ctx.translate(b.x, b.y); ctx.scale(s, s);
+      ctx.fillStyle = INK; ctx.beginPath(); ctx.arc(3, 4, b.r + 4, 0, 7); ctx.fill();
+      ctx.fillStyle = b.flash > 0 ? '#ffffff' : (b.kind === 'caine' ? '#ffd34d' : b.kind === 'bubble' ? '#2f5bd8' : '#e3243b');
+      ctx.beginPath(); ctx.arc(0, 0, b.r + 4, 0, 7); ctx.fill();
+      ctx.lineWidth = 3; ctx.strokeStyle = INK; ctx.stroke();
+      ctx.save(); ctx.beginPath(); ctx.arc(0, 0, b.r - 2, 0, 7); ctx.clip();
+      ctx.fillStyle = b.kind === 'hat' ? '#ffd34d' : '#1a1030'; ctx.fillRect(-b.r, -b.r, b.r * 2, b.r * 2);
+      if (b.kind === 'caine' && caineImg.complete && caineImg.naturalWidth) ctx.drawImage(caineImg, 14, 0, 112, 120, -b.r, -b.r - 2, b.r * 2, b.r * 2 + 4);
+      else if (b.kind === 'bubble' && bubbleImg.complete && bubbleImg.naturalWidth) ctx.drawImage(bubbleImg, -b.r + 2, -b.r + 2, b.r * 2 - 4, b.r * 2 - 4);
+      else if (b.kind === 'hat') {
+        ctx.fillStyle = '#1a1030'; ctx.fillRect(-11, -16, 22, 22); ctx.fillStyle = '#e3243b'; ctx.fillRect(-11, 0, 22, 5);
+        ctx.fillStyle = '#140c24'; ctx.beginPath(); ctx.ellipse(0, 7, 18, 4, 0, 0, 7); ctx.fill();
+      }
+      ctx.restore(); ctx.restore();
+    }
+  }
+  function drawTargets() {
+    ctx.save(); ctx.textAlign = 'center'; ctx.font = "bold 14px Fredoka, sans-serif";
+    for (const tg of targets) {
+      if (tg.down) {
+        ctx.fillStyle = 'rgba(93,255,140,.35)'; ctx.fillRect(tg.x - tg.half, tg.y - 2, tg.half * 2, 4);
+        ctx.fillStyle = '#5dff8c'; ctx.fillText(tg.ch, tg.x, tg.y + 22);
+      } else {
+        ctx.fillStyle = tg.flash > 0 ? '#fff' : '#fff7d6'; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.roundRect(tg.x - tg.half, tg.y - 9, tg.half * 2, 18, 4); ctx.fill(); ctx.stroke();
+        ctx.fillStyle = '#e3243b'; ctx.fillText(tg.ch, tg.x, tg.y + 5);
+      }
+    }
+    ctx.restore();
+  }
+  function drawFlippers() {
+    for (const f of flippers) {
+      ctx.save(); ctx.translate(f.px, f.py); ctx.rotate(f.a);
+      ctx.beginPath(); ctx.arc(0, 0, FR + 1, Math.PI / 2, Math.PI * 1.5); ctx.lineTo(FL, -FR + 4); ctx.arc(FL, 0, FR - 4, -Math.PI / 2, Math.PI / 2); ctx.closePath();
+      ctx.fillStyle = '#fff7d6'; ctx.fill(); ctx.strokeStyle = INK; ctx.lineWidth = 4; ctx.stroke();
+      line(6, 0, FL - 6, 0, 3, '#e3243b');
+      ctx.fillStyle = '#ffd34d'; ctx.beginPath(); ctx.arc(0, 0, 4, 0, 7); ctx.fill();
+      ctx.restore();
+    }
+  }
+  function drawPlunger() {
+    const y = plungerY();
+    ctx.fillStyle = '#8a8fb0'; ctx.fillRect(436, y, 8, H - y);
+    ctx.fillStyle = '#e3243b'; ctx.strokeStyle = INK; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(424, y, 32, 10, 3); ctx.fill(); ctx.stroke();
+    // spring coils
+    ctx.strokeStyle = '#ffd34d'; ctx.lineWidth = 2; ctx.beginPath();
+    for (let i = 0; i <= 8; i++) { const yy = y + 12 + i * (H - y - 14) / 8; ctx.lineTo(i % 2 ? 452 : 428, yy); }
+    ctx.stroke();
+    if (plunger.pull > 0) { ctx.fillStyle = '#ffd34d'; ctx.fillRect(464, H - 10 - plunger.pull * 120, 10, plunger.pull * 120); }
+  }
+  function drawBall() {
+    if (!ball || !ball.alive) return;
+    const g = ctx.createRadialGradient(ball.x - 3, ball.y - 4, 1, ball.x, ball.y, R);
+    g.addColorStop(0, '#ffffff'); g.addColorStop(0.5, '#cfd4e8'); g.addColorStop(1, '#6b7096');
+    ctx.fillStyle = 'rgba(0,0,0,.35)'; ctx.beginPath(); ctx.arc(ball.x + 3, ball.y + 4, R, 0, 7); ctx.fill();
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(ball.x, ball.y, R, 0, 7); ctx.fill();
+    ctx.strokeStyle = INK; ctx.lineWidth = 1.5; ctx.stroke();
+  }
+  function drawOverlay() {
+    ctx.save(); ctx.textAlign = 'center';
+    // ball save light
+    const saving = state === 'play' && saveArmed && t < saveUntil && ball && ball.alive;
+    ctx.fillStyle = saving ? (Math.floor(t * 4) % 2 ? '#5dff8c' : '#2a8f50') : 'rgba(255,255,255,.12)';
+    ctx.font = "bold 11px Fredoka, sans-serif"; ctx.fillText('BALL SAVE', 220, 846);
+    if (state === 'play' && ball && ball.alive && ball.x > 420 && !launched) {
+      ctx.fillStyle = '#ffd34d'; ctx.font = "bold 12px Fredoka, sans-serif";
+      ctx.save(); ctx.translate(440, 560); ctx.rotate(-Math.PI / 2); ctx.fillText('HOLD SPACE · RELEASE', 0, 4); ctx.restore();
+    }
+    for (const p of popups) {
+      const a = 1 - p.life / 1.2;
+      ctx.globalAlpha = a; ctx.font = p.big ? "20px Rye, serif" : "bold 13px Fredoka, sans-serif";
+      ctx.lineWidth = 4; ctx.strokeStyle = INK; ctx.strokeText(p.text, Math.min(380, Math.max(100, p.x)), p.y - p.life * 40);
+      ctx.fillStyle = p.big ? '#ffd34d' : '#fff'; ctx.fillText(p.text, Math.min(380, Math.max(100, p.x)), p.y - p.life * 40);
+    }
+    ctx.restore();
+  }
+  function draw() {
+    ctx.setTransform(scale * DPR, 0, 0, scale * DPR, 0, 0);
+    drawBackground(); drawDoor(); drawLanes(); drawWalls(); drawTargets(); drawBumpers(); drawPlunger(); drawFlippers(); drawBall(); drawOverlay();
+  }
+
+  let last = 0, acc = 0;
+  const STEP = 1 / 120;
+  function frame(now) {
+    const dt = Math.min(0.05, last ? (now - last) / 1000 : 0); last = now; acc += dt;
+    while (acc >= STEP) { update(STEP); acc -= STEP; }
+    draw();
+    requestAnimationFrame(frame);
+  }
+  resize(); newBall(); draw(); requestAnimationFrame(frame);
+
+  // ═══ debug hook (only with ?debug) ═══
+  if (/[?&]debug\b/.test(location.search)) {
+    window.pinballDebug = {
+      get state() { return { state, score, balls, ballNo, ball: ball && { ...ball }, targets: targets.map((x) => x.down), door: door.phase, spinner: spinner.halves, zoobleLevel, saveArmed, saveUntil, t }; },
+      step(n = 1) { for (let i = 0; i < n; i++) update(STEP); draw(); return this.state; },
+      start, flip, pullStart, pullRelease,
+      place(x, y, vx = 0, vy = 0, noSave = false) { ball = { x, y, vx, vy, alive: true }; launched = true; if (noSave) { saveArmed = true; saveUntil = 0; } },
+      plunge(power = 1) { pullStart(); plunger.pull = power; pullRelease(); },
+    };
+  }
+})();
+</script>
+</body>
+</html>

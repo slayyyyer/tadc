@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Toaster Showdown</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8D%9E%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--void:#0b0718;--chrome:#dfe6f2}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:var(--void);color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:
+      radial-gradient(ellipse at 50% -10%,rgba(47,91,216,.45),transparent 55%),
+      radial-gradient(ellipse at 50% 120%,rgba(227,36,59,.35),transparent 55%),
+      repeating-conic-gradient(from 0deg at 50% -20%,rgba(255,211,77,.05) 0 6deg,transparent 6deg 12deg),
+      var(--void);background-attachment:fixed;padding:12px 16px 90px;overflow-x:hidden}
+  button{font-family:inherit}
+  :focus-visible{outline:4px solid var(--gold);outline-offset:3px}
+
+  header{text-align:center;margin:4px auto 10px;max-width:1100px}
+  .ep{display:inline-block;font:700 12px 'Fredoka';letter-spacing:.18em;text-transform:uppercase;color:var(--ink);background:var(--gold);
+      border:3px solid var(--ink);border-radius:999px;padding:3px 12px;box-shadow:3px 3px 0 var(--red)}
+  h1{font-family:'Rye';font-weight:400;margin:8px 0 2px;font-size:clamp(22px,4.2vw,44px);line-height:1.1;color:var(--cream);
+     text-shadow:0 3px 0 var(--red),0 6px 0 var(--ink)}
+  .marquee{font-size:14px;color:#cbbff0;margin:0}
+
+  .stage{display:grid;grid-template-columns:minmax(170px,230px) 1fr minmax(170px,230px);gap:16px;max-width:1100px;margin:0 auto;align-items:start}
+  .side{display:flex;flex-direction:column;gap:12px;align-items:center}
+  .who{position:relative;cursor:pointer;text-align:center;-webkit-tap-highlight-color:transparent;border-radius:16px}
+  .who .tag{display:inline-block;margin-top:2px;font:700 12px 'Fredoka';letter-spacing:.08em;text-transform:uppercase;background:var(--ink);
+       color:var(--cream);border:2px solid var(--gold);border-radius:8px;padding:2px 8px}
+  .who svg{display:block;width:100%;height:auto;filter:drop-shadow(5px 6px 0 rgba(0,0,0,.55))}
+  #host{width:min(200px,100%)}
+  #host svg{animation:strut 2.6s ease-in-out infinite;transform-origin:50% 100%}
+  #host.brag svg{animation:brag .6s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes strut{50%{transform:rotate(-2deg) translateY(-3px)}}
+  @keyframes brag{40%{transform:scale(1.12) rotate(4deg)}}
+  #host .host-toast{transition:transform .25s}
+  #host.pop .host-toast{transform:translateY(-14px)}
+  #caine{width:min(120px,60%)}
+  #oracle{width:min(150px,100%)}
+  #oracle svg{animation:hum 3.4s ease-in-out infinite}
+  @keyframes hum{50%{transform:translateY(-4px)}}
+  #oracle.shake svg{animation:jiggle .5s}
+  @keyframes jiggle{20%{transform:rotate(-6deg)}40%{transform:rotate(5deg)}60%{transform:rotate(-3deg)}80%{transform:rotate(2deg)}}
+  .gumball{position:absolute;left:50%;top:86%;width:18px;height:18px;margin-left:-9px;border-radius:50%;border:2px solid var(--ink);opacity:0;pointer-events:none}
+  .gumball.drop{animation:gumdrop 1.1s cubic-bezier(.3,.1,.5,1) forwards}
+  @keyframes gumdrop{0%{opacity:1;transform:translate(0,-10px) scale(.5)}35%{transform:translate(18px,22px) scale(1)}55%{transform:translate(30px,6px)}
+     75%{transform:translate(40px,24px)}90%{opacity:1}100%{opacity:0;transform:translate(48px,24px)}}
+
+  #jax{width:min(120px,70%);--strain:0}
+  #jax svg{animation:jaxshake calc(1.2s - var(--strain) * .009s) linear infinite}
+  @keyframes jaxshake{0%,100%{transform:translate(0,0)}25%{transform:translate(calc(var(--strain) * .03px),calc(var(--strain) * -.02px)) rotate(calc(var(--strain) * .03deg))}
+     75%{transform:translate(calc(var(--strain) * -.03px),0) rotate(calc(var(--strain) * -.03deg))}}
+  #jax.glitch svg{animation:jaxglitch .12s steps(2) 8;filter:hue-rotate(160deg) drop-shadow(5px 6px 0 rgba(0,0,0,.55))}
+  @keyframes jaxglitch{0%{transform:translate(-6px,2px) skewX(10deg)}100%{transform:translate(6px,-2px) skewX(-10deg)}}
+  .patch{position:absolute;left:-8px;top:38%;transform:rotate(-14deg);background:#ff7eb6;color:var(--ink);font:700 10px/1.1 'Fredoka';
+         border:2px solid var(--ink);border-radius:6px;padding:2px 5px;box-shadow:2px 2px 0 var(--ink);white-space:nowrap}
+  .sweat{position:absolute;right:18%;top:6%;width:10px;height:14px;background:#8fd3ff;border:2px solid var(--ink);border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+         opacity:calc(var(--strain) / 100);animation:drip 1.4s ease-in infinite}
+  @keyframes drip{0%{transform:translateY(0)}100%{transform:translateY(16px);opacity:0}}
+  .meter{width:min(170px,100%);font:700 11px 'Fredoka';letter-spacing:.06em;text-transform:uppercase;color:#cbbff0;text-align:center}
+  .meter .bar{height:12px;margin-top:3px;border:3px solid var(--ink);border-radius:999px;background:#2a2148;overflow:hidden;box-shadow:2px 2px 0 var(--ink)}
+  .meter .bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,#5fd38d,var(--gold),var(--red));transition:width .4s}
+
+  .board-card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:22px;box-shadow:8px 8px 0 var(--red);padding:16px 16px 18px;position:relative}
+  .round-name{font-family:'Rye';font-size:clamp(18px,2.6vw,26px);text-align:center;margin:0}
+  .round-sub{text-align:center;font-size:14px;margin:2px 0 10px;color:#5c3a99}
+  .scores{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;margin-bottom:12px}
+  .chip{font:400 20px/1 'VT323',monospace;background:var(--ink);color:var(--cream);border-radius:10px;padding:5px 10px;border:2px solid var(--ink)}
+  .chip b{color:var(--gold);font-weight:400}
+  .legend{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:4px 6px;font-size:13px;margin:0 0 12px}
+  .legend .sw{display:inline-flex;align-items:center;gap:4px;font-weight:600}
+  .legend .sw i{width:16px;height:16px;border-radius:6px 6px 3px 3px;border:2px solid var(--ink);display:inline-block}
+  .legend .arrow{opacity:.6}
+
+  #board{display:grid;gap:10px;justify-content:center;margin:0 auto}
+  .slot{--size:min(96px,calc((100vw - 92px) / var(--cols)));width:var(--size);height:calc(var(--size) * 1.12);position:relative;padding:0;border:none;background:none;cursor:pointer;
+        -webkit-tap-highlight-color:transparent;touch-action:manipulation;border-radius:16px}
+  .slot .box{position:absolute;left:4%;right:4%;bottom:0;height:52%;border:4px solid var(--ink);border-radius:14px 14px 10px 10px;
+        background:linear-gradient(90deg,#9aa6bc,#f4f7fc 38%,#c9d2e2 62%,#7d889e);box-shadow:3px 3px 0 var(--ink);z-index:2}
+  .slot .box::before{content:'';position:absolute;left:14%;right:14%;top:-4px;height:8px;background:var(--ink);border-radius:4px}
+  .slot .lever{position:absolute;right:-9px;top:14%;width:9px;height:34%;background:var(--ink);border-radius:4px}
+  .slot .lever::after{content:'';position:absolute;left:-2px;top:0;width:13px;height:10px;background:var(--gold);border:2px solid var(--ink);border-radius:4px;transition:top .12s}
+  .slot.pressed .lever::after{top:calc(100% - 10px)}
+  .slot .slice{position:absolute;left:20%;right:20%;bottom:34%;height:52%;border:4px solid var(--crust,#b07a2e);border-radius:40% 40% 10% 10%/50% 50% 10% 10%;
+        background:var(--shade,#f7e6b5);z-index:1;transition:background .25s,border-color .25s}
+  .slot .slice::after{content:'';position:absolute;inset:18% 22% 30%;border-radius:40%;background:rgba(255,255,255,.18)}
+  .slot.anim .slice{animation:toast .45s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes toast{0%{transform:translateY(0)}35%{transform:translateY(55%)}100%{transform:translateY(0)}}
+  .slot .num{position:absolute;left:8%;bottom:8%;z-index:3;font:700 12px/1 'Fredoka';color:var(--ink)}
+  .slot .goal{position:absolute;right:-2px;top:-4px;z-index:4;width:clamp(22px,calc(var(--size) * .34),30px);height:clamp(22px,calc(var(--size) * .34),30px);border-radius:50%;background:#fff;border:3px solid var(--ink);
+        display:flex;align-items:center;justify-content:center;box-shadow:2px 2px 0 var(--ink)}
+  .slot .goal i{width:14px;height:13px;border:2px solid var(--gcrust);background:var(--gshade);border-radius:40% 40% 15% 15%/50% 50% 15% 15%}
+  .slot.match .goal{background:#5fd38d}
+  .slot.match .box{box-shadow:3px 3px 0 var(--ink),0 0 0 4px #5fd38d}
+  .slot.affected .box{box-shadow:3px 3px 0 var(--ink),0 0 0 4px var(--gold)}
+  .slot.prophecy .box{animation:prophecy .5s ease-in-out 5 alternate;box-shadow:3px 3px 0 var(--ink),0 0 0 5px #b07cff}
+  @keyframes prophecy{to{transform:translateY(-6px)}}
+  .board-card.won #board{pointer-events:none}
+
+  .controls{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:16px}
+  .btn{font:700 15px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:9px 16px;cursor:pointer;
+       box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block;transition:transform .1s,box-shadow .1s;touch-action:manipulation}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.red{background:var(--red);color:#fff}
+  .btn.blue{background:var(--blue);color:#fff}
+  .btn.purple{background:#b07cff}
+  .btn[disabled]{opacity:.45;cursor:not-allowed}
+  .keys{text-align:center;font-size:12px;color:#5c3a99;margin-top:10px}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30}
+  #music{position:fixed;right:14px;bottom:14px;z-index:30}
+
+  .panel{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9600;background:rgba(7,4,15,.74);backdrop-filter:blur(3px);padding:16px}
+  .panel.hidden{display:none}
+  .card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:20px;box-shadow:8px 8px 0 #8a0c1a;padding:20px 22px;max-width:min(540px,100%);
+        text-align:center;max-height:calc(100vh - 32px);overflow:auto;animation:cardin .4s cubic-bezier(.3,1.6,.5,1)}
+  @keyframes cardin{from{transform:scale(.7) rotate(-4deg);opacity:0}}
+  .card h2{font-family:'Rye';font-weight:400;margin:4px 0 8px;font-size:clamp(22px,4vw,34px);line-height:1.15}
+  .card p{margin:6px 0;line-height:1.45}
+  .card .stars{font-size:40px;letter-spacing:6px;margin:4px 0}
+  .card .stars .dim{filter:grayscale(1);opacity:.35}
+  .card .big{font:400 30px/1.1 'VT323',monospace;color:var(--red)}
+  .card .mini{display:flex;justify-content:center;gap:10px;align-items:flex-end;margin-bottom:4px}
+  .card .mini > div{width:70px}
+  .card .mini svg{width:100%;height:auto}
+  .card ul{text-align:left;margin:8px auto;padding-left:20px;max-width:420px;font-size:15px;line-height:1.45}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  .tadc-speech.host{background:#eef3fb;border-color:var(--blue);box-shadow:5px 5px 0 var(--blue)}
+  .tadc-speech.host::after{border-top-color:var(--blue)}
+  .tadc-speech.host.below::after{border-top-color:transparent;border-bottom-color:var(--blue)}
+  .tadc-speech.oracle{background:#f1e6ff;border-color:#5c3a99;box-shadow:5px 5px 0 #5c3a99;font-style:italic}
+  .tadc-speech.oracle::after{border-top-color:#5c3a99}
+  .tadc-speech.oracle.below::after{border-top-color:transparent;border-bottom-color:#5c3a99}
+  .tadc-speech.jax{background:#ffe3f1;border-color:#a03b6c;box-shadow:5px 5px 0 #a03b6c}
+  .tadc-speech.jax::after{border-top-color:#a03b6c}
+  .tadc-speech.jax.below::after{border-top-color:transparent;border-bottom-color:#a03b6c}
+
+  @media (max-width:860px){
+    .stage{grid-template-columns:1fr}
+    .side{flex-direction:row;justify-content:center;align-items:flex-end;flex-wrap:wrap}
+    #host{width:140px}
+    #caine{width:84px}
+    #oracle{width:104px}
+    #jax{width:80px}
+    .meter{width:130px}
+    .side.right{order:3}
+  }
+  @media (prefers-reduced-motion:reduce){*{animation-duration:.01ms !important;animation-iteration-count:1 !important}}
+</style>
+</head>
+<body>
+<header>
+  <span class="ep">Adventure 09 · Episode 1</span>
+  <h1>A Very Absolutely Normal Night at the Toaster Showdown</h1>
+  <p class="marquee">Live from Countertop Stage B. Nothing has been tampered with. Especially not Jax.</p>
+</header>
+
+<main class="stage">
+  <section class="side left" aria-label="Hosts">
+    <div class="who" id="host"><div id="hostArt"></div><span class="tag">Toastmaster Crispin</span></div>
+    <div class="who" id="caine"><div id="caineArt"></div><span class="tag">Caine · Producer</span></div>
+  </section>
+
+  <section class="board-card" id="boardCard" aria-label="Puzzle board">
+    <p class="round-name" id="roundName">Round 1</p>
+    <p class="round-sub" id="roundSub"></p>
+    <div class="scores">
+      <span class="chip">ROUND <b id="roundNo">1/4</b></span>
+      <span class="chip">MOVES <b id="moves">0</b></span>
+      <span class="chip">PAR <b id="par">0</b></span>
+      <span class="chip">MATCHED <b id="matched">0/0</b></span>
+    </div>
+    <div class="legend" id="legend"></div>
+    <div id="board" role="group" aria-label="Toaster slots. Use arrow keys to move, Enter or Space to pull a lever."></div>
+    <div class="controls">
+      <button class="btn purple" id="hintBtn">🔮 Ask The Oracle (<span id="gum">3</span>)</button>
+      <button class="btn blue" id="undoBtn">↶ Undo</button>
+      <button class="btn red" id="resetBtn">⟲ Re-bread</button>
+    </div>
+    <div class="keys">👆 tap a toaster to pull its lever · ⌨️ arrows + Enter · U undo · R reset · O oracle</div>
+  </section>
+
+  <section class="side right" aria-label="Guests">
+    <div class="who" id="oracle"><div id="oracleArt"></div><span class="gumball" id="gumball"></span><span class="tag">The Oracle</span></div>
+    <div class="who" id="jax"><div id="jaxArt"></div><span class="patch">NICENESS PATCH v1</span><span class="sweat"></span><span class="tag">Jax (?!)</span></div>
+    <div class="meter" aria-hidden="true">Jax strain-o-meter<div class="bar"><i id="strainBar"></i></div></div>
+  </section>
+</main>
+
+<div class="sr" aria-live="polite" id="live"></div>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+<button class="btn" id="music" aria-label="Toggle calliope music">♪ calliope</button>
+
+<div class="panel" id="introPanel">
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+    <div class="mini"><div id="introHost"></div><div id="introOracle"></div><div id="introJax"></div></div>
+    <h2 id="introTitle">The Toaster Showdown!</h2>
+    <p>Tonight's host is <b>Toastmaster Crispin</b>, a toaster with the confidence of six toasters. He has an <b>order ticket</b> for every slot: the little badge in the corner shows how toasted each slice must be.</p>
+    <ul>
+      <li>Pulling a lever toasts <b>that slice and its neighbors</b> (left, right, up, down) one shade darker.</li>
+      <li>Toast past the darkest shade and it <b>wraps back to raw</b>. Caine calls it "Un-Toasting." Science is baffled.</li>
+      <li>Match every badge to win the round. Beat <b>par</b> for three stars.</li>
+      <li>Stuck? <b>The Oracle</b> (a gumball machine; do not call her that) trades gumballs for prophecies.</li>
+    </ul>
+    <p><i>Also, Jax has been fitted with a Niceness Patch. He's fine. He's being very nice about it.</i></p>
+    <button class="btn red" id="startBtn">Roll the cameras ▶</button>
+  </div>
+</div>
+
+<div class="panel hidden" id="winPanel">
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="winTitle">
+    <h2 id="winTitle">PERFECTLY BROWNED!</h2>
+    <div class="stars" id="winStars"></div>
+    <div class="big" id="winStats"></div>
+    <p id="winLine"></p>
+    <button class="btn red" id="nextBtn">Next round ▶</button>
+    <button class="btn" id="retryBtn">Replay round</button>
+  </div>
+</div>
+
+<div class="panel hidden" id="finalPanel">
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="finalTitle">
+    <div class="mini"><div id="finalHost"></div><div id="finalCaine"></div><div id="finalJax"></div></div>
+    <h2 id="finalTitle">🏆 Grand Champion of Toast 🏆</h2>
+    <div class="stars" id="finalStars"></div>
+    <div class="big" id="finalStats"></div>
+    <p>Crispin presents you with the <b>Golden Crumb</b>, his highest honor, which he also awarded to himself this morning.</p>
+    <p id="finalCaineLine"></p>
+    <p id="finalJaxLine"></p>
+    <button class="btn red" id="againBtn">Run the episode again ▶</button>
+  </div>
+</div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, confetti, sfx, wireCaine, say, pick, clickable, toggleCalliope } = window.TADC;
+  const $ = (id) => document.getElementById(id);
+
+  // ═════════════ original character art ═════════════
+  const HOST_SVG = `
+<svg viewBox="0 0 172 192" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <linearGradient id="tsChrome" x1="0" x2="1"><stop offset="0" stop-color="#8f9bb2"/><stop offset=".35" stop-color="#f6f9fd"/><stop offset=".62" stop-color="#ccd5e4"/><stop offset="1" stop-color="#76829a"/></linearGradient>
+  </defs>
+  <g class="host-toast">
+    <path d="M42 60 V28 Q42 13 57 13 H67 Q82 13 82 28 V60 Z" fill="#e9b75a" stroke="#1b1b2f" stroke-width="4"/>
+    <path d="M50 58 V31 Q50 21 59 21 H65 Q74 21 74 31 V58 Z" fill="#f7e2a8"/>
+    <path d="M90 60 V24 Q90 9 105 9 H115 Q130 9 130 24 V60 Z" fill="#b8692a" stroke="#1b1b2f" stroke-width="4"/>
+    <path d="M98 58 V27 Q98 17 107 17 H113 Q122 17 122 27 V58 Z" fill="#d79a52"/>
+  </g>
+  <path d="M8 116 Q-2 108 4 92" fill="none" stroke="#1b1b2f" stroke-width="5" stroke-linecap="round"/>
+  <rect x="-1" y="70" width="12" height="24" rx="6" fill="#2f5bd8" stroke="#1b1b2f" stroke-width="3"/>
+  <circle cx="5" cy="70" r="8" fill="#ccd5e4" stroke="#1b1b2f" stroke-width="3"/>
+  <rect x="16" y="48" width="140" height="114" rx="30" fill="url(#tsChrome)" stroke="#1b1b2f" stroke-width="5"/>
+  <rect x="36" y="52" width="52" height="9" rx="4.5" fill="#1b1b2f"/>
+  <rect x="84" y="52" width="52" height="9" rx="4.5" fill="#1b1b2f"/>
+  <path d="M30 76 Q31 64 44 61" fill="none" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <path d="M46 74 Q60 62 76 70" fill="none" stroke="#1b1b2f" stroke-width="4" stroke-linecap="round"/>
+  <path d="M96 76 L122 74" fill="none" stroke="#1b1b2f" stroke-width="4" stroke-linecap="round"/>
+  <ellipse cx="62" cy="94" rx="13" ry="14" fill="#fff" stroke="#1b1b2f" stroke-width="3"/>
+  <ellipse cx="108" cy="94" rx="13" ry="14" fill="#fff" stroke="#1b1b2f" stroke-width="3"/>
+  <circle class="hp" cx="65" cy="97" r="5.5" fill="#1b1b2f"/>
+  <circle class="hp" cx="111" cy="97" r="5.5" fill="#1b1b2f"/>
+  <path d="M95 90 Q108 78 121 90 Z" fill="#b9c3d6" stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M54 118 Q86 144 120 114 Q88 128 54 118 Z" fill="#1b1b2f"/>
+  <path d="M60 120 Q87 131 113 118 L111 123 Q87 135 62 124 Z" fill="#fff"/>
+  <path d="M100 116 l2 -5 l2 5 l5 2 l-5 2 l-2 5 l-2 -5 l-5 -2 Z" fill="#ffd34d" stroke="#1b1b2f" stroke-width="1"/>
+  <path d="M70 146 L84 152 L70 158 Z M100 146 L86 152 L100 158 Z" fill="#e3243b" stroke="#1b1b2f" stroke-width="3" stroke-linejoin="round"/>
+  <circle cx="85" cy="152" r="4" fill="#e3243b" stroke="#1b1b2f" stroke-width="2.5"/>
+  <circle cx="36" cy="140" r="7" fill="#e3243b" stroke="#1b1b2f" stroke-width="3"/>
+  <path d="M36 140 L36 135" stroke="#fff" stroke-width="2"/>
+  <rect x="156" y="82" width="9" height="46" rx="4.5" fill="#1b1b2f"/>
+  <rect x="152" y="86" width="18" height="12" rx="4" fill="#ffd34d" stroke="#1b1b2f" stroke-width="3"/>
+  <rect x="30" y="160" width="20" height="12" rx="4" fill="#1b1b2f"/>
+  <rect x="122" y="160" width="20" height="12" rx="4" fill="#1b1b2f"/>
+</svg>`;
+
+  const ORACLE_SVG = `
+<svg viewBox="0 0 130 202" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+  <defs>
+    <radialGradient id="orGlass" cx=".33" cy=".28"><stop offset="0" stop-color="#fff" stop-opacity=".85"/><stop offset=".45" stop-color="#d7ecff" stop-opacity=".22"/><stop offset="1" stop-color="#8fb8e8" stop-opacity=".45"/></radialGradient>
+    <clipPath id="orClip"><circle cx="65" cy="74" r="44"/></clipPath>
+  </defs>
+  <circle cx="65" cy="74" r="46" fill="#2a2148"/>
+  <g clip-path="url(#orClip)" stroke="#1b1b2f" stroke-width="1.5">
+    <circle cx="30" cy="104" r="9" fill="#e3243b"/><circle cx="48" cy="110" r="9" fill="#ffd34d"/><circle cx="66" cy="112" r="9" fill="#2f5bd8"/>
+    <circle cx="84" cy="110" r="9" fill="#5fd38d"/><circle cx="101" cy="104" r="9" fill="#ff7eb6"/><circle cx="38" cy="90" r="9" fill="#b07cff"/>
+    <circle cx="56" cy="95" r="9" fill="#e3243b"/><circle cx="75" cy="95" r="9" fill="#ffd34d"/><circle cx="93" cy="90" r="9" fill="#2f5bd8"/>
+    <circle cx="25" cy="85" r="9" fill="#5fd38d"/><circle cx="106" cy="86" r="9" fill="#e3243b"/><circle cx="47" cy="79" r="8" fill="#ff7eb6"/>
+    <circle cx="84" cy="80" r="8" fill="#b07cff"/><circle cx="66" cy="81" r="8" fill="#5fd38d"/>
+  </g>
+  <ellipse cx="50" cy="58" rx="11" ry="12" fill="#fff" stroke="#1b1b2f" stroke-width="3"/>
+  <ellipse cx="80" cy="58" rx="11" ry="12" fill="#fff" stroke="#1b1b2f" stroke-width="3"/>
+  <circle class="op" cx="50" cy="61" r="4.5" fill="#5c3a99"/>
+  <circle class="op" cx="80" cy="61" r="4.5" fill="#5c3a99"/>
+  <path d="M38 57 Q50 42 62 57 Z" fill="#b07cff" stroke="#1b1b2f" stroke-width="2.5" stroke-linejoin="round"/>
+  <path d="M68 57 Q80 42 92 57 Z" fill="#b07cff" stroke="#1b1b2f" stroke-width="2.5" stroke-linejoin="round"/>
+  <circle cx="65" cy="74" r="46" fill="url(#orGlass)" stroke="#1b1b2f" stroke-width="5"/>
+  <ellipse cx="44" cy="46" rx="10" ry="5" fill="#fff" opacity=".8" transform="rotate(-35 44 46)"/>
+  <path d="M38 33 Q65 -2 92 33 Q65 24 38 33 Z" fill="#7a3fd1" stroke="#1b1b2f" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M65 4 l3 6 l7 1 l-5 5 l1 7 l-6 -3 l-6 3 l1 -7 l-5 -5 l7 -1 Z" fill="#ffd34d" stroke="#1b1b2f" stroke-width="2" stroke-linejoin="round"/>
+  <rect x="43" y="117" width="44" height="12" rx="3" fill="#ffd34d" stroke="#1b1b2f" stroke-width="4"/>
+  <path d="M30 128 H100 L110 194 H20 Z" fill="#e3243b" stroke="#1b1b2f" stroke-width="5" stroke-linejoin="round"/>
+  <rect x="35" y="136" width="60" height="16" rx="4" fill="#fff7d6" stroke="#1b1b2f" stroke-width="2.5"/>
+  <text x="65" y="148" font-size="10" text-anchor="middle" font-family="Rye, serif" fill="#1b1b2f">THE ORACLE</text>
+  <circle cx="65" cy="168" r="9" fill="#ccd5e4" stroke="#1b1b2f" stroke-width="3"/>
+  <path d="M65 168 L78 162" stroke="#1b1b2f" stroke-width="4" stroke-linecap="round"/>
+  <circle cx="79" cy="161" r="3.5" fill="#ffd34d" stroke="#1b1b2f" stroke-width="2"/>
+  <rect x="48" y="181" width="34" height="9" rx="2" fill="#1b1b2f"/>
+</svg>`;
+
+  // ═════════════ original dialogue ═════════════
+  const HOST = {
+    intro: [
+      "Gooood evening, viewers both carbon-based AND carbohydrate-based! I'm TOASTMASTER CRISPIN, the most handsome appliance on any countertop, anywhere, ever!",
+    ],
+    rounds: [
+      "Round one! Three slices! A child could do it! I could do it with my lever tied behind my back!",
+      "Round two: The Golden Mile! Five slices, three shades! Some contestants call it 'hard.' I call it 'my morning.'",
+      "Round three: Cross-Contamination! Now the heat travels UP and DOWN too! Thrilling! Mildly unsafe!",
+      "The FINAL BURN! Four shades! Nine slices! If you win, I'll have to admit someone else is good at toast. I will not enjoy it.",
+    ],
+    press: [
+      "Ooh, bold lever choice!", "My coils are TINGLING!", "Heat is building! Mostly because I'm making it!",
+      "Nobody pulls a lever like I pull a lever. But that was close!", "Crispy decision-making!", "The crowd goes mild!",
+      "I've seen better pulls. In the mirror. Every morning.",
+    ],
+    reset: ["Re-bread! Fresh slices for our contestant! The old ones have been sent to a farm upstate.", "A clean slate! Or a clean slice!"],
+    underPar: "UNDER PAR?! Impossible! I wrote that par myself! ...I'm having the par audited.",
+    atPar: "Exactly par! Just like I would have done! Which makes you almost as good as me. Almost.",
+    overPar: "You got there! Eventually! Like a bagel on the lowest setting.",
+    click: [
+      "Autographs after the show! Autographs DURING the show if you're quick!",
+      "Yes, I'm stainless steel. Yes, it IS this shiny naturally.",
+      "Fun fact: I've never burned a single slice. Those were 'artistic char.'",
+      "Please don't touch the host. Unless it's to admire him.",
+    ],
+  };
+  const CAINE = {
+    intro: "Welcome, welcome, WELCOME to tonight's absolutely normal programming! Nothing has been tampered with! I definitely did not install anything on anybody!",
+    between: [
+      "Ratings are through the roof! There isn't a roof! They're through the VOID!",
+      "Splendid! I'm told the studio audience is going wild. I'm the studio audience.",
+      "Marvelous! Crispin, try to look surprised. Crispin. Crispin, that's your smug face.",
+    ],
+    patch: "Whoops! Niceness Patch slipped a teensy bit. Reapplying! *bonk* All better!",
+    click: [
+      "I'm the producer tonight! That means I produce! Mostly confetti!",
+      "Don't mind me! Just a ringmaster enjoying a perfectly ordinary toaster game show!",
+      "Isn't Jax being LOVELY tonight? No reason. Totally organic.",
+    ],
+    final: "A CHAMPION! Crispin, hand over the Golden Crumb! Crispin. Let go of the Golden Crumb.",
+  };
+  const ORACLE = {
+    hint: [
+      "I see... a lever. I see... slot <b>{n}</b>. I see... you pulling it.",
+      "The swirls in this gumball spell out: slot <b>{n}</b>. They also spell 'cherry.'",
+      "Destiny is a slice of toast. Slot <b>{n}</b> is its butter.",
+      "The mists part... slot <b>{n}</b> calls to you... also you have a piece of lint on you.",
+      "Thus spake the gumball: <b>slot {n}</b>. Chew wisely.",
+    ],
+    empty: "The Oracle is empty this round. The Oracle requires restocking. The Oracle does not take exact change.",
+    solved: "The future is already perfectly toasted, child.",
+    click: [
+      "Do not call me 'the gumball machine.' I am THE ORACLE. The gumballs are a lifestyle.",
+      "I foresaw you clicking me. I foresee you doing it again.",
+    ],
+  };
+  const JAX = {
+    nice: [
+      "Wow. What a genuinely great lever pull. I mean that. I'm being FORCED to mean that.",
+      "You're doing amazing, sweetie. Who said that? Me. Unfortunately.",
+      "I'd never make fun of you. Literally. I've tried. Nothing comes out.",
+      "Mistakes are just learning opportunities! Ugh, my mouth tastes like a greeting card.",
+      "Golly! ...Did I just say golly?",
+      "You've got this, champ! *eye twitches*",
+      "Have I told you how much I value you as a contestant? Because apparently I have to.",
+      "That toast? Gorgeous. Your technique? Inspiring. My dignity? Gone.",
+      "I believe in you. Somebody unplug me.",
+      "Every slice is special in its own way. I hate that I said that. I hate that I mean it.",
+    ],
+    undo: ["Undoing is brave! Undoing is growth! I want to lie down.", "Wow, so mature of you to undo that. *grinding teeth intensifies*"],
+    hint: ["Asking for help is a strength! *audible jaw clench*", "Great idea, asking the gumball! She's very wise! (She's a gumball.)"],
+    win: [
+      "I'm so proud of you. I want everyone to know. Please don't tell anyone.",
+      "Bravo! Encore! Someone get me a mean sandwich, I need to feel something.",
+      "You won! And I'm happy for you! Which is a NEW and TERRIBLE feeling!",
+    ],
+    glitch: "You're such a total <s>dweeb</s> DELIGHT! A DELIGHT! A delightful delight!",
+    click: [
+      "Hi friend! :) ...please make the smiley face stop.",
+      "I'd love to help you! I'd love it! I am loving it right now! Help.",
+      "Pat on the back for you! *pat* There. Never speak of it.",
+    ],
+    final: "Best. Contestant. Ever. And I'll be saying that through clenched teeth until this patch wears off. Which is NEVER, apparently. Love you, buddy. AAAGH.",
+  };
+
+  // ═════════════ puzzle data ═════════════
+  const SHADES = [
+    { name: 'Raw', shade: '#f7e6b5', crust: '#c9a253' },
+    { name: 'Golden', shade: '#eab65a', crust: '#9c6a22' },
+    { name: 'Toasty', shade: '#b8692a', crust: '#6a3a12' },
+    { name: 'Charcoal', shade: '#3b261a', crust: '#120a06' },
+  ];
+  const SHADE_MAP = { 2: [0, 2], 3: [0, 1, 2], 4: [0, 1, 2, 3] };
+  const LEVELS = [
+    { name: 'Round 1 · The Warm-Up Crumb', sub: 'Three slices · two shades · heat spreads sideways', rows: 1, cols: 3, m: 2, picks: 2 },
+    { name: 'Round 2 · The Golden Mile', sub: 'Five slices · three shades', rows: 1, cols: 5, m: 3, picks: 3 },
+    { name: 'Round 3 · Cross-Contamination', sub: 'A 3×3 grid · heat spreads up and down too', rows: 3, cols: 3, m: 2, picks: 4 },
+    { name: 'Round 4 · The Final Burn', sub: 'Nine slices · four shades · no mercy', rows: 3, cols: 3, m: 4, picks: 4 },
+  ];
+  const GUMBALLS_PER_ROUND = 3;
+
+  // ═════════════ wiring ═════════════
+  $('hostArt').innerHTML = HOST_SVG;
+  $('oracleArt').innerHTML = ORACLE_SVG;
+  $('jaxArt').innerHTML = CAST.jax;
+  $('caineArt').innerHTML = CAST.caine;
+  const caine = wireCaine($('caineArt'));
+  ['introHost', 'finalHost'].forEach((id) => { $(id).innerHTML = HOST_SVG.replace(/tsChrome/g, 'tsChrome' + id); });
+  $('introOracle').innerHTML = ORACLE_SVG.replace(/orGlass/g, 'orGlassI').replace(/orClip/g, 'orClipI');
+  $('introJax').innerHTML = CAST.jax;
+  $('finalJax').innerHTML = CAST.jax;
+  $('finalCaine').innerHTML = CAST.caine.replace(/id="c(Hat|Coat|Eye)"/g, 'id="f$1"').replace(/url\(#c(Hat|Coat|Eye)\)/g, 'url(#f$1)');
+
+  const hostEl = $('host'), oracleEl = $('oracle'), jaxEl = $('jax'), caineEl = $('caine');
+  const hostSay = (t, ms = 4200) => say(hostEl, t, ms, { className: 'host' });
+  const oracleSay = (t, ms = 4600) => say(oracleEl, t, ms, { className: 'oracle' });
+  const live = (t) => { $('live').textContent = t.replace(/<[^>]+>/g, ''); };
+
+  // Host pupils follow the pointer, like a smug little security camera.
+  const hostPupils = hostEl.querySelectorAll('.hp');
+  const hostBase = [[65, 97], [111, 97]];
+  addEventListener('pointermove', (e) => {
+    const r = hostEl.getBoundingClientRect();
+    const a = Math.atan2(e.clientY - (r.top + r.height * 0.45), e.clientX - (r.left + r.width / 2));
+    hostPupils.forEach((p, i) => { p.setAttribute('cx', hostBase[i][0] + Math.cos(a) * 3.5); p.setAttribute('cy', hostBase[i][1] + Math.sin(a) * 3.5); });
+  });
+
+  // Jax strain
+  let strain = 0, lastJax = 0;
+  function setStrain(v) {
+    strain = Math.max(0, Math.min(100, v));
+    jaxEl.style.setProperty('--strain', strain);
+    $('strainBar').style.width = strain + '%';
+  }
+  function jaxSay(text, ms = 4200) {
+    lastJax = Date.now();
+    say(jaxEl, text, ms, { className: 'jax' });
+    setStrain(strain + 17);
+    if (strain >= 100) {
+      setTimeout(() => {
+        jaxEl.classList.add('glitch');
+        sfx('glitch');
+        say(jaxEl, JAX.glitch, 3600, { className: 'jax' });
+        setTimeout(() => {
+          jaxEl.classList.remove('glitch');
+          caine.talk(CAINE.patch, 3800);
+          sfx('honk');
+          setStrain(8);
+        }, 1300);
+      }, 900);
+    }
+  }
+
+  // ═════════════ game state ═════════════
+  let L, cur, target, sol, presses, history, gumballs, won, levelIdx = 0, results = [], hintsUsed = 0;
+  let cells = [];
+
+  const affected = (i) => {
+    const r = Math.floor(i / L.cols), c = i % L.cols, out = [i];
+    if (c > 0) out.push(i - 1);
+    if (c < L.cols - 1) out.push(i + 1);
+    if (r > 0) out.push(i - L.cols);
+    if (r < L.rows - 1) out.push(i + L.cols);
+    return out;
+  };
+  const shadeOf = (v) => SHADES[SHADE_MAP[L.m][v]];
+  const par = () => sol.reduce((a, b) => a + b, 0);
+
+  function scramble() {
+    const n = L.rows * L.cols;
+    for (;;) {
+      sol = new Array(n).fill(0);
+      const idx = [...Array(n).keys()].sort(() => Math.random() - 0.5).slice(0, L.picks);
+      idx.forEach((i) => { sol[i] = 1 + Math.floor(Math.random() * (L.m - 1)); });
+      target = new Array(n).fill(0);
+      sol.forEach((k, i) => { for (let t = 0; t < k; t++) affected(i).forEach((j) => { target[j] = (target[j] + 1) % L.m; }); });
+      const nonRaw = target.filter((v) => v !== 0).length;
+      if (nonRaw >= Math.min(n - 1, 2)) return;
+    }
+  }
+
+  function startLevel(i, fresh = true) {
+    levelIdx = i;
+    L = LEVELS[i];
+    if (fresh) scramble();
+    const n = L.rows * L.cols;
+    cur = new Array(n).fill(0);
+    presses = new Array(n).fill(0);
+    history = [];
+    gumballs = GUMBALLS_PER_ROUND;
+    won = false;
+    hintsUsed = 0;
+    $('boardCard').classList.remove('won');
+    $('roundName').textContent = L.name;
+    $('roundSub').textContent = L.sub;
+    $('roundNo').textContent = `${i + 1}/${LEVELS.length}`;
+    buildLegend();
+    buildBoard();
+    render();
+  }
+
+  function buildLegend() {
+    const parts = SHADE_MAP[L.m].map((s) => `<span class="sw"><i style="background:${SHADES[s].shade};border-color:${SHADES[s].crust}"></i>${SHADES[s].name}</span>`);
+    $('legend').innerHTML = parts.join('<span class="arrow">→</span>') + '<span class="arrow">→</span><span class="sw">back to Raw ♻</span>';
+  }
+
+  function buildBoard() {
+    const board = $('board');
+    board.innerHTML = '';
+    board.style.gridTemplateColumns = `repeat(${L.cols}, auto)`;
+    cells = [];
+    for (let i = 0; i < L.rows * L.cols; i++) {
+      const b = document.createElement('button');
+      b.className = 'slot';
+      b.style.setProperty('--cols', L.cols);
+      b.innerHTML = '<span class="slice"></span><span class="box"><span class="lever"></span></span><span class="num"></span><span class="goal"><i></i></span>';
+      b.querySelector('.num').textContent = i + 1;
+      b.addEventListener('click', () => press(i));
+      b.addEventListener('pointerenter', () => preview(i, true));
+      b.addEventListener('pointerleave', () => preview(i, false));
+      b.addEventListener('focus', () => preview(i, true));
+      b.addEventListener('blur', () => preview(i, false));
+      b.addEventListener('keydown', (e) => navKey(e, i));
+      b.tabIndex = i === 0 ? 0 : -1;
+      board.appendChild(b);
+      cells.push(b);
+    }
+  }
+
+  function preview(i, on) {
+    if (won) return;
+    affected(i).forEach((j) => cells[j] && cells[j].classList.toggle('affected', on));
+  }
+
+  function navKey(e, i) {
+    const r = Math.floor(i / L.cols), c = i % L.cols;
+    let next = null;
+    if (e.key === 'ArrowLeft' && c > 0) next = i - 1;
+    else if (e.key === 'ArrowRight' && c < L.cols - 1) next = i + 1;
+    else if (e.key === 'ArrowUp' && r > 0) next = i - L.cols;
+    else if (e.key === 'ArrowDown' && r < L.rows - 1) next = i + L.cols;
+    else if (e.key.startsWith('Arrow')) { e.preventDefault(); return; }
+    if (next === null) return;
+    e.preventDefault();
+    cells[i].tabIndex = -1;
+    cells[next].tabIndex = 0;
+    cells[next].focus();
+  }
+
+  function render(changed = []) {
+    let matched = 0;
+    cells.forEach((b, i) => {
+      const s = shadeOf(cur[i]), g = shadeOf(target[i]);
+      b.style.setProperty('--shade', s.shade);
+      b.style.setProperty('--crust', s.crust);
+      b.style.setProperty('--gshade', g.shade);
+      b.style.setProperty('--gcrust', g.crust);
+      const ok = cur[i] === target[i];
+      if (ok) matched++;
+      b.classList.toggle('match', ok);
+      b.setAttribute('aria-label', `Slot ${i + 1}: ${s.name}, order says ${g.name}${ok ? ', matched' : ''}`);
+      if (changed.includes(i)) { b.classList.remove('anim'); void b.offsetWidth; b.classList.add('anim'); }
+    });
+    $('moves').textContent = history.length;
+    $('par').textContent = par();
+    $('matched').textContent = `${matched}/${cells.length}`;
+    $('gum').textContent = gumballs;
+    $('hintBtn').disabled = won;
+    $('undoBtn').disabled = won || history.length === 0;
+    $('resetBtn').disabled = won;
+    return matched;
+  }
+
+  function applyPress(i, times) {
+    const hit = affected(i);
+    hit.forEach((j) => { cur[j] = (cur[j] + times) % L.m; });
+    presses[i] = (presses[i] + times) % L.m;
+    return hit;
+  }
+
+  function press(i) {
+    if (won) return;
+    const hit = applyPress(i, 1);
+    history.push(i);
+    const b = cells[i];
+    b.classList.add('pressed');
+    setTimeout(() => b.classList.remove('pressed'), 220);
+    hostEl.classList.add('pop');
+    setTimeout(() => hostEl.classList.remove('pop'), 250);
+    cells.forEach((c) => c.classList.remove('prophecy'));
+    const before = cells.filter((c) => c.classList.contains('match')).length;
+    const matched = render(hit);
+    sfx(matched > before ? 'ding' : 'tick');
+    if (matched === cells.length) return win();
+    chatter();
+  }
+
+  let pressCount = 0;
+  function chatter() {
+    pressCount++;
+    if (pressCount % 5 === 0 && Date.now() - lastJax > 5000) jaxSay(pick(JAX.nice));
+    else if (pressCount % 3 === 0) hostSay(pick(HOST.press), 2600);
+  }
+
+  function undo() {
+    if (won || !history.length) return;
+    const i = history.pop();
+    const hit = applyPress(i, L.m - 1);
+    render(hit);
+    sfx('boing');
+    if (Math.random() < 0.35 && Date.now() - lastJax > 4000) jaxSay(pick(JAX.undo));
+  }
+
+  function reset() {
+    if (won) return;
+    startLevel(levelIdx, false);
+    sfx('pop');
+    hostSay(pick(HOST.reset), 3000);
+  }
+
+  function ask() {
+    if (won) { oracleSay(ORACLE.solved); return; }
+    if (gumballs <= 0) { oracleSay(ORACLE.empty); sfx('honk'); return; }
+    const need = sol.map((k, i) => (((k - presses[i]) % L.m) + L.m) % L.m);
+    const options = need.map((v, i) => (v > 0 ? i : -1)).filter((i) => i >= 0);
+    if (!options.length) { oracleSay(ORACLE.solved); return; }
+    const i = pick(options);
+    gumballs--;
+    hintsUsed++;
+    render();
+    oracleEl.classList.remove('shake'); void oracleEl.offsetWidth; oracleEl.classList.add('shake');
+    const g = $('gumball');
+    g.style.background = pick(['#e3243b', '#ffd34d', '#2f5bd8', '#5fd38d', '#ff7eb6', '#b07cff']);
+    g.classList.remove('drop'); void g.offsetWidth; g.classList.add('drop');
+    sfx('pop');
+    const line = pick(ORACLE.hint).replace(/\{n\}/g, i + 1);
+    oracleSay(line, 5200);
+    live(`The Oracle says: ${line}`);
+    cells.forEach((c) => c.classList.remove('prophecy'));
+    cells[i].classList.add('prophecy');
+    if (Date.now() - lastJax > 4000 && Math.random() < 0.5) setTimeout(() => jaxSay(pick(JAX.hint)), 1200);
+  }
+
+  function win() {
+    won = true;
+    $('boardCard').classList.add('won');
+    cells.forEach((c) => c.classList.remove('affected', 'prophecy'));
+    render();
+    const moves = history.length, p = par();
+    const stars = moves <= p ? 3 : moves <= p + 3 ? 2 : 1;
+    results[levelIdx] = { stars, moves, par: p };
+    const r = $('boardCard').getBoundingClientRect();
+    confetti(r.left + r.width / 2, r.top + r.height / 2, 120, 1.3);
+    sfx('fanfare');
+    hostEl.classList.add('brag');
+    setTimeout(() => hostEl.classList.remove('brag'), 700);
+    const verdict = moves < p ? HOST.underPar : moves === p ? HOST.atPar : HOST.overPar;
+    hostSay(verdict, 4200);
+    setTimeout(() => jaxSay(pick(JAX.win), 4400), 900);
+    live(`Round complete in ${moves} moves. Par was ${p}.`);
+    setTimeout(() => {
+      if (levelIdx === LEVELS.length - 1) return showFinal();
+      $('winTitle').textContent = pick(['PERFECTLY BROWNED!', 'A TOAST TO YOU!', 'GOLDEN!', 'CRUMB-TASTIC!']);
+      $('winStars').innerHTML = starHtml(stars);
+      $('winStats').textContent = `${moves} moves · par ${p}${hintsUsed ? ` · ${hintsUsed} prophecy${hintsUsed > 1 ? 'ies' : ''}` : ''}`.replace('prophecyies', 'prophecies');
+      $('winLine').textContent = pick(CAINE.between);
+      openPanel('winPanel', 'nextBtn');
+    }, 1700);
+  }
+
+  const starHtml = (n) => [0, 1, 2].map((k) => `<span class="${k < n ? '' : 'dim'}">⭐</span>`).join('');
+
+  function showFinal() {
+    const total = results.reduce((a, r) => a + (r ? r.stars : 0), 0);
+    const moves = results.reduce((a, r) => a + (r ? r.moves : 0), 0);
+    $('finalStars').innerHTML = starHtml(Math.round(total / LEVELS.length));
+    $('finalStats').textContent = `${total}/${LEVELS.length * 3} stars · ${moves} total moves`;
+    $('finalJaxLine').innerHTML = `<b>Jax:</b> "${JAX.final}"`;
+    openPanel('finalPanel', 'againBtn');
+    $('finalCaineLine').innerHTML = `<b>Caine:</b> "${CAINE.final}"`;
+    let bursts = 0;
+    const iv = setInterval(() => {
+      confetti(Math.random() * innerWidth, innerHeight * (0.2 + Math.random() * 0.4), 80, 1.2);
+      if (++bursts >= 5) clearInterval(iv);
+    }, 350);
+  }
+
+  let returnFocus = null;
+  function openPanel(id, focusId) {
+    returnFocus = document.activeElement;
+    $(id).classList.remove('hidden');
+    setTimeout(() => $(focusId).focus(), 30);
+  }
+  function closePanels() { document.querySelectorAll('.panel').forEach((p) => p.classList.add('hidden')); }
+  const panelOpen = () => [...document.querySelectorAll('.panel')].some((p) => !p.classList.contains('hidden'));
+
+  function announceRound() {
+    setTimeout(() => hostSay(HOST.rounds[levelIdx], 5200), 300);
+    if (cells[0]) cells[0].focus({ preventScroll: true });
+  }
+
+  // ═════════════ events ═════════════
+  $('startBtn').addEventListener('click', () => {
+    closePanels();
+    sfx('fanfare');
+    startLevel(0);
+    caine.talk(CAINE.intro, 5200);
+    setTimeout(() => hostSay(HOST.intro[0], 5200), 2600);
+    setTimeout(() => jaxSay("Hi everyone! I'm Jax and I'm just SO happy to be here! (blink twice if you can see my eye twitching)", 5200), 6200);
+    setTimeout(() => hostSay(HOST.rounds[0], 4600), 8200);
+    setTimeout(() => cells[0] && cells[0].focus({ preventScroll: true }), 60);
+  });
+  $('nextBtn').addEventListener('click', () => { closePanels(); startLevel(levelIdx + 1); announceRound(); });
+  $('retryBtn').addEventListener('click', () => { closePanels(); startLevel(levelIdx); announceRound(); });
+  $('againBtn').addEventListener('click', () => { closePanels(); results = []; setStrain(0); startLevel(0); announceRound(); });
+  $('hintBtn').addEventListener('click', ask);
+  $('undoBtn').addEventListener('click', undo);
+  $('resetBtn').addEventListener('click', reset);
+  $('music').addEventListener('click', () => toggleCalliope());
+
+  clickable(hostEl, 'Toastmaster Crispin, the host');
+  clickable(oracleEl, 'The Oracle, ask for a prophecy');
+  clickable(jaxEl, 'Jax');
+  clickable(caineEl, 'Caine');
+  hostEl.addEventListener('click', () => { sfx('boing'); hostSay(pick(HOST.click), 3400); });
+  oracleEl.addEventListener('click', () => {
+    if (!L || panelOpen()) { oracleSay(pick(ORACLE.click)); return; }
+    ask();
+  });
+  jaxEl.addEventListener('click', () => jaxSay(pick(JAX.click), 3600));
+  caineEl.addEventListener('click', () => { sfx('honk'); caine.talk(pick(CAINE.click), 3600); });
+
+  addEventListener('keydown', (e) => {
+    if (panelOpen() || e.metaKey || e.ctrlKey || e.altKey || e.repeat) return;
+    const k = e.key.toLowerCase();
+    if (k === 'u') { e.preventDefault(); undo(); }
+    else if (k === 'r') { e.preventDefault(); reset(); }
+    else if (k === 'o') { e.preventDefault(); ask(); }
+  });
+
+  // Test hook (harmless): exposes read-only state for automated play-throughs.
+  window.__toaster = { get state() { return { level: levelIdx, cur: cur && cur.slice(), target: target && target.slice(), sol: sol && sol.slice(), presses: presses && presses.slice(), won }; } };
+
+  startLevel(0);
+  setTimeout(() => $('startBtn').focus(), 50);
+})();
+</script>
+</body>
+</html>

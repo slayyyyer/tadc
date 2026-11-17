@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Bubble-gotchi</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--lcd:#b8d8a8;--lcd-d:#2f4a2a}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at 50% 30%,rgba(111,182,255,.3),transparent 60%),#0b0718;display:flex;flex-direction:column;align-items:center;padding:14px 12px 80px}
+  h1{font-family:'Rye';font-weight:400;margin:0;font-size:clamp(26px,4.4vw,48px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink);text-align:center}
+  .sub{color:#cbbff0;margin:4px 0 12px;font-size:15px;text-align:center;max-width:620px}
+  /* the egg device */
+  #egg{position:relative;width:min(420px,94vw);padding:44px 34px 30px;border-radius:50% 50% 46% 46%/58% 58% 42% 42%;
+    background:radial-gradient(circle at 30% 25%,#ff9ab8,#e3243b 45%,#8a0c1a);border:6px solid var(--ink);box-shadow:10px 12px 0 var(--ink),inset -14px -18px 30px rgba(0,0,0,.25)}
+  #egg::before{content:'';position:absolute;left:18%;top:8%;width:22%;height:10%;border-radius:50%;background:rgba(255,255,255,.35);transform:rotate(-20deg)}
+  .brand{text-align:center;font:400 16px 'Rye';color:var(--gold);text-shadow:0 2px 0 var(--ink);margin-bottom:8px;letter-spacing:.06em}
+  #screen{position:relative;aspect-ratio:1;border:6px solid var(--ink);border-radius:18px;background:var(--lcd);overflow:hidden;box-shadow:inset 0 0 0 4px #9cbf8c,inset 0 6px 14px rgba(0,0,0,.25)}
+  #screen::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,rgba(0,0,0,.05) 0 2px,transparent 2px 4px);pointer-events:none}
+  #screen.night{background:#33452f}
+  #screen.night #stats{opacity:.5}
+  #stats{position:absolute;left:8px;right:8px;top:6px;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;font:400 16px/1 'VT323',monospace;color:var(--lcd-d);z-index:3}
+  .stat{text-align:center}
+  .bar{height:7px;border:2px solid var(--lcd-d);border-radius:3px;margin-top:2px;overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--lcd-d);transition:width .4s}
+  .bar.low i{background:#a02a2a;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:.3}}
+  #pet{position:absolute;left:50%;top:55%;width:34%;transform:translate(-50%,-50%);transition:left 1.6s ease-in-out,top 1.6s ease-in-out,width .8s cubic-bezier(.3,1.6,.5,1);z-index:2;cursor:pointer}
+  #pet .body{animation:bob 1.6s ease-in-out infinite}
+  #pet svg{width:100%;height:auto;display:block}
+  #pet.sad svg{filter:saturate(.3) brightness(.9)}
+  #pet.chomp .body{animation:chomp .15s ease-in-out 6}
+  #pet.wiggle .body{animation:wig .12s linear 10}
+  @keyframes bob{50%{transform:translateY(-8%) scale(1.04,.96)}}
+  @keyframes chomp{50%{transform:scale(1.18,.82)}}
+  @keyframes wig{25%{transform:rotate(-12deg)}75%{transform:rotate(12deg)}}
+  #mood{position:absolute;left:62%;top:22%;font-size:clamp(18px,4vw,26px);z-index:3;pointer-events:none;transition:opacity .3s}
+  .crumb{position:absolute;font-size:18px;z-index:1;cursor:pointer;filter:grayscale(.4)}
+  .fly{position:absolute;z-index:4;font-size:26px;pointer-events:none;transition:all .6s cubic-bezier(.4,0,.6,1)}
+  #ball{position:absolute;z-index:3;font-size:26px;cursor:pointer;display:none;transition:left .7s cubic-bezier(.3,1.4,.5,1),top .7s cubic-bezier(.3,1.4,.5,1)}
+  #lcdmsg{position:absolute;left:8px;right:8px;bottom:8px;text-align:center;font:400 19px/1.1 'VT323',monospace;color:var(--lcd-d);z-index:3;min-height:2.2em}
+  #zzz{position:absolute;right:16%;top:28%;font:400 26px 'VT323',monospace;color:#cfe8c0;z-index:3;display:none;animation:zz 2s ease-in-out infinite}
+  @keyframes zz{50%{transform:translate(6px,-8px);opacity:.5}}
+  #screen.night #zzz{display:block}
+  /* buttons */
+  #buttons{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}
+  .act{font:700 14px 'Fredoka';color:var(--ink);background:var(--cream);border:4px solid var(--ink);border-radius:16px;padding:9px 4px;cursor:pointer;box-shadow:0 5px 0 var(--ink);transition:transform .08s,box-shadow .08s}
+  .act:active{transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+  .act:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+  .act b{display:block;font-size:22px}
+  #info{margin-top:18px;width:min(420px,94vw);background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:10px 14px;font-size:14px;line-height:1.6;color:#e4dcff}
+  #info b{color:var(--gold)}
+  #snackMenu{position:absolute;inset:0;background:rgba(184,216,168,.96);z-index:5;display:none;flex-direction:column;align-items:center;justify-content:center;gap:8px;font:400 22px 'VT323',monospace;color:var(--lcd-d)}
+  #snackMenu.show{display:flex}
+  #snackMenu button{font:400 22px 'VT323',monospace;background:none;border:2px solid var(--lcd-d);border-radius:8px;color:var(--lcd-d);padding:3px 14px;cursor:pointer;min-width:70%}
+  #snackMenu button:hover,#snackMenu button:focus-visible{background:var(--lcd-d);color:var(--lcd);outline:none}
+  .btn{font:700 14px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30}
+</style>
+</head>
+<body>
+<h1>Bubble-gotchi</h1>
+<p class="sub">Bubble is your pet now. Bubble remembers you between breaks. Bubble gets hungry while you're away. Bubble will NOT stop talking about it.</p>
+<div id="egg">
+  <div class="brand">✦ BUBBLE-GOTCHI ✦</div>
+  <div id="screen">
+    <div id="stats">
+      <div class="stat">FOOD<div class="bar" id="bFood"><i></i></div></div>
+      <div class="stat">FUN<div class="bar" id="bFun"><i></i></div></div>
+      <div class="stat">SHINE<div class="bar" id="bShine"><i></i></div></div>
+      <div class="stat">ZZZ<div class="bar" id="bEnergy"><i></i></div></div>
+    </div>
+    <div id="pet" title="Bubble (click to tickle)"><div class="body"></div></div>
+    <div id="mood"></div>
+    <div id="zzz">z Z z</div>
+    <div id="ball">⚽</div>
+    <div id="lcdmsg"></div>
+    <div id="snackMenu" role="dialog" aria-label="Pick a snack">
+      <div>~ SNACK MENU ~</div>
+      <button data-snack="semicolon">; semicolon</button>
+      <button data-snack="pizza">🍕 pizza</button>
+      <button data-snack="door">🚪 a door (painted)</button>
+      <button data-snack="cake">🎂 cake</button>
+      <button data-snack="cancel">✕ never mind</button>
+    </div>
+  </div>
+  <div id="buttons">
+    <button class="act" id="aFeed"><b>🍽️</b>Feed</button>
+    <button class="act" id="aPlay"><b>⚽</b>Play</button>
+    <button class="act" id="aClean"><b>✨</b>Polish</button>
+    <button class="act" id="aNap"><b>🌙</b>Nap</button>
+    <button class="act" id="aTickle"><b>🤭</b>Tickle</button>
+    <button class="act" id="aTalk"><b>💬</b>Chat</button>
+  </div>
+</div>
+<div id="info"></div>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, confetti, sfx, pick } = window.TADC;
+  const $ = (id) => document.getElementById(id);
+  $('pet').querySelector('.body').innerHTML = CAST.bubble;
+
+  // ═══ persistence (per-browser only; the pet still works if storage is blocked) ═══
+  const KEY = 'tadc-bubblegotchi-v1';
+  const HOUR = 3600 * 1000;
+  // how many stat points drain per hour (Bubble needs a little care each break, not constant babysitting)
+  const DRAIN = { food: 25, fun: 33, shine: 16, energy: 20 };
+  const STAGES = [
+    { min: 0, name: 'Bubblet', size: 24, blurb: 'a tiny, freshly-blown Bubblet' },
+    { min: 25, name: 'Bubble', size: 32, blurb: 'a regular, healthy, chaotic Bubble' },
+    { min: 80, name: 'Big Bubble', size: 40, blurb: 'a Big Bubble with Big Opinions' },
+    { min: 200, name: 'Bubble Prime', size: 48, blurb: 'BUBBLE PRIME, the final form (still eats doors)' },
+  ];
+  function fresh() { return { born: Date.now(), last: Date.now(), food: 80, fun: 80, shine: 90, energy: 90, care: 0, pops: 0, napping: false, crumbs: 0 }; }
+  let pet;
+  try { pet = JSON.parse(localStorage.getItem(KEY)) || fresh(); } catch (e) { pet = fresh(); }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(pet)); } catch (e) { /* storage blocked: Bubble lives for this visit only */ } }
+
+  // catch up on time spent away (capped at 2 days so Bubble doesn't evaporate over a weekend)
+  function catchUp() {
+    const away = Math.min(Date.now() - pet.last, 48 * HOUR);
+    const hrs = away / HOUR;
+    pet.food = clamp(pet.food - DRAIN.food * hrs);
+    pet.fun = clamp(pet.fun - DRAIN.fun * hrs);
+    pet.shine = clamp(pet.shine - DRAIN.shine * hrs);
+    pet.energy = pet.napping ? clamp(pet.energy + 200 * hrs) : clamp(pet.energy - DRAIN.energy * hrs);
+    if (pet.napping && pet.energy >= 100) pet.napping = false;
+    pet.last = Date.now();
+    return away;
+  }
+  const clamp = (v) => Math.max(0, Math.min(100, v));
+  const away = catchUp();
+
+  // ═══ Bubble's lines (original) ═══
+  const L = {
+    hello: ['HIIII! You came back! I counted the seconds! I lost count! I ate the count!', 'Oh! It\'s you! My favorite person-shaped thing!', "WELCOME BACK! I've been bouncing in place this whole time!"],
+    longAway: ["Where WERE you?! I had to eat a shadow for dinner!", "You were gone for SO LONG. I aged. Bubbles can age! Probably!"],
+    hungry: ["I'm hungry! I could eat a door! Feed me a door!", 'My tummy is making the void noise again.', 'FOOD. FOOD. FOOOOD. (please)'],
+    bored: ["I'm SO bored I started counting my own teeth. I have too many!", "Play with me! PLAY WITH ME! I'll be good! I won't eat the ball! (I will eat the ball)"],
+    dull: ["I'm all smudgy! A bubble should SHINE!", "Polish me! I can't see my reflection in myself!"],
+    tired: ['So... sleepy... bubbling... slower...', 'Nap time? Nap time. NAP TIME.'],
+    happy: ["I'm SO HAPPY I could pop! (I won't pop!) (probably!)", 'Life is good! The void is cozy! You are here!', "Everything's perfect! Don't change ANYTHING! Except feed me later!"],
+    chat: [
+      'Did you know the floor is checkered ALL the way down? I checked! With my mouth!',
+      'Caine says I can\'t eat the exit sign anymore. I said "what exit sign." Then I burped.',
+      'If I eat a semicolon, does that end my statement? I keep talking, so NO!',
+      "Kinger taught me chess! I ate a knight! He said that's not how it works! It WORKED!",
+      "Jax called me annoying! I took it as a compliment! He hated that!",
+      "Do you think I'm round? I think I'm round. I work hard on being round.",
+      "Pomni asked if I know the way out! I said yes! I don't! I just like saying yes!",
+      "Your break is important! Stretch! Drink water! Feed Bubble! In that order! Mostly the last one!",
+    ],
+    fed: { semicolon: 'CRUNCH! Tastes like the end of a sentence;', pizza: 'PIZZA!!! I am ONE with the PIZZA!', door: "Mmm, painted door. Notes of plywood. Hints of false hope. Delicious.", cake: 'CAKE! Is it my birthday?! It is now!' },
+    full: ["I'm full! I'm SO full! ...okay one more.", 'No more! My round is getting too round!'],
+    tickle: ['HEEHEEHEE! STOP! DON\'T STOP!', 'NOT THE BOTTOM BUBBLE PART!', 'HAHAHAHA *pop*... just kidding I didn\'t pop!'],
+    play: ['Got it! Got it! I got it! ...where did it go?', 'Throw it again! AGAIN! AGAAAAIN!', 'I caught it with my FACE! That counts!'],
+    clean: ['Squeaky clean! I can see the void in my reflection!', 'SHINY! I\'m practically a disco ball!'],
+    nap: ['Goodnight... wake me up if there\'s food... or fun... or anything...'],
+    wake: ["I'M AWAKE! What did I miss?! Did I miss food?!"],
+    evolve: (s) => `WHOA! I EVOLVED! I'm ${s.blurb}! Look at me! LOOK AT ME!`,
+    popped: "Oh no... Bubble got so neglected it popped! ...but wait! Bubble ALWAYS comes back! *re-bubbles* HI AGAIN!",
+  };
+
+  // ═══ rendering ═══
+  const stageOf = () => STAGES.filter((s) => pet.care >= s.min).pop();
+  let shownStage = stageOf().name;
+  function render() {
+    for (const [k, id] of [['food', 'bFood'], ['fun', 'bFun'], ['shine', 'bShine'], ['energy', 'bEnergy']]) {
+      $(id).querySelector('i').style.width = pet[k] + '%';
+      $(id).classList.toggle('low', pet[k] < 25);
+    }
+    const st = stageOf();
+    $('pet').style.width = st.size + '%';
+    $('screen').classList.toggle('night', pet.napping);
+    const low = ['food', 'fun', 'shine', 'energy'].filter((k) => pet[k] < 25);
+    $('pet').classList.toggle('sad', low.length >= 2);
+    $('mood').textContent = pet.napping ? '' : low.length >= 2 ? '💧' : low.length ? '❗' : avg() > 75 ? '💖' : '';
+    // crumbs left over from eating, until polished away
+    const crumbs = $('screen').querySelectorAll('.crumb');
+    for (let i = crumbs.length; i < pet.crumbs; i++) {
+      const c = document.createElement('div'); c.className = 'crumb'; c.textContent = pick(['🍞', '·', '✦', '🫧']);
+      c.style.left = 10 + Math.random() * 78 + '%'; c.style.top = 72 + Math.random() * 12 + '%';
+      c.title = 'crumbs (Polish to clean)';
+      $('screen').appendChild(c);
+    }
+    const ageDays = Math.floor((Date.now() - pet.born) / (24 * HOUR));
+    $('info').innerHTML = `<b>${st.name}</b>: ${st.blurb}.<br>Age: ${ageDays ? ageDays + ' day' + (ageDays > 1 ? 's' : '') : 'brand new'} · Care points: <b>${Math.floor(pet.care)}</b>` +
+      (STAGES.find((s) => s.min > pet.care) ? ` (next form at ${STAGES.find((s) => s.min > pet.care).min})` : ' (final form!)') +
+      ` · Times re-bubbled: ${pet.pops}<br><span style="opacity:.75">Stats drain slowly in real time, even while you're away. Visit on your breaks!</span>`;
+    if (st.name !== shownStage) {
+      shownStage = st.name; msg(L.evolve(st), 4500); sfx('fanfare');
+      const r = $('screen').getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2, 120, 1.1);
+    }
+  }
+  const avg = () => (pet.food + pet.fun + pet.shine + pet.energy) / 4;
+  let msgTimer;
+  function msg(text, ms = 3200) {
+    const el = $('lcdmsg'); el.textContent = text;
+    clearTimeout(msgTimer); msgTimer = setTimeout(() => { el.textContent = ''; }, ms);
+  }
+  function anim(cls) { const p = $('pet'); p.classList.remove(cls); void p.offsetWidth; p.classList.add(cls); setTimeout(() => p.classList.remove(cls), 1300); }
+  function care(n) { pet.care += n; }
+  function wakeIfNapping() { if (pet.napping) { pet.napping = false; msg(pick(L.wake)); sfx('boing'); } }
+
+  // ═══ Bubble wanders around the screen ═══
+  function wander() {
+    if (pet.napping) { $('pet').style.left = '50%'; $('pet').style.top = '60%'; return; }
+    $('pet').style.left = 25 + Math.random() * 50 + '%';
+    $('pet').style.top = 42 + Math.random() * 26 + '%';
+  }
+  setInterval(wander, 2600);
+
+  // ═══ actions ═══
+  const menu = $('snackMenu');
+  $('aFeed').addEventListener('click', () => { wakeIfNapping(); menu.classList.add('show'); menu.querySelector('button').focus(); sfx('tick'); });
+  menu.addEventListener('click', (e) => {
+    const b = e.target.closest('button'); if (!b) return;
+    menu.classList.remove('show');
+    const s = b.dataset.snack; if (s === 'cancel') return;
+    if (pet.food >= 95) { msg(pick(L.full)); anim('wiggle'); return; }
+    const icon = { semicolon: ';', pizza: '🍕', door: '🚪', cake: '🎂' }[s];
+    const fly = document.createElement('div'); fly.className = 'fly'; fly.textContent = icon;
+    fly.style.left = '50%'; fly.style.top = '-10%';
+    $('screen').appendChild(fly);
+    const pr = $('pet').style;
+    requestAnimationFrame(() => { fly.style.left = pr.left || '50%'; fly.style.top = pr.top || '55%'; fly.style.transform = 'scale(.4)'; });
+    setTimeout(() => {
+      fly.remove(); anim('chomp'); sfx('pop'); setTimeout(() => sfx('pop'), 160);
+      const gain = { semicolon: 15, pizza: 35, door: 20, cake: 30 }[s];
+      pet.food = clamp(pet.food + gain); if (s === 'cake') pet.fun = clamp(pet.fun + 10);
+      if (s === 'door') window.TADC.mystery && window.TADC.mystery.find('stub-6'); // 🎟️ mystery clue: Bubble ate a door
+      pet.crumbs = Math.min(6, pet.crumbs + (s === 'semicolon' ? 0 : 1));
+      care(3); msg(L.fed[s]); save(); render();
+    }, 620);
+  });
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') menu.classList.remove('show'); });
+
+  // Play: a ball appears; click it to throw, Bubble chases it.
+  const ball = $('ball');
+  let throws = 0;
+  $('aPlay').addEventListener('click', () => {
+    wakeIfNapping();
+    if (pet.energy < 10) { msg(pick(L.tired)); return; }
+    throws = 0; ball.style.display = 'block'; ball.style.left = '20%'; ball.style.top = '70%';
+    msg('Click the ball to throw it! (3 throws)'); sfx('boing');
+  });
+  ball.addEventListener('click', () => {
+    const x = 10 + Math.random() * 75, y = 30 + Math.random() * 45;
+    ball.style.left = x + '%'; ball.style.top = y + '%'; sfx('boing');
+    setTimeout(() => {
+      $('pet').style.left = x + '%'; $('pet').style.top = y + '%'; anim('wiggle');
+      pet.fun = clamp(pet.fun + 12); pet.energy = clamp(pet.energy - 4); pet.food = clamp(pet.food - 2);
+      care(2); msg(pick(L.play)); save(); render();
+      if (++throws >= 3) { setTimeout(() => { ball.style.display = 'none'; msg('Good game! GOOD GAME!'); }, 900); }
+    }, 500);
+  });
+  $('aClean').addEventListener('click', () => {
+    wakeIfNapping();
+    $('screen').querySelectorAll('.crumb').forEach((c) => c.remove());
+    pet.crumbs = 0; pet.shine = 100; care(2);
+    anim('wiggle'); sfx('ding'); msg(pick(L.clean));
+    const r = $('pet').getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2, 30, 0.5);
+    save(); render();
+  });
+  $('aNap').addEventListener('click', () => {
+    pet.napping = !pet.napping;
+    msg(pet.napping ? pick(L.nap) : pick(L.wake)); sfx(pet.napping ? 'tick' : 'boing');
+    if (pet.napping) care(1);
+    save(); render(); wander();
+  });
+  function tickle() {
+    wakeIfNapping();
+    pet.fun = clamp(pet.fun + 6); care(1); anim('wiggle'); sfx('pop'); msg(pick(L.tickle));
+    save(); render();
+  }
+  $('aTickle').addEventListener('click', tickle);
+  $('pet').addEventListener('click', tickle);
+  $('aTalk').addEventListener('click', () => {
+    wakeIfNapping();
+    const needs = ['food', 'fun', 'shine', 'energy'].filter((k) => pet[k] < 30);
+    const needLine = { food: L.hungry, fun: L.bored, shine: L.dull, energy: L.tired };
+    msg(needs.length && Math.random() < 0.6 ? pick(needLine[pick(needs)]) : pick(L.chat), 4200);
+    pet.fun = clamp(pet.fun + 2); save(); render(); sfx('tick');
+  });
+
+  // ═══ live tick: real-time drain while the page is open; napping restores energy ═══
+  setInterval(() => {
+    catchUp();
+    // a fully neglected Bubble pops... and immediately comes back (Bubble ALWAYS comes back)
+    if (pet.food === 0 && pet.fun === 0 && pet.shine === 0) {
+      pet.pops++; Object.assign(pet, { food: 60, fun: 60, shine: 80, energy: 80, napping: false });
+      msg(L.popped, 6000); sfx('glitch');
+    }
+    save(); render();
+  }, 5000);
+
+  // greeting based on how long you've been away
+  render();
+  setTimeout(() => {
+    const low = ['food', 'fun', 'shine', 'energy'].filter((k) => pet[k] < 25);
+    if (pet.napping) msg('zzz... (Bubble is napping. Press Nap to wake.)');
+    else if (away > 6 * HOUR) msg(pick(L.longAway), 4500);
+    else if (low.length) msg(pick({ food: L.hungry, fun: L.bored, shine: L.dull, energy: L.tired }[low[0]]), 4200);
+    else msg(pick(L.hello), 4200);
+  }, 400);
+  save();
+})();
+</script>
+</body>
+</html>

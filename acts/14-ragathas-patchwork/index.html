@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ragatha's Patchwork</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at 50% 0%,rgba(255,126,182,.3),transparent 55%),#0b0718;padding-bottom:70px}
+  header{text-align:center;padding:14px 16px 4px}
+  h1{font-family:'Rye';font-weight:400;margin:0;font-size:clamp(26px,4.4vw,50px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink)}
+  .sub{color:#cbbff0;margin:4px 0 0;font-size:15px}
+  main{display:grid;grid-template-columns:230px minmax(300px,720px) 200px;gap:18px;justify-content:center;align-items:start;padding:12px 14px}
+  .panel{background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-radius:16px;box-shadow:6px 6px 0 var(--red-d);padding:10px}
+  .panel h2{font-family:'Rye';font-weight:400;font-size:17px;margin:2px 0 8px;text-align:center}
+  .label{font:700 11px 'Fredoka';letter-spacing:.14em;color:#5c3a99;margin:8px 2px 4px}
+  #fabrics{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+  #colors{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+  .sw{aspect-ratio:1;border:3px solid var(--ink);border-radius:10px;cursor:pointer;padding:0;overflow:hidden;background:#fff}
+  .sw canvas{width:100%;height:100%;display:block;pointer-events:none}
+  .sw.sel{outline:3px solid var(--red);outline-offset:2px;transform:scale(1.06)}
+  .sw:focus-visible{outline:3px dashed var(--red);outline-offset:2px}
+  .tools{display:grid;gap:6px}
+  .btn{font:700 13px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:12px;padding:8px;cursor:pointer;box-shadow:2px 2px 0 var(--ink);text-align:center;text-decoration:none}
+  .btn:active{transform:translate(1px,1px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.on{background:#ff7eb6}
+  .btn.blue{background:var(--blue);color:#fff}
+  .btn:focus-visible{outline:3px dashed var(--red);outline-offset:2px}
+  #quiltWrap{position:relative;border-radius:18px;padding:14px;background:#7a4a2a;box-shadow:inset 0 0 0 4px #5a3418,8px 8px 0 var(--red-d);touch-action:none}
+  #quilt{width:100%;height:auto;display:block;border-radius:6px;cursor:crosshair;box-shadow:0 0 0 3px var(--ink)}
+  #ragatha{width:150px;margin:6px auto 0;cursor:pointer;transform-origin:50% 100%}
+  #ragatha.yay{animation:yay .6s cubic-bezier(.3,1.7,.5,1)}
+  @keyframes yay{40%{transform:translateY(-14px) rotate(-4deg) scale(1.05)}}
+  #ragatha svg{width:100%;height:auto;filter:drop-shadow(0 8px 6px rgba(0,0,0,.5))}
+  .count{text-align:center;font-weight:700;font-size:13px;color:#5c3a99;margin-top:6px}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30}
+  @media (max-width:1050px){main{grid-template-columns:minmax(300px,720px)}#fabrics{grid-template-columns:repeat(8,1fr)}#colors{grid-template-columns:repeat(10,1fr)}.tools{grid-template-columns:repeat(3,1fr)}#ragatha{width:110px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Ragatha's Patchwork</h1>
+  <p class="sub">A cozy break. Pick a fabric and a color, then click or drag on the quilt. Click a patch again to turn it into triangles.</p>
+</header>
+<main>
+  <section class="panel">
+    <h2>🧵 Sewing Basket</h2>
+    <div class="label">FABRIC</div><div id="fabrics"></div>
+    <div class="label">COLOR</div><div id="colors"></div>
+  </section>
+  <section><div id="quiltWrap"><canvas id="quilt" width="960" height="640"></canvas></div></section>
+  <section class="panel">
+    <h2>✂️ Tools</h2>
+    <div class="tools">
+      <button class="btn on" id="mirror">🪞 Mirror: ON</button>
+      <button class="btn" id="shuffle">🎲 Surprise quilt</button>
+      <button class="btn" id="fill">🪣 Fill all blanks</button>
+      <button class="btn" id="unpick">🪡 Unpick (eraser)</button>
+      <button class="btn blue" id="save">📸 Save quilt</button>
+      <button class="btn" id="clear">🧺 Start over</button>
+    </div>
+    <div id="ragatha" title="Ragatha"></div>
+    <div class="count"><span id="sewn">0</span> / 96 patches sewn</div>
+  </section>
+</main>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, say, confetti, sfx, pick } = window.TADC;
+  const COLS = 12, ROWS = 8, CELL = 80;
+  const COLORS = ['#e3243b', '#ff7eb6', '#ff9a3d', '#ffd34d', '#5fd38d', '#2fa89a', '#6fb6ff', '#2f5bd8', '#b07cff', '#fff7d6'];
+  const FABRICS = ['solid', 'stripes', 'dots', 'gingham', 'zigzag', 'stars', 'hearts', 'checks'];
+
+  // ═══ Ragatha (original lines) ═══
+  const rag = document.getElementById('ragatha');
+  rag.innerHTML = CAST.ragatha;
+  const RAG = {
+    sew: ['Ooh, that one\'s lovely!', 'Perfect stitch! I mean it! I always mean it!', 'You have such a good eye for fabric!', 'Look at you go!', 'That color is SO you.', 'Every patch is a little hug for the quilt!'],
+    tri: ['Triangles! Fancy! Very advanced quilting!', 'Oh, you did a half-and-half! My favorite!'],
+    milestone: {
+      24: "A quarter of a quilt! That's already enough to cover a very small chess king!",
+      48: 'Halfway there! Take a stretch break! Shoulders down! Breathe!',
+      72: 'Three quarters! I can practically feel how cozy it\'s going to be!',
+      96: "YOU FINISHED A WHOLE QUILT! I'm going to cry! Happy tears! Stuffing tears!",
+    },
+    shuffle: ['Ooh, a surprise quilt! Like a quilt that came out of a gift box!', 'Randomness can be beautiful too!'],
+    unpick: ['Unpicking is part of sewing! Mistakes are just practice!', 'Out it comes! No shame in a do-over!'],
+    poke: ["Hi! Hello! I'm right here if you need moral support!", 'Did you drink water today? Go drink some water! I\'ll wait!', 'Your shoulders are up by your ears again. Down! Good!'],
+  };
+  let lastSay = 0;
+  function ragSay(arr, force = false, ms = 2800) {
+    const now = performance.now();
+    if (!force && now - lastSay < 5000) return;
+    lastSay = now; say(rag, pick(arr), ms);
+    rag.classList.remove('yay'); void rag.offsetWidth; rag.classList.add('yay');
+  }
+  rag.addEventListener('click', () => { ragSay(RAG.poke, true); sfx('ding'); });
+
+  // ═══ fabric painter: draws one pattern into a rect, clipped ═══
+  function drawFabric(ctx, kind, color, x, y, w, h) {
+    ctx.save();
+    ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+    ctx.fillStyle = color; ctx.fillRect(x, y, w, h);
+    const light = color === '#fff7d6' || color === '#ffd34d';
+    const accent = light ? 'rgba(27,27,47,.28)' : 'rgba(255,255,255,.45)';
+    ctx.fillStyle = accent; ctx.strokeStyle = accent;
+    const s = w / 8;
+    switch (kind) {
+      case 'stripes': ctx.lineWidth = s * 0.9; for (let i = -w; i < w * 2; i += s * 2.2) { ctx.beginPath(); ctx.moveTo(x + i, y); ctx.lineTo(x + i + h, y + h); ctx.stroke(); } break;
+      case 'dots': for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) { ctx.beginPath(); ctx.arc(x + (c + 0.5 + (r % 2) * 0.5) * w / 4, y + (r + 0.5) * h / 4, s * 0.55, 0, 7); ctx.fill(); } break;
+      case 'gingham': ctx.globalAlpha = 0.55; for (let i = 0; i < 4; i++) { ctx.fillRect(x + i * w / 4, y, w / 8, h); ctx.fillRect(x, y + i * h / 4, w, h / 8); } break;
+      case 'zigzag': ctx.lineWidth = s * 0.6; for (let r = 0; r < 4; r++) { ctx.beginPath(); for (let c = 0; c <= 8; c++) ctx.lineTo(x + c * w / 8, y + (r + 0.35 + (c % 2) * 0.4) * h / 4); ctx.stroke(); } break;
+      case 'stars': for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) star(ctx, x + (c + 0.5) * w / 3, y + (r + 0.5) * h / 3, s * 0.9); break;
+      case 'hearts': for (let r = 0; r < 3; r++) for (let c = 0; c < 3; c++) heart(ctx, x + (c + 0.5) * w / 3, y + (r + 0.5) * h / 3, s * 0.85); break;
+      case 'checks': for (let r = 0; r < 4; r++) for (let c = 0; c < 4; c++) if ((r + c) % 2) ctx.fillRect(x + c * w / 4, y + r * h / 4, w / 4, h / 4); break;
+      default: break;
+    }
+    ctx.restore();
+  }
+  function star(ctx, cx, cy, r) { ctx.beginPath(); for (let i = 0; i < 10; i++) { const rr = i % 2 ? r * 0.45 : r, a = i / 10 * Math.PI * 2 - Math.PI / 2; ctx.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); } ctx.fill(); }
+  function heart(ctx, cx, cy, r) { ctx.beginPath(); ctx.moveTo(cx, cy + r * 0.8); ctx.bezierCurveTo(cx - r * 1.4, cy - r * 0.2, cx - r * 0.5, cy - r * 1.2, cx, cy - r * 0.35); ctx.bezierCurveTo(cx + r * 0.5, cy - r * 1.2, cx + r * 1.4, cy - r * 0.2, cx, cy + r * 0.8); ctx.fill(); }
+
+  // ═══ swatches ═══
+  let fabric = 'solid', color = COLORS[0], erasing = false;
+  function swatch(parent, draw, onPick, sel, label) {
+    const b = document.createElement('button'); b.className = 'sw' + (sel ? ' sel' : ''); b.setAttribute('aria-label', label);
+    const c = document.createElement('canvas'); c.width = c.height = 60; b.appendChild(c);
+    draw(c.getContext('2d'));
+    b.addEventListener('click', () => { parent.querySelectorAll('.sw').forEach((x) => x.classList.toggle('sel', x === b)); onPick(); sfx('tick'); setEraser(false); });
+    parent.appendChild(b);
+    return c;
+  }
+  const fabricCanvases = {};
+  const fabEl = document.getElementById('fabrics'), colEl = document.getElementById('colors');
+  FABRICS.forEach((f) => { fabricCanvases[f] = swatch(fabEl, (ctx) => drawFabric(ctx, f, color, 0, 0, 60, 60), () => { fabric = f; }, f === fabric, f + ' fabric'); });
+  function refreshFabricSwatches() { FABRICS.forEach((f) => drawFabric(fabricCanvases[f].getContext('2d'), f, color, 0, 0, 60, 60)); }
+  COLORS.forEach((c) => swatch(colEl, (ctx) => { ctx.fillStyle = c; ctx.fillRect(0, 0, 60, 60); }, () => { color = c; refreshFabricSwatches(); }, c === color, 'color ' + c));
+
+  // ═══ quilt model: each cell is null or {f,c, tri:0..4, f2,c2} (tri>0 = split diagonally, second half has its own fabric) ═══
+  let quilt = Array.from({ length: ROWS }, () => Array(COLS).fill(null));
+  const cv = document.getElementById('quilt'), ctx = cv.getContext('2d');
+  function drawCell(r, c) {
+    const x = c * CELL, y = r * CELL, cell = quilt[r][c];
+    ctx.clearRect(x, y, CELL, CELL);
+    if (!cell) {
+      ctx.fillStyle = (r + c) % 2 ? '#efe4cf' : '#f6eddb'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = 'rgba(122,74,42,.18)'; ctx.setLineDash([4, 6]); ctx.lineWidth = 2; ctx.strokeRect(x + 6, y + 6, CELL - 12, CELL - 12); ctx.setLineDash([]);
+      return;
+    }
+    drawFabric(ctx, cell.f, cell.c, x, y, CELL, CELL);
+    if (cell.tri) {
+      // second fabric on one triangular half; tri 1..4 picks which corner
+      ctx.save(); ctx.beginPath();
+      const pts = [[[x, y], [x + CELL, y], [x, y + CELL]], [[x, y], [x + CELL, y], [x + CELL, y + CELL]], [[x + CELL, y], [x + CELL, y + CELL], [x, y + CELL]], [[x, y], [x + CELL, y + CELL], [x, y + CELL]]][cell.tri - 1];
+      ctx.moveTo(...pts[0]); ctx.lineTo(...pts[1]); ctx.lineTo(...pts[2]); ctx.closePath(); ctx.clip();
+      drawFabric(ctx, cell.f2, cell.c2, x, y, CELL, CELL);
+      ctx.restore();
+      ctx.strokeStyle = 'rgba(27,27,47,.5)'; ctx.setLineDash([5, 5]); ctx.lineWidth = 2;
+      ctx.beginPath();
+      if (cell.tri === 1 || cell.tri === 3) { ctx.moveTo(x + CELL, y); ctx.lineTo(x, y + CELL); } else { ctx.moveTo(x, y); ctx.lineTo(x + CELL, y + CELL); }
+      ctx.stroke(); ctx.setLineDash([]);
+    }
+    // stitching around every patch
+    ctx.strokeStyle = 'rgba(255,255,255,.75)'; ctx.lineWidth = 2; ctx.setLineDash([6, 5]);
+    ctx.strokeRect(x + 5, y + 5, CELL - 10, CELL - 10); ctx.setLineDash([]);
+    ctx.strokeStyle = 'rgba(27,27,47,.35)'; ctx.lineWidth = 1.5; ctx.strokeRect(x + 0.75, y + 0.75, CELL - 1.5, CELL - 1.5);
+  }
+  function drawAll() { for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) drawCell(r, c); updateCount(); }
+  let lastMilestone = 0;
+  function updateCount() {
+    const n = quilt.flat().filter(Boolean).length;
+    document.getElementById('sewn').textContent = n;
+    for (const m of [24, 48, 72, 96]) {
+      if (n >= m && lastMilestone < m) {
+        lastMilestone = m; ragSay([RAG.milestone[m]], true, 4000); sfx('fanfare');
+        const r = cv.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 3, m === 96 ? 200 : 60, m === 96 ? 1.4 : 0.8);
+      }
+    }
+    if (n < lastMilestone) lastMilestone = [0, 24, 48, 72, 96].filter((m) => m <= n).pop();
+  }
+
+  // ═══ sewing ═══
+  let mirror = true;
+  function targets(r, c) { const t = [[r, c]]; if (mirror && c !== COLS - 1 - c) t.push([r, COLS - 1 - c]); return t; }
+  function sew(r, c, isClick) {
+    for (const [rr, cc] of targets(r, c)) {
+      const mirrored = cc !== c;
+      if (erasing) { quilt[rr][cc] = null; drawCell(rr, cc); continue; }
+      const cell = quilt[rr][cc];
+      if (isClick && cell && cell.f === fabric && cell.c === color && !cell.tri) {
+        // re-clicking the same fabric splits the patch diagonally with the previous fabric
+        Object.assign(cell, { tri: mirrored ? 2 : 1, f2: cell.pf || 'solid', c2: cell.pc || '#fff7d6' });
+        if (!mirrored) ragSay(RAG.tri);
+      } else if (isClick && cell && cell.tri) {
+        cell.tri = cell.tri % 4 + 1;                              // rotate the split
+        if (mirrored) cell.tri = [0, 2, 1, 4, 3][cell.tri];
+      } else {
+        quilt[rr][cc] = { f: fabric, c: color, tri: 0, pf: cell ? cell.f : null, pc: cell ? cell.c : null };
+      }
+      drawCell(rr, cc);
+    }
+    updateCount();
+  }
+  function cellAt(e) {
+    const rect = cv.getBoundingClientRect();
+    const c = Math.floor((e.clientX - rect.left) / rect.width * COLS), r = Math.floor((e.clientY - rect.top) / rect.height * ROWS);
+    return r >= 0 && r < ROWS && c >= 0 && c < COLS ? [r, c] : null;
+  }
+  let dragging = false, lastCell = null;
+  cv.addEventListener('pointerdown', (e) => {
+    const rc = cellAt(e); if (!rc) return;
+    dragging = true; lastCell = rc.join(); cv.setPointerCapture(e.pointerId);
+    sew(rc[0], rc[1], true); sfx(erasing ? 'boing' : 'pop');
+    if (!erasing && Math.random() < 0.3) ragSay(RAG.sew);
+  });
+  cv.addEventListener('pointermove', (e) => {
+    if (!dragging) return;
+    const rc = cellAt(e); if (!rc || rc.join() === lastCell) return;
+    lastCell = rc.join(); sew(rc[0], rc[1], false); sfx('tick');
+  });
+  const stop = () => { dragging = false; lastCell = null; };
+  cv.addEventListener('pointerup', stop); cv.addEventListener('pointercancel', stop);
+
+  // ═══ tools ═══
+  const mirrorBtn = document.getElementById('mirror');
+  mirrorBtn.addEventListener('click', () => { mirror = !mirror; mirrorBtn.textContent = `🪞 Mirror: ${mirror ? 'ON' : 'off'}`; mirrorBtn.classList.toggle('on', mirror); sfx('tick'); });
+  const unpickBtn = document.getElementById('unpick');
+  function setEraser(on) { erasing = on; unpickBtn.classList.toggle('on', on); cv.style.cursor = on ? 'not-allowed' : 'crosshair'; }
+  unpickBtn.addEventListener('click', () => { setEraser(!erasing); if (erasing) ragSay(RAG.unpick, true); });
+  document.getElementById('shuffle').addEventListener('click', () => {
+    // a harmonious random quilt: 3-color palette, mirrored, with some triangles
+    const pal = [pick(COLORS), pick(COLORS), pick(COLORS)], fabs = [pick(FABRICS), pick(FABRICS), 'solid'];
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS / 2; c++) {
+      const i = (r + c * 2) % 3, j = (i + 1) % 3;
+      const cell = { f: fabs[i], c: pal[i], tri: Math.random() < 0.3 ? 1 + Math.floor(Math.random() * 4) : 0, f2: fabs[j], c2: pal[j] };
+      quilt[r][c] = cell;
+      quilt[r][COLS - 1 - c] = { ...cell, tri: cell.tri ? [0, 2, 1, 4, 3][cell.tri] : 0 };
+    }
+    drawAll(); sfx('fanfare'); ragSay(RAG.shuffle, true);
+  });
+  document.getElementById('fill').addEventListener('click', () => {
+    for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (!quilt[r][c]) quilt[r][c] = { f: fabric, c: color, tri: 0 };
+    drawAll(); sfx('pop');
+  });
+  document.getElementById('clear').addEventListener('click', () => {
+    quilt = Array.from({ length: ROWS }, () => Array(COLS).fill(null)); lastMilestone = 0; drawAll(); setEraser(false);
+    ragSay(['A fresh start! The best kind of start!'], true);
+  });
+  document.getElementById('save').addEventListener('click', () => {
+    // add a little stitched border + label, then download
+    const out = document.createElement('canvas'); out.width = cv.width + 80; out.height = cv.height + 120;
+    const o = out.getContext('2d');
+    o.fillStyle = '#7a4a2a'; o.fillRect(0, 0, out.width, out.height);
+    o.drawImage(cv, 40, 40);
+    o.strokeStyle = '#ffd34d'; o.setLineDash([10, 8]); o.lineWidth = 4; o.strokeRect(22, 22, out.width - 44, out.height - 84); o.setLineDash([]);
+    o.fillStyle = '#fff7d6'; o.font = "700 28px Fredoka, sans-serif"; o.textAlign = 'center';
+    o.fillText("Sewn with love in Ragatha's Patchwork 🧵", out.width / 2, out.height - 28);
+    out.toBlob((b) => {
+      const a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download = 'my-circus-quilt.png'; a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+      ragSay(['Saved! Hang it on a wall! Or a virtual wall! All walls are virtual here!'], true);
+    });
+  });
+
+  drawAll();
+  setTimeout(() => ragSay(["Welcome to my sewing corner! Pull up a cushion. Let's make something cozy together!"], true, 4200), 500);
+})();
+</script>
+</body>
+</html>

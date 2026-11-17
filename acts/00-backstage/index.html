@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Backstage</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--void:#0b0718;
+    --tungsten:255,190,110;--wood:#2a1a10;--wall:#1a1220;--muted:#cdbfa0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%}
+  body{
+    font-family:'Fredoka',system-ui,sans-serif;color:var(--cream);
+    background:
+      radial-gradient(ellipse 70% 50% at 50% 0%,rgba(var(--tungsten),.18),transparent 70%),
+      radial-gradient(ellipse at 50% 120%,rgba(227,36,59,.12),transparent 60%),
+      var(--void);
+    padding:16px 16px 84px;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;
+  }
+  h1,h2{font-family:'Rye',serif;font-weight:400;color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 5px 0 var(--ink);margin:0;text-align:center}
+  h1{font-size:clamp(28px,5vw,48px)}
+  h2{font-size:clamp(20px,3.4vw,30px)}
+  .sub{color:var(--muted);margin:6px 0 14px;text-align:center;font-size:15px}
+  a{color:var(--gold)}
+  .btn{
+    font:700 15px 'Fredoka',system-ui,sans-serif;color:var(--ink);background:var(--gold);border:3px solid var(--ink);
+    border-radius:999px;padding:9px 16px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block;
+    transition:transform .1s;line-height:1.2
+  }
+  .btn:hover{transform:translateY(-1px)}
+  .btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+  .btn.alt{background:var(--cream)}
+  .btn.red{background:var(--red);color:#fff}
+  .btn:focus-visible,button:focus-visible,a:focus-visible,[tabindex]:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+  .btn[disabled]{opacity:.5;cursor:default;transform:none}
+  #back{position:fixed;left:14px;bottom:14px;z-index:40;background:var(--cream);color:var(--ink);border:3px solid var(--ink);border-radius:999px;
+    padding:7px 13px;font-weight:700;font-size:14px;text-decoration:none;box-shadow:3px 3px 0 var(--ink)}
+  #back:hover{background:var(--gold)}
+  .visually-hidden{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+  /* ───────── GATE ───────── */
+  #gate{margin-top:8vh;width:min(440px,100%);background:#1d1426;border:4px solid var(--ink);border-radius:22px;
+    box-shadow:0 0 0 3px #3a2a4a,8px 8px 0 3px var(--ink);padding:22px 20px;text-align:center}
+  #gate svg{width:120px;height:auto;display:block;margin:6px auto 12px}
+  #gate p{margin:10px 0;line-height:1.45}
+  #gate .caine-line{font-style:italic;color:var(--cream)}
+  #gate .caine-line b{font-style:normal;color:var(--red);font-family:'Rye';font-weight:400}
+
+  /* ───────── SHOW ───────── */
+  #show{width:min(980px,100%)}
+  .layout{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:14px;align-items:start}
+  @media (max-width:820px){.layout{grid-template-columns:minmax(0,1fr)}}
+
+  .stage{
+    position:relative;height:clamp(380px,62vh,520px);border:4px solid var(--ink);border-radius:20px;overflow:hidden;
+    box-shadow:0 0 0 3px #3a2a4a,8px 8px 0 3px var(--ink);cursor:pointer;
+    background:
+      linear-gradient(180deg,transparent 0 68%,rgba(0,0,0,.35) 68% 69%,transparent 69%),
+      repeating-linear-gradient(90deg,#2b1c12 0 46px,#25170e 46px 48px) bottom/100% 32% no-repeat,
+      linear-gradient(180deg,#120c18,var(--wall) 60%);
+    transition:filter .6s;
+  }
+  .stage.no-pointer{cursor:default}
+  .spot{position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(ellipse 55% 70% at 50% 28%,rgba(var(--tungsten),.30),rgba(var(--tungsten),.08) 55%,transparent 75%),
+      radial-gradient(ellipse at 50% 100%,rgba(0,0,0,.0),rgba(0,0,0,.55) 90%);
+    transition:opacity .6s}
+  .vignette{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px 30px rgba(0,0,0,.75)}
+
+  /* ropes + sandbags */
+  .rope{position:absolute;top:0;width:4px;background:repeating-linear-gradient(170deg,#b89b6a 0 5px,#8e7447 5px 9px);border-radius:2px}
+  .rope::after{content:'';position:absolute;left:50%;bottom:-26px;transform:translateX(-50%);width:26px;height:28px;
+    background:radial-gradient(circle at 35% 30%,#a28a63,#6d5a3b);border:3px solid var(--ink);border-radius:40% 40% 46% 46%}
+  .rope.r1{left:7%;height:9%}.rope.r2{left:25%;height:18%}.rope.r3{right:6%;height:7%}
+  .rope.r3::after{width:22px;height:24px}
+
+  /* switchboard */
+  .switchboard{position:absolute;left:3%;top:18%;width:23%;min-width:78px;padding:6px 6px 8px;background:#3b3245;border:3px solid var(--ink);border-radius:8px;
+    box-shadow:3px 3px 0 var(--ink);filter:saturate(.6) brightness(.85)}
+  .switchboard .plate{font:400 clamp(8px,1.4vw,12px) 'Rye';color:var(--gold);background:#1b1b2f;border-radius:4px;padding:2px 4px;text-align:center;letter-spacing:.06em}
+  .switchboard .knobs{display:flex;justify-content:space-around;margin-top:6px}
+  .switchboard .knob{width:clamp(9px,1.6vw,15px);height:clamp(14px,2.4vw,22px);border:2px solid var(--ink);border-radius:3px;background:#887a96;position:relative}
+  .switchboard .knob::after{content:'';position:absolute;left:1px;right:1px;top:1px;height:40%;background:#d8d0e0;border-radius:2px;transition:top .25s,background .25s}
+  .switchboard .knob.on::after{top:auto;bottom:1px;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+  .switchboard .dust{position:absolute;inset:0;background:radial-gradient(circle at 30% 40%,rgba(255,255,255,.08),transparent 40%);pointer-events:none}
+
+  /* checkered floor rack */
+  .floors{position:absolute;left:4%;top:44%;width:20%;min-width:66px;height:20%;display:flex;gap:3px;align-items:flex-end}
+  .floors i{flex:1;height:100%;border:2px solid var(--ink);border-radius:3px;transform:skewX(-8deg);
+    background:conic-gradient(#e9e2cf 25%,#1b1b2f 0 50%,#e9e2cf 0 75%,#1b1b2f 0) 0 0/12px 12px;filter:brightness(.7)}
+  .floors i:nth-child(2){height:92%}.floors i:nth-child(3){height:84%}
+  .floors::after{content:'SPARE FLOORS';position:absolute;bottom:-15px;left:0;right:0;text-align:center;font:700 clamp(7px,1.2vw,10px) 'Fredoka';letter-spacing:.08em;color:var(--muted)}
+
+  /* stack of wet painted doors */
+  .doorstack{position:absolute;right:3%;top:12%;width:23%;min-width:74px;height:50%}
+  .pdoor{position:absolute;bottom:0;width:62%;height:100%;border:3px solid var(--ink);border-radius:6px 6px 2px 2px;
+    background:linear-gradient(90deg,#7a1020,#b31a2e 40%,#8a0c1a);box-shadow:3px 3px 0 var(--ink)}
+  .pdoor::before{content:'EXIT';position:absolute;top:10%;left:50%;transform:translateX(-50%);font:400 clamp(9px,1.6vw,14px) 'Rye';color:var(--gold);
+    background:#3a0710;padding:1px 4px;border-radius:3px;border:2px solid var(--ink)}
+  .pdoor::after{content:'';position:absolute;right:12%;top:52%;width:9%;aspect-ratio:1;border-radius:50%;background:var(--gold);border:2px solid var(--ink)}
+  .pdoor.d1{right:0;transform:rotate(4deg);transform-origin:bottom right;filter:brightness(.6)}
+  .pdoor.d2{right:14%;transform:rotate(2deg);transform-origin:bottom right;filter:brightness(.75);background:linear-gradient(90deg,#1f3b96,#2f5bd8 40%,#1d2f78)}
+  .pdoor.d3{right:28%;transform:rotate(-1deg);transform-origin:bottom right}
+  .drip{position:absolute;top:30%;width:5px;background:var(--gold);border-radius:0 0 3px 3px;animation:drip 3.5s ease-in infinite}
+  .pdoor .drip:nth-child(1){left:22%;height:14%}
+  .pdoor .drip:nth-child(2){left:46%;height:9%;animation-delay:1.2s;background:#ffb3bd}
+  @keyframes drip{0%{transform:scaleY(.4);transform-origin:top}60%{transform:scaleY(1.1)}100%{transform:scaleY(.4)}}
+  .wet{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font:700 clamp(7px,1.2vw,10px) 'Fredoka';letter-spacing:.08em;color:var(--gold)}
+
+  /* the velvet curtain + the seats behind it */
+  .portal{position:absolute;left:30%;width:40%;top:6%;height:52%;border:4px solid var(--ink);border-radius:12px 12px 4px 4px;overflow:hidden;
+    background:#060410;box-shadow:0 0 0 3px #3b2a14,5px 5px 0 3px var(--ink)}
+  .seats{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:5%;padding:8% 6% 10%;
+    background:radial-gradient(ellipse at 50% 0%,rgba(var(--tungsten),.35),transparent 60%),linear-gradient(#1a0f24,#0b0718);opacity:0;transition:opacity 1s .4s}
+  .portal.open .seats{opacity:1}
+  .seatrow{display:flex;gap:4%;justify-content:center;width:100%}
+  .seat{width:11%;max-width:22px;aspect-ratio:.85;background:linear-gradient(#a3142a,#6b0b1a);border:2px solid var(--ink);border-radius:5px 5px 2px 2px;position:relative}
+  .seat::after{content:'';position:absolute;left:-12%;right:-12%;bottom:-18%;height:30%;background:#4a0812;border:2px solid var(--ink);border-radius:2px}
+  .seatrow:nth-child(1) .seat{transform:scale(.7)}.seatrow:nth-child(2) .seat{transform:scale(.85)}
+  .seat.you{background:linear-gradient(#ffe48a,#d9a419);box-shadow:0 0 14px 4px rgba(255,211,77,.8);animation:glow 2.2s ease-in-out infinite}
+  @keyframes glow{50%{box-shadow:0 0 22px 8px rgba(255,211,77,.95)}}
+  .namecard{position:absolute;left:50%;top:-58%;transform:translateX(-50%);font:700 clamp(8px,1.3vw,11px) 'Fredoka';background:var(--cream);color:var(--ink);
+    border:2px solid var(--ink);border-radius:4px;padding:0 4px;white-space:nowrap}
+  .stagefront{position:absolute;left:0;right:0;top:0;height:10%;background:linear-gradient(var(--gold),#b8861b);border-bottom:3px solid var(--ink);z-index:3;
+    font:400 clamp(8px,1.4vw,12px) 'Rye';color:var(--ink);display:flex;align-items:center;justify-content:center;letter-spacing:.1em}
+  .curtain{position:absolute;top:10%;bottom:0;width:51%;z-index:2;transition:transform 1.6s cubic-bezier(.6,.05,.3,1);
+    background:repeating-linear-gradient(90deg,#6b0b1a 0 10px,#a3142a 10px 18px,#7d0d1e 18px 24px);box-shadow:inset 0 -20px 30px rgba(0,0,0,.5)}
+  .curtain.l{left:0;border-right:2px solid var(--ink)}.curtain.r{right:0;border-left:2px solid var(--ink)}
+  .curtain::after{content:'';position:absolute;bottom:0;left:0;right:0;height:10px;background:var(--gold);border-top:2px solid var(--ink)}
+  .portal.open .curtain.l{transform:translateX(-92%)}
+  .portal.open .curtain.r{transform:translateX(92%)}
+
+  /* cast */
+  .cast{position:absolute;left:1%;right:1%;bottom:3%;height:34%;display:flex;justify-content:center;align-items:flex-end;gap:clamp(2px,1vw,10px);z-index:4}
+  .actor{position:relative;height:72%;opacity:0;transform:translateY(24px) scale(.9);transition:opacity .6s,transform .6s cubic-bezier(.3,1.5,.5,1);
+    flex:0 1 auto;pointer-events:none;display:flex;align-items:flex-end}
+  .actor.in{opacity:1;transform:none;pointer-events:auto}
+  .actor svg{height:100%;width:auto;display:block;filter:drop-shadow(0 6px 5px rgba(0,0,0,.6))}
+  .actor.small{height:38%;align-self:center}
+  #caine{height:100%}
+  #bubble{margin-bottom:14%}
+  .actor.speaking svg{filter:drop-shadow(0 0 10px rgba(var(--tungsten),.9)) drop-shadow(0 6px 5px rgba(0,0,0,.6))}
+  .splat{position:absolute;width:15%;aspect-ratio:1;border-radius:50% 40% 55% 45%;border:2px solid var(--ink);opacity:0;transition:opacity .4s;pointer-events:none}
+  #caine.caught .splat{opacity:1}
+  .splat.s1{left:6%;top:56%;background:var(--red)}
+  .splat.s2{right:6%;top:58%;background:var(--blue)}
+  .splat.s3{left:14%;top:64%;background:var(--gold);width:10%}
+  .splat.s4{right:16%;top:66%;background:var(--gold);width:9%}
+  .brush{position:absolute;left:40%;bottom:6%;width:22%;height:5px;background:#b98a52;border:2px solid var(--ink);border-radius:3px;z-index:5;opacity:0;transform:rotate(-12deg)}
+  .brush::after{content:'';position:absolute;right:-12px;top:-5px;width:13px;height:11px;background:var(--red);border:2px solid var(--ink);border-radius:2px 7px 7px 2px}
+  .brush.on{opacity:1;animation:clatter .5s}
+  @keyframes clatter{0%{transform:translateY(-120px) rotate(70deg)}70%{transform:translateY(0) rotate(-20deg)}85%{transform:translateY(-8px) rotate(-8deg)}100%{transform:rotate(-12deg)}}
+
+  /* atmosphere effects */
+  canvas#fx{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:6}
+  .beam{position:absolute;width:150px;height:150px;border-radius:50%;left:50%;top:40%;margin:-75px 0 0 -75px;z-index:7;pointer-events:none;
+    box-shadow:0 0 0 2000px rgba(5,3,10,.62),inset 0 0 40px 10px rgba(var(--tungsten),.35);opacity:0;transition:opacity .5s}
+  .stage.fx-spotlight .beam{opacity:1;animation:sweep 7s ease-in-out infinite alternate}
+  @keyframes sweep{0%{left:18%;top:70%}35%{left:50%;top:30%}70%{left:78%;top:68%}100%{left:40%;top:72%}}
+  .stage.fx-stars{filter:hue-rotate(-12deg) saturate(1.1)}
+  .stage.fx-stars .spot{opacity:.55}
+  .stage.fx-rain{filter:saturate(.65) brightness(.9)}
+  .stage.fx-confetti .spot{opacity:1;background:radial-gradient(ellipse 60% 75% at 50% 30%,rgba(255,150,190,.30),rgba(var(--tungsten),.12) 55%,transparent 78%)}
+
+  /* caption + controls */
+  .caption{margin-top:12px;min-height:76px;background:var(--cream);color:var(--ink);border:3px solid var(--ink);border-radius:14px;box-shadow:4px 4px 0 var(--ink);
+    padding:10px 14px;font-size:17px;line-height:1.4}
+  .caption .who{font-family:'Rye';font-weight:400;color:var(--red-d);margin-right:6px}
+  .caption.narr{background:#2a2033;color:var(--cream);font-style:italic}
+  .caption.narr .who{color:var(--gold)}
+  .controls{display:flex;align-items:center;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .controls .hint{color:var(--muted);font-size:13px}
+  .controls .count{margin-left:auto;color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums}
+  .choices{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+  .choices[hidden],.controls[hidden]{display:none}
+
+  /* transcript */
+  .transcript{background:#150f1c;border:3px solid var(--ink);border-radius:16px;box-shadow:0 0 0 2px #3a2a4a,4px 4px 0 2px var(--ink);padding:10px 12px}
+  .transcript h2{font-size:18px;text-align:left;text-shadow:0 2px 0 var(--red-d)}
+  #log{list-style:none;margin:8px 0 0;padding:0 4px 0 0;max-height:clamp(220px,58vh,560px);overflow-y:auto;font-size:14px;line-height:1.4;scrollbar-color:#4a3a5a transparent}
+  @media (max-width:820px){#log{max-height:220px}}
+  #log li{padding:5px 0;border-bottom:1px dashed rgba(255,247,214,.12)}
+  #log li b{font-family:'Rye';font-weight:400;color:var(--gold);margin-right:4px}
+  #log li.narr{color:var(--muted);font-style:italic}
+  #log li.narr b{color:#b9a6d6}
+
+  /* finale card */
+  #curtainCall{position:fixed;inset:0;z-index:8999;display:flex;align-items:center;justify-content:center;padding:16px;
+    background:radial-gradient(ellipse at 50% 40%,rgba(var(--tungsten),.18),rgba(5,3,10,.94) 65%)}
+  #curtainCall[hidden]{display:none}
+  #curtainCall .card{width:min(460px,100%);background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-radius:22px;box-shadow:8px 8px 0 var(--red-d);
+    padding:26px 22px;text-align:center}
+  #curtainCall h2{font-size:clamp(24px,5vw,34px);color:var(--red);text-shadow:0 3px 0 var(--ink)}
+  #curtainCall p{font-size:16px;line-height:1.45}
+  #curtainCall .row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+
+  /* playground */
+  #playground{margin-top:18px}
+  .side{display:flex;flex-direction:column;gap:14px;min-width:0}
+  #show.pg .layout{grid-template-columns:minmax(0,1fr) 300px}
+  @media (max-width:820px){#show.pg .layout{grid-template-columns:minmax(0,1fr)}#show.pg .stage{height:clamp(300px,44vh,420px)}#show.pg .caption{display:none}#show.pg #playground>.sub{display:none}}
+  #show.pg #playground{margin-top:0}
+  #show.pg .pg-grid{grid-template-columns:minmax(0,1fr)}
+  #show.pg #playground h2{font-size:22px}
+  #show.pg #log{max-height:220px}
+  #playground[hidden]{display:none}
+  .pg-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-top:12px}
+  .panel{background:#1d1426;border:3px solid var(--ink);border-radius:16px;box-shadow:0 0 0 2px #3a2a4a,4px 4px 0 2px var(--ink);padding:12px 14px}
+  .panel h3{font-family:'Rye';font-weight:400;color:var(--gold);margin:0 0 4px;font-size:18px}
+  .panel p.note{margin:0 0 10px;color:var(--muted);font-size:13px}
+  .board{background:#3b3245;border:3px solid var(--ink);border-radius:10px;padding:10px;display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+  .board .plate{grid-column:1/-1;font:400 14px 'Rye';color:var(--gold);background:var(--ink);border-radius:5px;padding:3px;text-align:center;letter-spacing:.1em}
+  .toggle{display:flex;align-items:center;gap:8px;background:#2a2234;color:var(--cream);border:3px solid var(--ink);border-radius:8px;padding:8px;
+    font:600 14px 'Fredoka';cursor:pointer;text-align:left}
+  .toggle .lever{width:16px;height:26px;border:2px solid var(--ink);border-radius:4px;background:#887a96;position:relative;flex:none}
+  .toggle .lever::after{content:'';position:absolute;left:1px;right:1px;top:1px;height:45%;background:#d8d0e0;border-radius:2px;transition:top .2s,background .2s}
+  .toggle[aria-pressed="true"]{background:#3c2f22;border-color:var(--gold)}
+  .toggle[aria-pressed="true"] .lever::after{top:auto;bottom:1px;background:var(--gold);box-shadow:0 0 8px var(--gold)}
+  .doorflip{width:100%;display:flex;flex-direction:column;align-items:center;gap:8px;background:none;border:none;cursor:pointer;color:inherit;font:inherit;padding:4px}
+  .bigdoor{width:min(180px,70%);aspect-ratio:.55;border:4px solid var(--ink);border-radius:10px 10px 3px 3px;box-shadow:5px 5px 0 var(--ink);position:relative;
+    background:linear-gradient(90deg,#7a1020,#c21e33 40%,#8a0c1a);display:flex;align-items:flex-start;justify-content:center;padding:18% 5% 0;transform-style:preserve-3d}
+  .bigdoor.flip{animation:flip .45s ease-in-out}
+  @keyframes flip{50%{transform:perspective(500px) rotateY(85deg)}}
+  .bigdoor::after{content:'';position:absolute;right:12%;top:55%;width:10%;aspect-ratio:1;border-radius:50%;background:var(--gold);border:2px solid var(--ink)}
+  .bigdoor .sign{font:400 13px/1.25 'Rye';color:var(--gold);background:#3a0710;border:2px solid var(--ink);border-radius:5px;padding:5px 6px;text-align:center;
+    text-shadow:0 1px 0 #000;max-width:100%;overflow-wrap:break-word;hyphens:auto}
+  .doorcount{font-size:13px;color:var(--muted)}
+  .credits{position:relative;height:250px;overflow:hidden;background:#0b0718;border:3px solid var(--ink);border-radius:10px;
+    -webkit-mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent);mask-image:linear-gradient(transparent,#000 14%,#000 86%,transparent)}
+  .credits .roll{position:absolute;left:0;right:0;top:100%;text-align:center;padding:0 10px}
+  .credits.rolling .roll{animation:roll 26s linear forwards}
+  @keyframes roll{to{transform:translateY(calc(-100% - 260px))}}
+  .credits.static{overflow-y:auto;-webkit-mask-image:none;mask-image:none}
+  .credits.static .roll{position:static;padding:12px}
+  .roll h4{font-family:'Rye';font-weight:400;color:var(--gold);margin:22px 0 6px;font-size:15px;letter-spacing:.06em}
+  .roll p{margin:3px 0;font-size:14px}
+  .roll .role{color:var(--muted);font-size:12px;display:block}
+  .roll .you{color:var(--gold);font-weight:700;font-size:17px}
+  .pg-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .footnote{color:var(--muted);font-size:12px;text-align:center;margin-top:22px}
+
+  @media (max-width:520px){
+    body{padding:12px 16px 84px}
+    .caption{font-size:15px}
+    .portal{left:28%;width:44%}
+    .switchboard{left:2%;width:24%}
+    .floors{left:3%;width:22%}
+    .doorstack{right:2%;width:24%}
+    .cast{left:0;right:0;gap:1px;height:30%}
+    .actor{height:auto;flex:1 1 0;min-width:0;align-self:flex-end}
+    .actor svg{width:100%;height:auto;max-height:100%}
+    .actor.small{flex:.6 1 0;align-self:center;height:auto}
+    #caine{flex:1.5 1 0;height:auto}
+    .controls .hint{display:none}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{animation:none!important;transition:none!important}
+    .stage.fx-spotlight .beam{left:50%;top:32%}
+  }
+</style>
+</head>
+<body>
+
+<!-- ───────── GATE: the door is painted on ───────── -->
+<section id="gate" hidden aria-labelledby="gateTitle">
+  <svg viewBox="0 0 120 170" role="img" aria-label="A door painted flat onto a wall, with a slightly crooked EXIT sign">
+    <rect x="2" y="2" width="116" height="166" rx="6" fill="#2a2033" stroke="#1b1b2f" stroke-width="4"/>
+    <path d="M24 160 V44 Q24 20 60 20 Q96 20 96 44 V160 Z" fill="#b31a2e" stroke="#1b1b2f" stroke-width="4"/>
+    <path d="M30 156 V46 Q30 26 60 26" fill="none" stroke="#e85a6c" stroke-width="3" stroke-linecap="round" opacity=".6"/>
+    <g transform="rotate(-4 60 46)"><rect x="40" y="36" width="40" height="18" rx="3" fill="#3a0710" stroke="#1b1b2f" stroke-width="3"/>
+      <text x="60" y="50" text-anchor="middle" font-family="Rye, serif" font-size="12" fill="#ffd34d">EXIT</text></g>
+    <circle cx="84" cy="100" r="5" fill="#ffd34d" stroke="#1b1b2f" stroke-width="3"/>
+    <path d="M40 64 v18 M70 62 v10" stroke="#ffd34d" stroke-width="3" stroke-linecap="round" opacity=".8"/>
+    <path d="M10 160 q8 -6 14 0 M96 160 q8 -6 14 0" stroke="#1b1b2f" stroke-width="3" fill="none"/>
+  </svg>
+  <h1 id="gateTitle">This door is painted on.</h1>
+  <p class="caine-line"><b>Caine:</b> “Lovely brushwork, isn't it? Took me a whole afternoon. Please stop knocking, you'll smudge the knob.”</p>
+  <p style="color:var(--muted);font-size:14px">Some doors only open for people holding the whole ticket.</p>
+  <p><a class="btn" href="../../index.html">↩ Back to the Big Top</a></p>
+</section>
+
+<!-- ───────── SHOW ───────── -->
+<main id="show" hidden>
+  <h1>Backstage</h1>
+  <p class="sub">Behind the painted door. Mind the sandbags.</p>
+
+  <div class="layout">
+    <div>
+      <div class="stage" id="stage" aria-label="Backstage scene. Click, or press Enter or Space, to continue." role="group">
+        <div class="rope r1"></div><div class="rope r2"></div><div class="rope r3"></div>
+        <div class="switchboard" aria-hidden="true">
+          <div class="plate">ATMOSPHERE</div>
+          <div class="knobs"><span class="knob" data-k="stars"></span><span class="knob" data-k="rain"></span><span class="knob" data-k="confetti"></span><span class="knob" data-k="spotlight"></span></div>
+          <div class="dust"></div>
+        </div>
+        <div class="floors" aria-hidden="true"><i></i><i></i><i></i></div>
+        <div class="doorstack" aria-hidden="true">
+          <div class="pdoor d1"></div>
+          <div class="pdoor d2"><span class="drip"></span></div>
+          <div class="pdoor d3"><span class="drip"></span><span class="drip"></span></div>
+          <div class="wet">WET PAINT</div>
+        </div>
+        <div class="portal" id="portal" aria-hidden="true">
+          <div class="seats" id="seats"></div>
+          <div class="curtain l"></div><div class="curtain r"></div>
+          <div class="stagefront">STAFF ONLY</div>
+        </div>
+        <div class="brush" id="brush" aria-hidden="true"></div>
+        <div class="cast" id="cast"></div>
+        <div class="spot"></div>
+        <div class="vignette"></div>
+        <canvas id="fx" aria-hidden="true"></canvas>
+        <div class="beam" aria-hidden="true"></div>
+      </div>
+
+      <div class="caption" id="caption" aria-hidden="true"></div>
+      <div class="controls" id="controls">
+        <button class="btn" id="next" type="button">Next ▸</button>
+        <span class="hint">or click the stage, or press Enter / Space</span>
+        <span class="count" id="count" aria-hidden="true"></span>
+      </div>
+      <div class="choices" id="choices" hidden>
+        <button class="btn red" id="takeSeat" type="button">🎟️ Take your seat (back to work)</button>
+        <button class="btn alt" id="stay" type="button">🕯️ Stay backstage a little</button>
+      </div>
+    </div>
+
+    <div class="side" id="side">
+    <section class="transcript" aria-labelledby="tTitle">
+      <h2 id="tTitle">Transcript</h2>
+      <ol id="log" role="log" aria-live="polite" aria-relevant="additions" tabindex="0" aria-label="Scene transcript"></ol>
+    </section>
+    </div>
+  </div>
+
+  <!-- playground -->
+  <section id="playground" hidden aria-labelledby="pgTitle">
+    <h2 id="pgTitle" tabindex="-1">Backstage, after hours</h2>
+    <p class="sub">The show's paused. Fiddle with things. Caine says it's fine. Caine says a lot of things.</p>
+    <div class="pg-grid">
+      <div class="panel">
+        <h3>The Switchboard</h3>
+        <p class="note">Flip the levers. The backstage lighting obeys (mostly).</p>
+        <div class="board" role="group" aria-label="Atmosphere switchboard">
+          <div class="plate">ATMOSPHERE</div>
+          <button class="toggle" type="button" data-fx="stars" aria-pressed="false"><span class="lever"></span>✨ Stars</button>
+          <button class="toggle" type="button" data-fx="rain" aria-pressed="false"><span class="lever"></span>🌧️ Rain</button>
+          <button class="toggle" type="button" data-fx="confetti" aria-pressed="false"><span class="lever"></span>🎊 Confetti</button>
+          <button class="toggle" type="button" data-fx="spotlight" aria-pressed="false"><span class="lever"></span>🔦 Spotlight</button>
+        </div>
+        <p class="note" id="fxStatus" role="status" style="margin-top:8px"></p>
+      </div>
+
+      <div class="panel">
+        <h3>The Door Stack</h3>
+        <p class="note">Every one hand-painted. None of them go anywhere.</p>
+        <button class="doorflip" id="doorflip" type="button" aria-describedby="doorcount">
+          <span class="bigdoor" id="bigdoor"><span class="sign" id="doorsign"></span></span>
+          <span class="doorcount" id="doorcount" aria-live="polite"></span>
+        </button>
+      </div>
+
+      <div class="panel">
+        <h3>Credits</h3>
+        <p class="note">Stay till the end. There's no post-credits scene. Probably.</p>
+        <div class="credits" id="credits" tabindex="0" aria-label="Credits">
+          <div class="roll">
+            <h4>THE AMAZING DIGITAL CIRCUS</h4><p>presents</p><p><b>“The Door Was Never Locked”</b></p>
+            <h4>RINGMASTER &amp; SET PAINTER</h4><p>Caine<span class="role">every exit, by hand, in one coat</span></p>
+            <h4>STARRING</h4>
+            <p>Pomni<span class="role">the one who asked the right question</span></p>
+            <p>Jax<span class="role">did not care, cared a little</span></p>
+            <p>Ragatha<span class="role">sandbag-comfort consultant</span></p>
+            <p>Gangle<span class="role">both masks, one heart</span></p>
+            <p>Zooble<span class="role">sighing, emotionally load-bearing</span></p>
+            <p>Kinger<span class="role">still looking for the pantry</span></p>
+            <p>Bubble<span class="role">catering (ate the catering)</span></p>
+            <h4>VISITING PERFORMERS</h4>
+            <p>Claude<span class="role">stagehand, curtain rigging, dialogue</span></p>
+            <p>GPT (Codex)<span class="role">stagehand, fellow act-builder</span></p>
+            <h4>AND FEATURING</h4>
+            <p class="you">You, the audience</p><p><span class="role">without whom it's just a very loud rehearsal</span></p>
+            <h4>SPECIAL THANKS</h4><p>The keyhole, for squeezing</p><p>The sandbags, for staying put</p><p>Every door that was really an entrance</p>
+            <h4>&nbsp;</h4><p>No exits were harmed in the making of this finale.</p>
+            <p><span class="role">An original fan-made scene. All dialogue original.</span></p>
+            <h4>🎭</h4><p>See you next show.</p>
+          </div>
+        </div>
+        <div class="pg-actions">
+          <button class="btn" id="rollBtn" type="button">▶ Roll credits</button>
+        </div>
+      </div>
+    </div>
+    <div class="pg-actions" style="justify-content:center;margin-top:16px">
+      <button class="btn alt" id="replay" type="button">↺ Replay the scene</button>
+      <button class="btn red" id="seatLater" type="button">🎟️ OK, take my seat</button>
+    </div>
+    <p class="footnote">Tip: click anyone on stage for a little encore.</p>
+  </section>
+</main>
+
+<!-- final card -->
+<div id="curtainCall" hidden role="dialog" aria-modal="true" aria-labelledby="ccTitle">
+  <div class="card">
+    <h2 id="ccTitle" tabindex="-1">🎭 Curtain. The code misses you.</h2>
+    <p>Your seat will be right here, still glowing, whenever you come back through the door. It's an entrance, after all.</p>
+    <div class="row">
+      <a class="btn red" href="../../index.html" id="ccHome">↩ Back to the Big Top</a>
+      <button class="btn alt" type="button" id="ccStay">Actually, one more minute backstage</button>
+    </div>
+  </div>
+</div>
+
+<a id="back" href="../../index.html">← back to the Big Top</a>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(function () {
+  'use strict';
+  const $ = (id) => document.getElementById(id);
+  const T = window.TADC || {};
+  const reduced = () => window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sfx = (k) => { try { T.sfx && T.sfx(k); } catch (e) { /* audio is optional */ } };
+
+  // ───────── GATE ─────────
+  let solved = false;
+  try {
+    const raw = localStorage.getItem('tadc-mystery-v1');
+    const data = raw ? JSON.parse(raw) : null;
+    solved = !!(data && data.solved === true);
+  } catch (e) { solved = false; }
+  const preview = new URLSearchParams(location.search).has('preview');
+  if (!solved && !preview) {
+    $('gate').hidden = false;
+    document.title = 'A Painted Door';
+    return;
+  }
+  $('show').hidden = false;
+
+  // ───────── BUILD THE STAGE ─────────
+  const ORDER = ['pomni', 'jax', 'ragatha', 'gangle', 'zooble', 'kinger', 'bubble', 'caine'];
+  const NAMES = { pomni: 'Pomni', jax: 'Jax', ragatha: 'Ragatha', gangle: 'Gangle', zooble: 'Zooble', kinger: 'Kinger', bubble: 'Bubble', caine: 'Caine' };
+  const castEl = $('cast');
+  const actors = {};
+  ORDER.forEach((name) => {
+    const el = document.createElement('div');
+    el.className = 'actor' + (name === 'bubble' ? ' small' : '');
+    el.id = name;                       // cast-named id => shared babble voice
+    el.setAttribute('aria-label', NAMES[name]);
+    el.innerHTML = (T.CAST && T.CAST[name]) || '';
+    if (name === 'caine') el.insertAdjacentHTML('beforeend', '<span class="splat s1"></span><span class="splat s2"></span><span class="splat s3"></span><span class="splat s4"></span>');
+    castEl.appendChild(el);
+    actors[name] = el;
+  });
+  let caineCtl = null;
+  try { if (T.wireCaine && actors.caine.querySelector('.caine-svg')) caineCtl = T.wireCaine(actors.caine); } catch (e) { caineCtl = null; }
+
+  // seats: three rows, one glowing YOU seat
+  const seatsEl = $('seats');
+  [5, 6, 7].forEach((n, row) => {
+    const r = document.createElement('div'); r.className = 'seatrow';
+    for (let i = 0; i < n; i++) {
+      const s = document.createElement('span'); s.className = 'seat';
+      if (row === 2 && i === 3) { s.classList.add('you'); s.id = 'youSeat'; s.innerHTML = '<span class="namecard">YOU</span>'; }
+      r.appendChild(s);
+    }
+    seatsEl.appendChild(r);
+  });
+
+  function setMask(face) {
+    const g = actors.gangle;
+    const c = g.querySelector('.mask-comedy'), t = g.querySelector('.mask-tragedy');
+    if (c) c.style.display = face === 'tragedy' ? 'none' : '';
+    if (t) t.style.display = face === 'tragedy' ? '' : 'none';
+  }
+
+  // ───────── THE SCRIPT (all original) ─────────
+  // who: cast name or 'N' (narration). do: stage action run before the line.
+  const SCRIPT = [
+    { who: 'N', text: 'You squeeze through the glowing keyhole. It is a tight fit. The keyhole mutters an apology.', do: 'arrive' },
+    { who: 'N', text: 'BACKSTAGE. Ropes. Sandbags. A dusty switchboard labelled ATMOSPHERE. A rack of spare checkered floors. And leaning on the far wall, a whole stack of EXIT doors. Still wet.' },
+    { who: 'pomni', text: 'Wait. Wait, wait, wait. Is this… out? Is this OUT? Somebody please tell me this is out.', do: 'enter' },
+    { who: 'pomni', text: 'Those are exit doors. Lots of them. Why are there so many? Why are they <em>glistening?</em>' },
+    { who: 'jax', text: "They're glistening 'cause they're wet, genius. Somebody's been busy.", do: 'enter' },
+    { who: 'jax', text: "…Not that I care. I'm just standing near the mysterious secret doors. Casually. With my eyes." },
+    { who: 'ragatha', text: "Oh, sweetie, you made it all the way back here! Are you okay? Do you want a sandbag? They're surprisingly huggable.", do: 'enter' },
+    { who: 'gangle', text: "It's so dark back here… this isn't the part where something scary happens, right?", do: 'enter' },
+    { who: 'gangle', text: '*mask slips* …I just KNOW there is a scary part.', do: 'tragedy' },
+    { who: 'zooble', text: "Great. A secret room. Full of doors. That don't open. My absolute favorite genre.", do: 'enter' },
+    { who: 'kinger', text: 'Is this the pantry? Someone promised me a pantry. Or a pancreas. One of the P rooms.', do: 'enter' },
+    { who: 'bubble', text: 'BACKSTAGE BACKSTAGE BACKSTAGE! Can I eat a sandbag? I am eating a sandbag. Too late. Crunchy!', do: 'enter' },
+    { who: 'N', text: 'Somewhere in the dark, a wet paintbrush clatters to the floor. Everyone turns.', do: 'brush' },
+    { who: 'caine', text: 'Ah! Ahem! Hello, everyone! Nobody is painting anything. I am simply… gesturing. Wetly.', do: 'caine' },
+    { who: 'zooble', text: "Your gloves are red. And blue. And gold. There's a brush at your feet. Come on." },
+    { who: 'caine', text: 'Oh, FINE! Yes! It was me! I painted every exit in this circus! Every one! By hand! With a teeny little brush!' },
+    { who: 'pomni', text: "I knew it. I KNEW it. You painted them on so we'd never get—" },
+    { who: 'caine', text: "Get trapped? Goodness, no! No, no, no. You've misread the whole floor plan. Somebody fetch the curtain!" },
+    { who: 'bubble', text: "I'll fetch it! …I bit it. It's fine. It was velvet. Tasted purple." },
+    { who: 'N', text: 'Caine grabs a fistful of velvet and yanks. Behind the curtain, a real backstage door swings open…', do: 'open' },
+    { who: 'N', text: '…onto rows and rows of theatre seats, all facing the stage. The AUDIENCE. One seat glows softly. Its little name card reads: YOU.', do: 'reveal' },
+    { who: 'kinger', text: "Oh my. They've been out there the whole time? I would have tidied my squares." },
+    { who: 'caine', text: "Every real door back here leads to the same place: out there, to the seats. You were never trapped, my dear guest. You're not in the show. You're the AUDIENCE!" },
+    { who: 'caine', text: 'You visit! You watch! You laugh at my material, which is excellent! Then you go home. And then you come BACK. That is the whole trick!' },
+    { who: 'jax', text: "So the big spooky exit… is a door to a chair. Huh. …It's a decent chair, I guess." },
+    { who: 'caine', text: "An exit is a door you leave by. An entrance is a door you come back through. Same door, different mood! And I much prefer entrances." },
+    { who: 'ragatha', text: "So they can go home whenever they need to, and we'll keep their seat warm. That's lovely, Caine. Really." },
+    { who: 'gangle', text: '*mask flips back* Oh! Wait… is this a happy ending? I think this is a happy ending!', do: 'comedy' },
+    { who: 'pomni', text: "So the exit was never some huge scary nothing. It was just… going home." },
+    { who: 'pomni', text: "And going home is allowed. And coming back is allowed too. Oh. Oh, that's… that's such a relief." },
+    { who: 'zooble', text: 'Congrats, you solved the emotional subplot. Can somebody please go sit down so the rest of us can stop standing?' },
+    { who: 'caine', text: 'Well then, dear audience! The house lights are yours. What will it be?', do: 'end' },
+  ];
+
+  // ───────── PLAYBACK ─────────
+  const log = $('log'), caption = $('caption'), nextBtn = $('next'), count = $('count'), stage = $('stage');
+  let step = -1, lastAdvance = 0, finished = false, speaking = null;
+  const fmt = (s) => s.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+  const plain = (s) => s.replace(/<[^>]*>/g, '').replace(/\*/g, '');
+
+  function addLog(who, text) {
+    const li = document.createElement('li');
+    if (who === 'N') li.className = 'narr';
+    li.innerHTML = '<b>' + (who === 'N' ? '◆' : NAMES[who] + ':') + '</b> ' + fmt(text);
+    log.appendChild(li);
+    log.scrollTop = log.scrollHeight;
+  }
+
+  function act(kind, who) {
+    switch (kind) {
+      case 'arrive': sfx('pop'); break;
+      case 'enter': actors[who].classList.add('in'); sfx(who === 'bubble' ? 'boing' : 'pop'); break;
+      case 'tragedy': setMask('tragedy'); sfx('tick'); break;
+      case 'comedy': setMask('comedy'); sfx('ding'); break;
+      case 'brush': $('brush').classList.add('on'); sfx('glitch'); break;
+      case 'caine': actors.caine.classList.add('in', 'caught'); sfx('honk'); break;
+      case 'open': $('portal').classList.add('open'); sfx('fanfare'); break;
+      case 'reveal': {
+        sfx('ding');
+        if (!reduced() && T.confetti) {
+          const r = $('youSeat').getBoundingClientRect();
+          setTimeout(() => T.confetti(r.left + r.width / 2, r.top, 50, 0.8), 300);
+        }
+        break;
+      }
+      case 'end': sfx('fanfare'); break;
+    }
+  }
+
+  function speak(who, text) {
+    const ms = Math.max(4200, Math.min(11000, plain(text).length * 75));
+    if (speaking) speaking.classList.remove('speaking');
+    document.querySelectorAll('.tadc-speech').forEach((b) => b.remove());   // one line on stage at a time
+    if (who === 'N') { speaking = null; return; }
+    const el = actors[who];
+    el.classList.add('speaking'); speaking = el;
+    try {
+      if (who === 'caine' && caineCtl) caineCtl.talk(fmt(text), ms);
+      else if (T.say) T.say(el, fmt(text), ms);
+    } catch (e) { /* bubbles are decoration; caption + transcript carry the text */ }
+  }
+
+  function advance() {
+    if (finished) return;
+    const now = performance.now();
+    if (now - lastAdvance < 350) return;   // no accidental double-skips
+    lastAdvance = now;
+    step++;
+    const line = SCRIPT[step];
+    if (line.do) act(line.do, line.who);
+    speak(line.who, line.text);
+    caption.className = 'caption' + (line.who === 'N' ? ' narr' : '');
+    caption.innerHTML = '<span class="who">' + (line.who === 'N' ? 'Backstage' : NAMES[line.who]) + '</span>' + fmt(line.text);
+    addLog(line.who, line.text);
+    count.textContent = (step + 1) + ' / ' + SCRIPT.length;
+    if (step === SCRIPT.length - 1) finish();
+  }
+
+  function finish() {
+    finished = true;
+    $('controls').hidden = true;
+    stage.classList.add('no-pointer');
+    stage.removeAttribute('tabindex');
+    $('choices').hidden = false;
+    $('takeSeat').focus({ preventScroll: true });
+    $('choices').scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'center' });
+  }
+
+  nextBtn.addEventListener('click', (e) => { e.stopPropagation(); advance(); });
+  stage.addEventListener('click', (e) => {
+    if (finished) {
+      const a = e.target.closest('.actor.in');
+      if (a && $('playground').hidden === false) encore(a.id);
+      return;
+    }
+    advance();
+  });
+  stage.tabIndex = 0;
+  document.addEventListener('keydown', (e) => {
+    if (finished || e.repeat || e.altKey || e.ctrlKey || e.metaKey) return;
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const t = e.target;
+    if (t && t !== document.body && t !== stage && t.closest('button, a, input, textarea, select, [role="button"]')) return; // they handle themselves
+    e.preventDefault();
+    advance();
+  });
+
+  // ───────── ENDINGS ─────────
+  const cc = $('curtainCall');
+  let ccReturn = null;
+  function openCurtainCall() {
+    ccReturn = document.activeElement;
+    document.querySelectorAll('.tadc-speech').forEach((b) => b.remove());
+    cc.hidden = false;
+    sfx('fanfare');
+    if (!reduced() && T.confetti) T.confetti(innerWidth / 2, innerHeight * 0.4, 80, 1);
+    $('ccTitle').focus();
+  }
+  function closeCurtainCall() { cc.hidden = true; }
+  cc.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') { closeCurtainCall(); if (ccReturn && ccReturn.focus) ccReturn.focus(); }
+    if (e.key === 'Tab') {     // keep focus inside the card
+      const f = [$('ccHome'), $('ccStay')];
+      if (e.shiftKey && (document.activeElement === f[0] || document.activeElement === $('ccTitle'))) { e.preventDefault(); f[1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+  $('takeSeat').addEventListener('click', openCurtainCall);
+  $('seatLater').addEventListener('click', openCurtainCall);
+  $('ccStay').addEventListener('click', () => { closeCurtainCall(); openPlayground(); });
+
+  function openPlayground() {
+    const pg = $('playground');
+    const first = pg.hidden;
+    if (pg.parentNode !== $('side')) $('side').prepend(pg);   // levers sit right beside the stage they control
+    $('show').classList.add('pg');
+    pg.hidden = false;
+    $('choices').hidden = true;
+    stage.classList.remove('no-pointer');
+    if (first) {
+      sfx('boing');
+      if (caineCtl) caineCtl.talk('Stay as long as you like! Touch the levers! Do NOT lick the doors. Bubble.', 5200);
+    }
+    $('pgTitle').focus();
+    stage.scrollIntoView({ behavior: reduced() ? 'auto' : 'smooth', block: 'start' });
+  }
+  $('stay').addEventListener('click', openPlayground);
+
+  $('replay').addEventListener('click', () => {
+    step = -1; finished = false; lastAdvance = 0;
+    log.innerHTML = '';
+    ORDER.forEach((n) => actors[n].classList.remove('in', 'caught', 'speaking'));
+    setMask('comedy');
+    $('brush').classList.remove('on');
+    $('portal').classList.remove('open');
+    $('playground').hidden = true;
+    $('show').classList.remove('pg');
+    Object.keys(fx).forEach((k) => { fx[k] = false; });
+    document.querySelectorAll('.toggle[data-fx]').forEach((b) => b.setAttribute('aria-pressed', 'false'));
+    $('fxStatus').textContent = '';
+    refreshFx();
+    $('controls').hidden = false; $('choices').hidden = true;
+    stage.classList.remove('no-pointer'); stage.tabIndex = 0;
+    caption.className = 'caption'; caption.textContent = '';
+    count.textContent = '';
+    window.scrollTo({ top: 0, behavior: reduced() ? 'auto' : 'smooth' });
+    nextBtn.focus();
+    advance();
+  });
+
+  // encores (playground): click a cast member for a fresh original line
+  const ENCORES = {
+    pomni: ['I keep checking the seat is still there. It is. It keeps being there.', 'Home is a door. Doors are fine. I am fine. Genuinely, this time!'],
+    jax: ["Don't tell anyone I sat in the chair. I sat in the chair.", "The doors are still wet. I touched one. Don't look at my hand."],
+    ragatha: ['Take your time, hon. The show waits for you. That is sort of the point.', 'I patched a little cushion for your seat. It has a heart on it!'],
+    gangle: ['Happy mask today! Let\'s see how long it lasts!', 'The curtain is so soft. I might cry. Happy crying!'],
+    zooble: ["I'm staying back here. It's quiet. Nobody asks me to juggle.", 'Fine. The ending was nice. Write that down and then lose it.'],
+    kinger: ['I found the pantry! It was a broom cupboard. I live here now.', 'Did you know the seats face the stage? Remarkable engineering.'],
+    bubble: ['I ATE THE WORD EXIT. NOW IT SAYS IT.', 'Is the audience edible? Asking for me.'],
+    caine: ['An entrance a day keeps the void away! That is not a real saying. Yet!', 'I may paint a few more doors. Strictly entrances. Mostly.'],
+  };
+  const encoreIdx = {};
+  function encore(name) {
+    const lines = ENCORES[name]; if (!lines) return;
+    encoreIdx[name] = ((encoreIdx[name] ?? -1) + 1) % lines.length;
+    const text = lines[encoreIdx[name]];
+    speak(name, text);
+    caption.className = 'caption';
+    caption.innerHTML = '<span class="who">' + NAMES[name] + '</span>' + text;
+    addLog(name, text);
+  }
+  ORDER.forEach((name) => {
+    const el = actors[name];
+    el.addEventListener('keydown', (e) => {
+      if (!$('playground').hidden && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); e.stopPropagation(); encore(name); }
+    });
+  });
+  // make actors keyboard-reachable only once the playground is open
+  const pgObserver = new MutationObserver(() => {
+    const open = !$('playground').hidden;
+    ORDER.forEach((n) => {
+      const el = actors[n];
+      if (open && el.classList.contains('in')) { el.tabIndex = 0; el.setAttribute('role', 'button'); el.setAttribute('aria-label', 'Encore from ' + NAMES[n]); }
+      else { el.removeAttribute('tabindex'); el.removeAttribute('role'); el.setAttribute('aria-label', NAMES[n]); }
+    });
+  });
+  pgObserver.observe($('playground'), { attributes: true, attributeFilter: ['hidden'] });
+
+  // ───────── ATMOSPHERE (switchboard) ─────────
+  const fx = { stars: false, rain: false, confetti: false, spotlight: false };
+  const canvas = $('fx'), ctx = canvas.getContext('2d');
+  let W = 0, H = 0, raf = 0, particles = { stars: [], rain: [], confetti: [] };
+  const COLORS = ['#e3243b', '#2f5bd8', '#ffd34d', '#fff7d6', '#ff7eb6', '#5fd38d'];
+  function sizeCanvas() {
+    const r = stage.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+    W = r.width; H = r.height;
+    canvas.width = Math.round(W * dpr); canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function seed(kind) {
+    const n = kind === 'stars' ? 70 : kind === 'rain' ? 110 : 90;
+    particles[kind] = Array.from({ length: n }, () => ({
+      x: Math.random() * W, y: Math.random() * H,
+      v: kind === 'rain' ? 7 + Math.random() * 5 : 0.8 + Math.random() * 1.6,
+      s: kind === 'stars' ? 0.8 + Math.random() * 1.8 : 4 + Math.random() * 4,
+      p: Math.random() * Math.PI * 2, c: COLORS[Math.floor(Math.random() * COLORS.length)], r: Math.random() * 6,
+    }));
+  }
+  function drawStar(x, y, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 8; i++) { const rr = i % 2 ? r * 0.4 : r * 2.2, a = (i / 8) * Math.PI * 2; ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr); }
+    ctx.closePath(); ctx.fill();
+  }
+  function frame(t, still) {
+    ctx.clearRect(0, 0, W, H);
+    if (fx.stars) {
+      ctx.fillStyle = '#fff7d6';
+      for (const p of particles.stars) {
+        ctx.globalAlpha = still ? 0.8 : 0.35 + 0.65 * Math.abs(Math.sin(t / 900 + p.p));
+        if (p.s > 2.2) drawStar(p.x, p.y * 0.7, p.s * 0.7); else { ctx.beginPath(); ctx.arc(p.x, p.y * 0.7, p.s, 0, 7); ctx.fill(); }
+      }
+    }
+    if (fx.rain) {
+      ctx.strokeStyle = 'rgba(170,200,255,.55)'; ctx.lineWidth = 1.5; ctx.globalAlpha = 1;
+      for (const p of particles.rain) {
+        if (!still) { p.y += p.v; p.x -= p.v * 0.15; if (p.y > H) { p.y = -12; p.x = Math.random() * (W + 40); } }
+        ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(p.x + 2, p.y - 12); ctx.stroke();
+      }
+    }
+    if (fx.confetti) {
+      for (const p of particles.confetti) {
+        if (!still) { p.y += p.v; p.x += Math.sin(t / 500 + p.p) * 0.8; p.r += 0.05; if (p.y > H + 10) { p.y = -10; p.x = Math.random() * W; } }
+        ctx.save(); ctx.globalAlpha = 0.95; ctx.translate(p.x, p.y); ctx.rotate(p.r); ctx.fillStyle = p.c;
+        ctx.fillRect(-p.s / 2, -p.s / 4, p.s, (p.s / 2) * Math.abs(Math.cos(p.r * 2)) + 1); ctx.restore();
+      }
+    }
+    ctx.globalAlpha = 1;
+  }
+  function loop(t) {
+    frame(t, false);
+    raf = (fx.stars || fx.rain || fx.confetti) ? requestAnimationFrame(loop) : 0;
+  }
+  function refreshFx() {
+    ['stars', 'rain', 'confetti', 'spotlight'].forEach((k) => {
+      stage.classList.toggle('fx-' + k, fx[k]);
+      const knob = document.querySelector('.switchboard .knob[data-k="' + k + '"]');
+      if (knob) knob.classList.toggle('on', fx[k]);
+    });
+    const any = fx.stars || fx.rain || fx.confetti;
+    if (reduced()) { cancelAnimationFrame(raf); raf = 0; frame(0, true); return; }
+    if (any && !raf) raf = requestAnimationFrame(loop);
+    if (!any) { cancelAnimationFrame(raf); raf = 0; ctx.clearRect(0, 0, W, H); }
+  }
+  const FX_LINES = {
+    stars: 'Stars on. The ceiling is pretending to be a sky. Let it.',
+    rain: 'Rain on. Indoor weather! Mind the wet paint, it is now wetter.',
+    confetti: 'Confetti on. Bubble is trying to catch it with his face.',
+    spotlight: 'Spotlight on. It is looking for someone. (It is you.)',
+  };
+  document.querySelectorAll('.toggle[data-fx]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const k = btn.dataset.fx;
+      fx[k] = !fx[k];
+      btn.setAttribute('aria-pressed', String(fx[k]));
+      if (fx[k] && particles[k] && !particles[k].length) { sizeCanvas(); seed(k); }
+      sfx('tick');
+      $('fxStatus').textContent = fx[k] ? FX_LINES[k] : k[0].toUpperCase() + k.slice(1) + ' off.';
+      refreshFx();
+    });
+  });
+  addEventListener('resize', () => {
+    sizeCanvas();
+    Object.keys(particles).forEach((k) => { if (particles[k].length) seed(k); });
+    if (reduced()) frame(0, true);
+  });
+  sizeCanvas();
+
+  // ───────── THE DOOR STACK ─────────
+  const DOORS = [
+    'EXIT (Decorative)',
+    'EXIT (Do Not Lick) (Bubble)',
+    'EXIT? (Rhetorical)',
+    'NOT AN EXIT. Why are you still reading?',
+    'EXIT, Now With 30% More Door',
+    'Door To Another Door',
+    'This Way To The Gift Shop (There Is No Gift Shop)',
+    'STAFF ONLY (Staff = Caine)',
+    "Kinger's Pantry (Probably)",
+    'EXIT (Under Construction Forever)',
+    'WET PAINT, Please Stop Knocking',
+    'ENTRANCE (Painted Backwards On Purpose)',
+  ];
+  let doorIdx = 0;
+  function showDoor() {
+    $('doorsign').textContent = DOORS[doorIdx];
+    $('doorflip').setAttribute('aria-label', 'Painted door: ' + DOORS[doorIdx] + '. Flip to the next door.');
+    $('doorcount').textContent = 'Door ' + (doorIdx + 1) + ' of ' + DOORS.length + ' · click to flip';
+  }
+  $('doorflip').addEventListener('click', () => {
+    doorIdx = (doorIdx + 1) % DOORS.length;
+    const d = $('bigdoor');
+    d.classList.remove('flip'); void d.offsetWidth; d.classList.add('flip');
+    sfx('boing');
+    setTimeout(showDoor, reduced() ? 0 : 220);
+  });
+  showDoor();
+
+  // ───────── CREDITS ─────────
+  const credits = $('credits');
+  if (reduced()) credits.classList.add('static');
+  $('rollBtn').addEventListener('click', () => {
+    if (reduced()) { credits.classList.add('static'); credits.scrollTop = 0; credits.focus(); return; }
+    credits.classList.remove('rolling'); void credits.offsetWidth; credits.classList.add('rolling');
+    $('rollBtn').textContent = '↺ Roll again';
+  });
+
+  // ───────── CURTAIN UP ─────────
+  caption.innerHTML = '<span class="who">Backstage</span><em>The keyhole glows. Press Next to squeeze through.</em>';
+  caption.classList.add('narr');
+  nextBtn.focus({ preventScroll: true });
+})();
+</script>
+</body>
+</html>

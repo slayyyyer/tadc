@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kinger's Chess Nightmare</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6;--purple:#8a5fd1;--purple-d:#4b2c80}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:radial-gradient(ellipse at 50% 0%,rgba(138,95,209,.45),transparent 60%),radial-gradient(ellipse at 50% 110%,rgba(227,36,59,.3),transparent 55%),#0b0718;overflow-x:hidden}
+  header{text-align:center;padding:16px 16px 4px}
+  h1{font-family:'Rye';font-weight:400;margin:0;font-size:clamp(24px,4.2vw,48px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink)}
+  .sub{color:#cbbff0;margin:6px 0 0;font-size:15px}
+  main{display:grid;grid-template-columns:220px minmax(300px,560px) 300px;gap:22px;justify-content:center;align-items:start;padding:14px 16px 100px}
+  /* Kinger's corner */
+  #kingerBox{text-align:center;position:sticky;top:14px}
+  #kinger{width:150px;margin:20px auto 0;cursor:pointer;animation:sway 3.4s ease-in-out infinite;transform-origin:50% 100%}
+  #kinger svg{width:100%;height:auto;filter:drop-shadow(0 10px 8px rgba(0,0,0,.6))}
+  #kinger.panic{animation:panic .12s linear infinite}
+  @keyframes sway{50%{transform:rotate(2.5deg)}}
+  @keyframes panic{0%{transform:translateX(-4px) rotate(-3deg)}50%{transform:translateX(4px) rotate(3deg)}}
+  #fort{font-size:34px;margin-top:-18px;filter:drop-shadow(0 3px 2px #000)}
+  .stats{margin-top:16px;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:10px 12px;text-align:left;font-size:14px;line-height:1.7}
+  .stats b{color:var(--gold);float:right}
+  #turn{margin-top:12px;font-weight:700;font-size:16px;min-height:1.4em}
+  /* board */
+  #boardWrap{position:relative}
+  #board{display:grid;grid-template-columns:repeat(8,1fr);aspect-ratio:1;border:8px solid var(--ink);border-radius:10px;overflow:hidden;
+    box-shadow:0 0 0 6px var(--gold),0 0 0 12px var(--ink),0 24px 40px rgba(0,0,0,.6);background:var(--ink)}
+  #board.shake{animation:shake .5s}
+  @keyframes shake{20%{transform:translate(-10px,4px) rotate(-1deg)}40%{transform:translate(10px,-4px) rotate(1deg)}60%{transform:translate(-6px,2px)}80%{transform:translate(6px,-2px)}}
+  .sq{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none}
+  .sq.l{background:#f4efe6}
+  .sq.d{background:#e3243b}
+  .sq.d.alt{background:#2f5bd8}
+  .sq.last::before{content:'';position:absolute;inset:0;background:rgba(255,211,77,.45)}
+  .sq.sel::before{content:'';position:absolute;inset:0;background:rgba(93,255,140,.55);box-shadow:inset 0 0 0 4px #1b1b2f}
+  .sq.can::after{content:'';position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(27,27,47,.45)}
+  .sq.cap::after{content:'';position:absolute;inset:6%;border-radius:50%;border:5px solid rgba(27,27,47,.55);background:none;width:auto;height:auto}
+  .coord{position:absolute;font-size:10px;font-weight:700;opacity:.55;color:var(--ink)}
+  .coord.f{right:3px;bottom:1px}
+  .coord.r{left:3px;top:1px}
+  .pc{position:relative;z-index:1;font-size:clamp(28px,5.6vw,52px);line-height:1;transition:transform .15s}
+  .pc.w{color:#fff;text-shadow:0 0 0 #000,-2px 0 0 var(--ink),2px 0 0 var(--ink),0 -2px 0 var(--ink),0 2px 0 var(--ink),0 4px 4px rgba(0,0,0,.5)}
+  .pc.b{color:var(--purple);text-shadow:-2px 0 0 var(--purple-d),2px 0 0 var(--purple-d),0 -2px 0 var(--purple-d),0 2px 0 #1b0f2e,0 4px 4px rgba(0,0,0,.5)}
+  .pc.emoji{font-size:clamp(24px,4.6vw,44px);filter:drop-shadow(0 3px 2px rgba(0,0,0,.5))}
+  .pc.emoji.w{outline:3px solid #fff;outline-offset:2px;border-radius:50%;text-shadow:none}
+  .pc.emoji.b{outline:3px solid var(--purple);outline-offset:2px;border-radius:50%;text-shadow:none}
+  .pc.wild{width:70%;height:70%;animation:bob 1.2s ease-in-out infinite}
+  .pc.wild svg{width:100%;height:100%}
+  @keyframes bob{50%{transform:translateY(-4px) scale(1.06,.95)}}
+  .pc.landed{animation:land .35s cubic-bezier(.3,1.8,.5,1)}
+  @keyframes land{0%{transform:scale(1.5,.6)}60%{transform:scale(.9,1.15)}100%{transform:none}}
+  .sq:hover .pc{transform:translateY(-3px)}
+  /* commentary */
+  #booth{background:var(--cream);color:var(--ink);border:4px solid var(--ink);border-radius:14px;box-shadow:6px 6px 0 var(--red-d);overflow:hidden}
+  #booth .head{display:flex;align-items:center;gap:8px;background:repeating-linear-gradient(90deg,var(--red) 0 20px,#fff 20px 40px);border-bottom:4px solid var(--ink);padding:6px 10px}
+  #booth .head span{background:var(--ink);color:var(--gold);font-family:'Rye';padding:2px 10px;border-radius:6px;font-size:15px}
+  #booth .mic{width:54px;flex:none}
+  #booth .mic svg{width:100%;height:auto}
+  #log{list-style:none;margin:0;padding:8px 12px;max-height:46vh;overflow:auto;font-size:14px;line-height:1.35}
+  #log li{padding:6px 0;border-bottom:2px dashed rgba(27,27,47,.15)}
+  #log li:first-child{font-weight:700;animation:pop .3s}
+  #log li.big{color:var(--red-d)}
+  @keyframes pop{from{transform:scale(.9);opacity:0}}
+  #legend{margin-top:14px;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.15);border-radius:14px;padding:10px 12px;font-size:13px;line-height:1.5;color:#e4dcff}
+  #legend h3{margin:0 0 4px;font-family:'Rye';font-weight:400;color:var(--gold);font-size:16px}
+  .diff{display:block;margin-top:10px;font-size:13px;color:#e4dcff}
+  .diff select{display:block;width:100%;margin-top:4px;font:600 14px 'Fredoka',system-ui,sans-serif;color:var(--ink);background:var(--cream);border:3px solid var(--ink);border-radius:10px;padding:5px 8px;cursor:pointer}
+  .btns{position:fixed;left:14px;bottom:14px;display:flex;gap:8px;z-index:30;flex-wrap:wrap}
+  .btn{font:700 14px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);text-decoration:none}
+  .btn.red{background:var(--red);color:#fff}
+  @media (max-width:1100px){main{grid-template-columns:minmax(300px,560px)}#kingerBox{position:static;display:grid;grid-template-columns:120px 1fr;gap:12px;align-items:center;text-align:left}#kinger{width:110px;margin:0}#fort{display:none}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Kinger's Chess Nightmare</h1>
+  <p class="sub">You're white. Kinger is purple. The rules are… mostly chess. Click a piece, then click where it goes.</p>
+</header>
+<main>
+  <aside id="kingerBox">
+    <div>
+      <div id="kinger" title="Kinger"></div>
+      <div id="fort">🛏️🛏️🛏️</div>
+    </div>
+    <div>
+      <div id="turn">Your move!</div>
+      <div class="stats">
+        Your wins <b id="sWins">0</b><br>
+        Kinger's "checkmates" <b id="sClaims">0</b><br>
+        Queens misplaced <b id="sQueens">0</b><br>
+        Knights gone for snacks <b id="sSnacks">0</b>
+      </div>
+      <label class="diff">Kinger's mood
+        <select id="diff">
+          <option value="pillow">Pillow (easy)</option>
+          <option value="fort">Fort (normal)</option>
+          <option value="grandmaster">Grandmaster (allegedly)</option>
+        </select>
+      </label>
+    </div>
+  </aside>
+  <section id="boardWrap"><div id="board"></div></section>
+  <aside>
+    <div id="booth">
+      <div class="head"><div class="mic" id="mic"></div><span>PLAY-BY-PLAY</span></div>
+      <ul id="log"></ul>
+    </div>
+    <div id="legend">
+      <h3>Circus promotions</h3>
+      When a pawn reaches the far end, it doesn't become a queen. It becomes something worse:<br>
+      🐔 <b>Rubber chicken</b>: moves 1 square any direction, captures.<br>
+      🛏️ <b>Pillow fort</b>: never moves. Impenetrable.<br>
+      🫧 <b>Bubble jr.</b>: teleports to any empty square. Can't capture.<br>
+      🎈 <b>Balloon</b>: floats up to 2 squares any direction. Can't capture.<br>
+      <i>Also: wild Bubble may wander onto the board. Bubble eats things.</i>
+    </div>
+  </aside>
+</main>
+<div class="btns">
+  <a class="btn" href="../../index.html">← back to the Big Top</a>
+  <button class="btn red" id="newGame">♻️ New game (Kinger insists)</button>
+</div>
+
+<script src="../../assets/cast.js"></script>
+<script src="kinger-ai.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, say, confetti, sfx, wireCaine, pick } = window.TADC;
+
+  // ═══ cast ═══
+  const kingerEl = document.getElementById('kinger');
+  kingerEl.innerHTML = CAST.kinger;
+  const micEl = document.getElementById('mic');
+  micEl.innerHTML = CAST.caine;
+  wireCaine(micEl); // eye tracking + blinking for the booth commentator
+
+  // ═══ original lines ═══
+  const K = {
+    think: [
+      "Hmm. Hmmmm. Which one's the horsey again?",
+      "I'm thinking three moves ahead! Or behind. One of those.",
+      "My strategy is so secret, even I don't know it.",
+      "Don't rush me! Kings take their time! And naps!",
+      "Is this the pawn that owes me money?",
+      "I used to be very good at this. In a different decade. Possibly a different game.",
+    ],
+    capture: ["Ha HA! Got one! ...Was that one mine?", "Sorry! Sorry! It's the rules! I think!", "Into the box you go! The box of... taken things!"],
+    lost: ["My little guy! He had a family! Probably!", "That's fine. I didn't like him. I LOVED him.", "Noooo! Oh well. Yes. Fine. NOOOO."],
+    queenGone: ["Has anyone seen my queen? She was RIGHT here!", "QUEEN?! QUEEEEN?! ...She's probably in the pillow fort.", "My queen is missing! This is NOT a drill! Is it a drill?"],
+    queenBack: ["THERE you are! Don't ever do that again!", "My queen! She was behind the board the whole time! Classic her!"],
+    checkmate: ["CHECKMATE! I win! I WIN!", "Checkmate! Probably! Is that how you say it?", "CHECK! And also MATE! Both of them!"],
+    forget: ["...wait, what game are we playing?", "Checkmate? Who said checkmate? Let's keep going!", "Did I win something? I feel like I won something."],
+    skip: ["Oh! Is it my turn? No? Yes? You go. I'll go after. Or before."],
+    // thinking out loud (the search found something)
+    swing: [
+      "Oh. OH. There's a move here! A real one! I can feel it in my crown!",
+      "If I go there, and you go there, and then I... ha! HA! I'm a genius! Temporarily!",
+      "I see it! I see the whole board! ...Mostly the purple parts.",
+    ],
+    forced: [
+      "Your king looks very... reachable. I mean that kindly.",
+      "I've counted three times and it came out the same every time! That never happens!",
+      "Ooh, I know this part! This is the part where I win! I read about it once!",
+    ],
+    doom: [
+      "Something's wrong. I can feel it in my felt. Is it the board? It's probably the board.",
+      "Every move I look at ends with me in a box. I don't like boxes. Unless they're forts.",
+    ],
+    forgot: [
+      "I had a plan. It was beautiful. It had a little bow on it. Where did it go?",
+      "Eeny, meeny... that one! The one my hand is already on!",
+    ],
+    fond: [
+      "Back to you, old friend. You've never let me down. Recently.",
+      "I'll move this one again. We've been through so much together. Two turns!",
+    ],
+    poke: ["Hello! Are you my opponent or my pillow?", "Please don't poke the king. The king is fragile. Emotionally.", "I'm ready! I'm SO ready! What are we doing?"],
+  };
+  const C = {
+    move: ["{P} to {sq}! A classic! Probably!", "{P} glides to {sq}! The crowd goes mild!", "And {p} heads to {sq}! Riveting! I'm riveted!", "{P} to {sq}! Bold! Or not! Hard to say!"],
+    retreat: ["A BOLD retreat by {p}! Into the VOID! Well, to {sq}.", "{P} backs away to {sq}! Strategic! Cowardly! Both!"],
+    capture: ["OHHH! {P} TAKES {v} on {sq}! Brutal! Delightful!", "{V} has been eliminated on {sq}! Don't worry, they're in a better tent now!", "{P} snatches {v}! The crowd goes WILD! (The crowd is me.)"],
+    knightWander: ["Oh dear, the {side} knight got bored and trotted off to {sq}! Horses, am I right?"],
+    knightLeave: ["The {side} knight has LEFT THE BOARD to find snacks! That's… allowed? I'm allowing it!"],
+    promo: ["PROMOTION! The pawn becomes... a {thing}!? The rulebook is ON FIRE!"],
+    claim: ["Kinger claims CHECKMATE! The judges are reviewing... the judges are me... I have no idea!"],
+    bubbleIn: ["Uh oh. Bubble has wandered onto the board at {sq}! Nobody tell Bubble what chess is."],
+    bubbleEat: ["BUBBLE ATE THE {v}!! Is that legal? It is NOW!"],
+    bubbleOut: ["Bubble got bored and floated away! Goodbye, Bubble! Stay chewy!"],
+    win: ["THE KING HAS FALLEN! YOU WIN! Kinger is... taking it surprisingly well?"],
+    loss: ["Kinger... actually won?! For real this time! Nobody's more surprised than Kinger!"],
+    stuck: ["Kinger has no legal moves! He declares a picnic instead! New game!"],
+  };
+
+  // ═══ pieces ═══
+  const GLYPH = { K: '♚', Q: '♛', R: '♜', B: '♝', N: '♞', P: '♟' };
+  const SPECIAL = { chicken: '🐔', fort: '🛏️', bubble: '🫧', balloon: '🎈' };
+  const NAME = { K: 'king', Q: 'queen', R: 'rook', B: 'bishop', N: 'knight', P: 'pawn', chicken: 'rubber chicken', fort: 'pillow fort', bubble: 'bubble jr.', balloon: 'balloon', wild: 'Bubble' };
+  // chicken bites (2.5); bubble jr. teleports anywhere (1.5); fort is a sturdy wall (1.5); balloon is a slow scout (1.2)
+  const VALUE = { P: 1, N: 3, B: 3, R: 5, Q: 9, K: 1000, chicken: 2.5, fort: 1.5, bubble: 1.5, balloon: 1.2, wild: 0 };
+  const sqName = (r, c) => 'abcdefgh'[c] + (8 - r);
+  const cap1 = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const inB = (r, c) => r >= 0 && r < 8 && c >= 0 && c < 8;
+
+  let board, turn, selected, legal, busy, lastMove, queenAway, landedAt;
+  let stats = { wins: 0, claims: 0, queens: 0, snacks: 0 };
+  try { stats = Object.assign(stats, JSON.parse(localStorage.getItem('tadc-kinger-stats') || '{}')); } catch (e) { /* storage blocked */ }
+  function saveStats() {
+    try { localStorage.setItem('tadc-kinger-stats', JSON.stringify(stats)); } catch (e) { /* storage blocked */ }
+    document.getElementById('sWins').textContent = stats.wins;
+    document.getElementById('sClaims').textContent = stats.claims;
+    document.getElementById('sQueens').textContent = stats.queens;
+    document.getElementById('sSnacks').textContent = stats.snacks;
+  }
+
+  function newGame() {
+    const back = ['R', 'N', 'B', 'Q', 'K', 'B', 'N', 'R'];
+    board = Array.from({ length: 8 }, () => Array(8).fill(null));
+    for (let c = 0; c < 8; c++) {
+      board[0][c] = { t: back[c], s: 'b' }; board[1][c] = { t: 'P', s: 'b' };
+      board[6][c] = { t: 'P', s: 'w' }; board[7][c] = { t: back[c], s: 'w' };
+    }
+    turn = 'w'; selected = null; legal = []; busy = false; lastMove = null; queenAway = false; landedAt = null;
+    kingerLast = null; kingerLastPiece = null;
+    kingerEl.classList.remove('panic');
+    document.getElementById('log').innerHTML = '';
+    render();
+    setTurnText();
+  }
+
+  // ═══ move generation (mostly chess; no check rules — Kinger never learned them) ═══
+  function movesFrom(r, c, B = board) {
+    const p = B[r][c]; if (!p) return [];
+    const out = [];
+    const enemy = (t) => t && t.s !== p.s && t.s !== 'n';
+    const add = (rr, cc, canCap = true, mustCap = false) => {
+      if (!inB(rr, cc)) return false;
+      const t = B[rr][cc];
+      if (!t) { if (!mustCap) out.push({ r: rr, c: cc }); return true; }
+      if (canCap && enemy(t)) out.push({ r: rr, c: cc, cap: true });
+      return false;
+    };
+    const slide = (dirs, max = 8, canCap = true) => dirs.forEach(([dr, dc]) => {
+      for (let i = 1; i <= max; i++) { if (!add(r + dr * i, c + dc * i, canCap)) break; }
+    });
+    const ORTH = [[1, 0], [-1, 0], [0, 1], [0, -1]], DIAG = [[1, 1], [1, -1], [-1, 1], [-1, -1]], ALL = ORTH.concat(DIAG);
+    switch (p.t) {
+      case 'P': {
+        const dir = p.s === 'w' ? -1 : 1, start = p.s === 'w' ? 6 : 1;
+        if (inB(r + dir, c) && !B[r + dir][c]) {
+          out.push({ r: r + dir, c });
+          if (r === start && !B[r + dir * 2][c]) out.push({ r: r + dir * 2, c });
+        }
+        add(r + dir, c - 1, true, true); add(r + dir, c + 1, true, true);
+        break;
+      }
+      case 'N': [[1, 2], [2, 1], [-1, 2], [-2, 1], [1, -2], [2, -1], [-1, -2], [-2, -1]].forEach(([a, b]) => add(r + a, c + b)); break;
+      case 'B': slide(DIAG); break;
+      case 'R': slide(ORTH); break;
+      case 'Q': slide(ALL); break;
+      case 'K': case 'chicken': slide(ALL, 1); break;
+      case 'balloon': slide(ALL, 2, false); break;
+      case 'bubble':
+        for (let rr = 0; rr < 8; rr++) for (let cc = 0; cc < 8; cc++) if (!B[rr][cc]) out.push({ r: rr, c: cc });
+        break;
+      default: break; // fort, wild
+    }
+    return out;
+  }
+  function allMoves(side, B = board) {
+    const list = [];
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+      if (B[r][c] && B[r][c].s === side) movesFrom(r, c, B).forEach((m) => list.push({ fr: r, fc: c, ...m }));
+    }
+    return list;
+  }
+
+  // ═══ applying moves ═══
+  function apply(m) {
+    const p = board[m.fr][m.fc], victim = board[m.r][m.c];
+    board[m.r][m.c] = p; board[m.fr][m.fc] = null;
+    lastMove = m; landedAt = [m.r, m.c];
+    const who = p.s === 'w' ? 'your' : "Kinger's";
+    const pName = `${who} ${NAME[p.t]}`;
+    const sq = sqName(m.r, m.c);
+    if (victim) {
+      const vName = `${victim.s === 'w' ? 'your' : "Kinger's"} ${NAME[victim.t]}`;
+      narrate(fill(pick(C.capture), pName, sq, vName), true);
+      sfx('honk');
+      const el = squareEl(m.r, m.c); if (el) { const r = el.getBoundingClientRect(); confetti(r.left + r.width / 2, r.top + r.height / 2, 40, 0.8); }
+      if (victim.s === 'b' && victim.t !== 'K') say(kingerEl, pick(K.lost), 2600);
+      if (p.s === 'b') say(kingerEl, pick(K.capture), 2600);
+    } else {
+      const backwards = (p.s === 'w' && m.r > m.fr) || (p.s === 'b' && m.r < m.fr);
+      narrate(fill(pick(backwards ? C.retreat : C.move), pName, sq), false, backwards);
+      sfx('pop');
+    }
+    // circus promotion
+    if (p.t === 'P' && (m.r === 0 || m.r === 7)) {
+      p.t = pick(['chicken', 'fort', 'bubble', 'balloon']);
+      if (p.s === 'w') window.TADC.mystery && window.TADC.mystery.find('stub-3'); // 🎟️ mystery clue: YOUR pawn reached the far side
+      narrate(pick(C.promo).replace('{thing}', NAME[p.t].toUpperCase()), true);
+      sfx('fanfare');
+    }
+    return victim;
+  }
+  function fill(t, pName, sq, vName = '') {
+    return t.replace('{P}', cap1(pName)).replace('{p}', pName).replace('{sq}', sq).replace('{V}', cap1(vName)).replace('{v}', vName);
+  }
+
+  function kingAlive(side) {
+    for (const row of board) for (const p of row) if (p && p.t === 'K' && p.s === side) return true;
+    return false;
+  }
+  function checkEnd() {
+    if (!kingAlive('b')) {
+      stats.wins++; saveStats();
+      narrate(pick(C.win), true);
+      say(kingerEl, "Oh! I've been captured! How exciting! Nobody's captured me in YEARS!", 4000);
+      sfx('fanfare');
+      for (let i = 0; i < 6; i++) setTimeout(() => confetti(Math.random() * innerWidth, innerHeight * 0.3, 60, 1.1), i * 150);
+      busy = true; setTimeout(newGame, 4200);
+      return true;
+    }
+    if (!kingAlive('w')) {
+      narrate(pick(C.loss), true);
+      say(kingerEl, "I... won? I WON! Wait till I tell my pillow!", 4000);
+      sfx('fanfare');
+      busy = true; setTimeout(newGame, 4200);
+      return true;
+    }
+    return false;
+  }
+
+  // ═══ narration ═══
+  const micSvg = micEl.querySelector('.caine-svg');
+  function narrate(text, big = false, notable = false) {
+    const li = document.createElement('li');
+    li.textContent = text; if (big) li.className = 'big';
+    const log = document.getElementById('log');
+    log.prepend(li);
+    log.scrollTop = 0;
+    while (log.children.length > 40) log.lastChild.remove();
+    // Booth-Caine chatters while the log line lands; he only pops a bubble over the board for the BIG moments.
+    micSvg.classList.remove('quiet');
+    clearTimeout(micSvg._q);
+    micSvg._q = setTimeout(() => micSvg.classList.add('quiet'), 300 + text.length * 35);
+    if (big) say(document.getElementById('board'), `<b>Caine:</b> ${text}`, 3200, { className: 'caine' });
+  }
+
+  // ═══ Kinger's AI (minimax + alpha-beta in kinger-ai.js, over movesFrom above) ═══
+  const AI = window.KingerAI.create({ gen: allMoves, value: VALUE });
+  window.KingerAI.instance = AI; // for curious testers poking at Kinger's brain
+  const DIFF_KEY = 'tadc-kinger-difficulty';
+  let difficulty = 'fort';
+  try { const d = localStorage.getItem(DIFF_KEY); if (window.KingerAI.PRESETS[d]) difficulty = d; } catch (e) { /* storage blocked */ }
+  const diffEl = document.getElementById('diff');
+  diffEl.value = difficulty;
+  diffEl.addEventListener('change', () => {
+    if (!window.KingerAI.PRESETS[diffEl.value]) return;
+    difficulty = diffEl.value;
+    try { localStorage.setItem(DIFF_KEY, difficulty); } catch (e) { /* storage blocked */ }
+    say(kingerEl, {
+      pillow: "Pillow mode! I'll go easy. I'll go so easy I might fall asleep.",
+      fort: "Fort mode! Sensible! Sturdy! Mostly upright!",
+      grandmaster: "Grandmaster mode. I was one, you know. Allegedly. There were witnesses. Probably.",
+    }[difficulty], 3000);
+    sfx('ding');
+  });
+  let kingerLast = null, kingerLastPiece = null; // the piece he moved last (he's sentimental)
+
+  function kingerTurn() {
+    const moves = allMoves('b');
+    const kingThere = moves.some((m) => m.cap && board[m.r][m.c].t === 'K');
+    // he still forgets whose turn it is, but not when your king is right there (unless he's in Pillow mode)
+    if (Math.random() < 0.06 && !(kingThere && difficulty !== 'pillow')) {
+      say(kingerEl, pick(K.skip), 2600);
+      narrate("Kinger forgot it was his turn! Free move for you! Don't tell him!", true);
+      return endKinger();
+    }
+    if (!moves.length) {
+      narrate(pick(C.stuck), true); busy = true; setTimeout(newGame, 3000); return;
+    }
+    const t0 = performance.now();
+    setTimeout(() => { // let the "thinking" text paint, then think for real (capped ~150 ms)
+      const prefer = kingerLast && board[kingerLast[0]][kingerLast[1]] === kingerLastPiece ? kingerLast : null;
+      const d = AI.decide(board, 'b', window.KingerAI.PRESETS[difficulty], prefer);
+      const choice = d.move;
+      const lines = { swing: K.swing, forced: K.forced, doom: K.doom };
+      if (lines[d.mood]) say(kingerEl, pick(lines[d.mood]), 2600);
+      else if (d.mood === 'forgot' && Math.random() < 0.6) say(kingerEl, pick(K.forgot), 2400);
+      else if (d.mood === 'fond' && Math.random() < 0.3) say(kingerEl, pick(K.fond), 2400);
+      else if (Math.random() < 0.35) say(kingerEl, pick(K.think), 2200);
+      setTimeout(() => {
+        apply(choice);
+        kingerLast = [choice.r, choice.c]; kingerLastPiece = board[choice.r][choice.c];
+        render();
+        if (checkEnd()) return;
+        endKinger();
+      }, Math.max(0, 700 - (performance.now() - t0)));
+    }, 20);
+  }
+  function endKinger() {
+    chaos();
+    render();
+    if (checkEnd()) return;
+    turn = 'w'; busy = false; setTurnText();
+  }
+
+  // ═══ chaos events ═══
+  function emptySquares(rows = [0, 1, 2, 3, 4, 5, 6, 7]) {
+    const out = [];
+    for (const r of rows) for (let c = 0; c < 8; c++) if (!board[r][c]) out.push([r, c]);
+    return out;
+  }
+  function find(pred) {
+    const out = [];
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) if (board[r][c] && pred(board[r][c])) out.push([r, c]);
+    return out;
+  }
+  function chaos() {
+    // 1. bored knights
+    if (Math.random() < 0.1) {
+      const knights = find((p) => p.t === 'N');
+      if (knights.length) {
+        const [r, c] = pick(knights), p = board[r][c], side = p.s === 'w' ? 'white' : 'purple';
+        board[r][c] = null;
+        if (Math.random() < 0.35) {
+          stats.snacks++; saveStats();
+          narrate(pick(C.knightLeave).replace('{side}', side), true);
+        } else {
+          const [nr, nc] = pick(emptySquares());
+          board[nr][nc] = p; landedAt = [nr, nc];
+          narrate(pick(C.knightWander).replace('{side}', side).replace('{sq}', sqName(nr, nc)), true);
+        }
+        sfx('boing');
+      }
+    }
+    // 2. Kinger misplaces his queen…
+    if (!queenAway && Math.random() < 0.07) {
+      const qs = find((p) => p.t === 'Q' && p.s === 'b');
+      if (qs.length) {
+        const [r, c] = qs[0]; board[r][c] = null; queenAway = true;
+        stats.queens++; saveStats();
+        kingerEl.classList.add('panic');
+        say(kingerEl, pick(K.queenGone), 3400);
+        narrate("Kinger's queen has gone MISSING! Search parties are being organized! (Nobody is organizing them.)", true);
+        sfx('glitch');
+      }
+    } else if (queenAway && Math.random() < 0.22) {
+      // …and she comes back, eventually.
+      const spots = emptySquares([0, 1, 2]);
+      if (spots.length) {
+        const [r, c] = pick(spots); board[r][c] = { t: 'Q', s: 'b' }; landedAt = [r, c]; queenAway = false;
+        kingerEl.classList.remove('panic');
+        say(kingerEl, pick(K.queenBack), 3000);
+        narrate(`Kinger's queen has returned at ${sqName(r, c)}! She says she was "getting a snack."`, true);
+        sfx('ding');
+      }
+    }
+    // 3. premature checkmate declarations
+    if (Math.random() < 0.08) {
+      stats.claims++; saveStats();
+      say(kingerEl, pick(K.checkmate), 2000);
+      narrate(pick(C.claim), true);
+      const b = document.getElementById('board'); b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake');
+      sfx('fanfare');
+      setTimeout(() => say(kingerEl, pick(K.forget), 2600), 2200);
+    }
+    // 4. wild Bubble
+    const wild = find((p) => p.t === 'wild');
+    if (!wild.length && Math.random() < 0.06) {
+      const spots = emptySquares([2, 3, 4, 5]);
+      if (spots.length) {
+        const [r, c] = pick(spots); board[r][c] = { t: 'wild', s: 'n' }; landedAt = [r, c];
+        narrate(pick(C.bubbleIn).replace('{sq}', sqName(r, c)), true); sfx('pop');
+      }
+    } else if (wild.length) {
+      const [r, c] = wild[0];
+      const near = [];
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+        if ((dr || dc) && inB(r + dr, c + dc)) near.push([r + dr, c + dc]);
+      }
+      const snacks = near.filter(([rr, cc]) => board[rr][cc] && board[rr][cc].t !== 'K');
+      if (snacks.length && Math.random() < 0.15) {
+        const [rr, cc] = pick(snacks), v = board[rr][cc];
+        board[rr][cc] = board[r][c]; board[r][c] = null; landedAt = [rr, cc];
+        narrate(pick(C.bubbleEat).replace('{v}', `${v.s === 'w' ? 'YOUR' : "KINGER'S"} ${NAME[v.t].toUpperCase()}`), true);
+        sfx('pop'); setTimeout(() => sfx('pop'), 120);
+      } else if (Math.random() < 0.1) {
+        board[r][c] = null; narrate(pick(C.bubbleOut), true);
+      } else {
+        const open = near.filter(([rr, cc]) => !board[rr][cc]);
+        if (open.length) { const [rr, cc] = pick(open); board[rr][cc] = board[r][c]; board[r][c] = null; }
+      }
+    }
+  }
+
+  // ═══ rendering & input ═══
+  const boardEl = document.getElementById('board');
+  const squareEl = (r, c) => boardEl.children[r * 8 + c];
+  function render() {
+    const legalSet = new Map(legal.map((m) => [m.r * 8 + m.c, m]));
+    let html = '';
+    for (let r = 0; r < 8; r++) for (let c = 0; c < 8; c++) {
+      const dark = (r + c) % 2 === 1;
+      const cls = ['sq', dark ? 'd' : 'l'];
+      if (dark && r % 2 === 0) cls.push('alt');
+      if (lastMove && ((lastMove.fr === r && lastMove.fc === c) || (lastMove.r === r && lastMove.c === c))) cls.push('last');
+      if (selected && selected[0] === r && selected[1] === c) cls.push('sel');
+      const lm = legalSet.get(r * 8 + c);
+      if (lm) cls.push(lm.cap ? 'cap' : 'can');
+      const p = board[r][c];
+      let inner = '';
+      if (p) {
+        const landed = landedAt && landedAt[0] === r && landedAt[1] === c ? ' landed' : '';
+        if (p.t === 'wild') inner = `<div class="pc wild${landed}">${CAST.bubble}</div>`;
+        else if (SPECIAL[p.t]) inner = `<div class="pc emoji ${p.s}${landed}">${SPECIAL[p.t]}</div>`;
+        else inner = `<div class="pc ${p.s}${landed}">${GLYPH[p.t]}︎</div>`;
+      }
+      if (c === 0) inner += `<span class="coord r">${8 - r}</span>`;
+      if (r === 7) inner += `<span class="coord f">${'abcdefgh'[c]}</span>`;
+      html += `<div class="${cls.join(' ')}" data-r="${r}" data-c="${c}">${inner}</div>`;
+    }
+    boardEl.innerHTML = html;
+    landedAt = null;
+  }
+  function setTurnText() {
+    document.getElementById('turn').textContent = turn === 'w' ? '⚪ Your move!' : '🟣 Kinger is thinking… (about soup)';
+  }
+
+  boardEl.addEventListener('click', (e) => {
+    const sq = e.target.closest('.sq'); if (!sq || busy || turn !== 'w') return;
+    const r = +sq.dataset.r, c = +sq.dataset.c, p = board[r][c];
+    const target = legal.find((m) => m.r === r && m.c === c);
+    if (selected && target) {
+      apply({ fr: selected[0], fc: selected[1], ...target });
+      selected = null; legal = [];
+      render();
+      if (checkEnd()) return;
+      turn = 'b'; busy = true; setTurnText();
+      setTimeout(kingerTurn, 650);
+      return;
+    }
+    if (p && p.s === 'w') {
+      selected = [r, c]; legal = movesFrom(r, c);
+      if (!legal.length) say(sq, p.t === 'fort' ? "The fort does not move. The fort IS." : "That piece is stuck! Like me in traffic!", 1600);
+      sfx('ding');
+    } else if (p && p.t === 'wild') {
+      say(sq, pick(window.TADC.LINES.bubble), 2400); sfx('pop');
+      selected = null; legal = [];
+    } else { selected = null; legal = []; }
+    render();
+  });
+
+  kingerEl.addEventListener('click', () => { sfx('honk'); say(kingerEl, pick(K.poke), 2600); });
+  document.getElementById('newGame').addEventListener('click', () => {
+    if (busy && turn === 'b') return;
+    newGame();
+    say(kingerEl, "A new game! I LOVE new games! Are we still playing checkers?", 3000);
+  });
+
+  saveStats();
+  newGame();
+  setTimeout(() => {
+    narrate("Welcome to the GRAND CHESS SHOWDOWN! In this corner: YOU! In the other corner: Kinger, and also his pillow fort!", true);
+    say(kingerEl, "Oh! A challenger! Let's play! I'm purple! I think. I'm always purple.", 3800);
+  }, 400);
+})();
+</script>
+</body>
+</html>

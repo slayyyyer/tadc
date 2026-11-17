@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caine's Adventure Generator</title>
+<link href="https://fonts.googleapis.com/css2?family=Rye&family=Fredoka:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{--red:#e3243b;--red-d:#8a0c1a;--blue:#2f5bd8;--gold:#ffd34d;--ink:#1b1b2f;--cream:#fff7d6}
+  *{box-sizing:border-box}
+  html,body{margin:0;min-height:100%;background:#0b0718;color:#fff;font-family:'Fredoka',system-ui,sans-serif}
+  body{background:
+    radial-gradient(ellipse at 50% -10%,rgba(227,36,59,.35),transparent 55%),
+    radial-gradient(ellipse at 50% 120%,rgba(47,91,216,.35),transparent 55%),#0b0718;overflow-x:hidden}
+  header{text-align:center;padding:18px 16px 0}
+  h1{font-family:'Rye';font-weight:400;margin:0;font-size:clamp(24px,4.4vw,50px);color:var(--gold);text-shadow:0 3px 0 var(--red-d),0 6px 0 var(--ink)}
+  .sub{color:#cbbff0;margin:6px 0 0}
+  main{display:grid;grid-template-columns:minmax(300px,520px) minmax(300px,520px);gap:28px;justify-content:center;align-items:start;padding:18px 16px 110px}
+  /* wheel */
+  #wheelBox{position:relative;width:100%;aspect-ratio:1}
+  #wheel{width:100%;height:100%;display:block;filter:drop-shadow(0 18px 20px rgba(0,0,0,.6))}
+  #pointer{position:absolute;left:50%;top:-6px;transform:translateX(-50%);width:0;height:0;border-left:20px solid transparent;border-right:20px solid transparent;
+    border-top:40px solid var(--gold);filter:drop-shadow(0 3px 0 var(--ink));z-index:2;transform-origin:50% 0}
+  #pointer.tick{animation:tick .08s}
+  @keyframes tick{50%{transform:translateX(-50%) rotate(-14deg)}}
+  #spin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:26%;aspect-ratio:1;border-radius:50%;border:5px solid var(--ink);
+    background:radial-gradient(circle at 35% 30%,#ff6b7d,var(--red) 60%,var(--red-d));color:#fff;font:400 clamp(16px,2.4vw,24px) 'Rye';cursor:pointer;
+    box-shadow:0 6px 0 var(--ink),0 0 30px rgba(255,211,77,.4);z-index:3;transition:transform .1s}
+  #spin:hover{transform:translate(-50%,-52%) scale(1.04)}
+  #spin:active{transform:translate(-50%,-46%)}
+  #spin:disabled{filter:grayscale(.6);cursor:wait}
+  /* episode card */
+  #card{background:var(--cream);color:var(--ink);border:5px solid var(--ink);border-radius:16px;box-shadow:8px 8px 0 var(--red-d);overflow:hidden;transform-origin:50% 0}
+  #card.flip{animation:flip .7s cubic-bezier(.3,1.5,.5,1)}
+  @keyframes flip{0%{transform:rotateX(90deg)}100%{transform:none}}
+  #card .bar{background:repeating-linear-gradient(90deg,var(--red) 0 26px,#fff 26px 52px);height:22px;border-bottom:4px solid var(--ink)}
+  #card .in{padding:16px 20px 18px}
+  #card .ep{font:700 13px 'Fredoka';letter-spacing:.2em;color:var(--red)}
+  #card h2{font-family:'Rye';font-weight:400;font-size:clamp(22px,3vw,32px);margin:4px 0 12px;line-height:1.1}
+  .row{display:grid;grid-template-columns:112px 1fr;gap:8px;padding:7px 0;border-top:2px dashed rgba(27,27,47,.2);font-size:15px}
+  .row b{font-size:12px;letter-spacing:.12em;color:#5c3a99;padding-top:2px}
+  .reel{display:inline-block;transition:filter .1s}
+  .reel.rolling{filter:blur(1.2px);color:#8a0c1a}
+  #pitch{margin-top:12px;background:#fff;border:3px solid var(--ink);border-radius:12px;padding:10px 12px;font-style:italic;font-size:15px}
+  .actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap}
+  .btn{font:700 14px 'Fredoka';color:var(--ink);background:var(--gold);border:3px solid var(--ink);border-radius:999px;padding:8px 14px;cursor:pointer;
+    box-shadow:3px 3px 0 var(--ink);text-decoration:none;display:inline-block}
+  .btn.blue{background:var(--blue);color:#fff}
+  #history{margin-top:22px}
+  #history h3{font-family:'Rye';font-weight:400;color:var(--gold);margin:0 0 8px;font-size:20px}
+  #history ol{margin:0;padding-left:22px;color:#cbbff0;font-size:14px;line-height:1.6}
+  #back{position:fixed;left:14px;bottom:14px;z-index:30}
+  #caine{position:fixed;right:16px;bottom:8px;width:clamp(90px,10vw,140px);z-index:25;animation:fl 3s ease-in-out infinite}
+  #caine svg{width:100%;height:auto;filter:drop-shadow(0 10px 8px rgba(0,0,0,.6))}
+  @keyframes fl{50%{transform:translateY(-10px) rotate(2deg)}}
+  #toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(80px);background:var(--ink);color:#fff;border:2px solid var(--gold);
+    padding:8px 14px;border-radius:999px;font-weight:700;transition:transform .3s;z-index:40}
+  #toast.show{transform:translateX(-50%)}
+  #wheel{cursor:pointer}
+  #wheelBox.busy #wheel{cursor:wait}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+  .btn:not(:disabled):hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+  .btn:focus-visible,#spin:focus-visible{outline:3px dashed var(--gold);outline-offset:3px}
+  #caine{cursor:pointer}
+  @media (max-width:760px){main{grid-template-columns:1fr}#caine{width:72px}#toast{bottom:70px}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Caine's Adventure Generator</h1>
+  <p class="sub">Spin the wheel! Caine pitches tonight's adventure. Hand the card to Claude and it'll build it into a new act.</p>
+</header>
+<main>
+  <section>
+    <div id="wheelBox">
+      <div id="pointer"></div>
+      <canvas id="wheel" width="1040" height="1040"></canvas>
+      <button id="spin">SPIN!</button>
+    </div>
+  </section>
+  <section>
+    <div id="card">
+      <div class="bar"></div>
+      <div class="in">
+        <div class="ep" id="ep">EPISODE ???</div>
+        <h2 id="title">Spin the wheel, superstar!</h2>
+        <div class="row"><b>SETTING</b><span class="reel" id="r-setting">…</span></div>
+        <div class="row"><b>STARRING</b><span class="reel" id="r-star">…</span></div>
+        <div class="row"><b>GUEST NPC</b><span class="reel" id="r-npc">…</span></div>
+        <div class="row"><b>THE TWIST</b><span class="reel" id="r-twist">…</span></div>
+        <div class="row"><b>BUILD IT AS</b><span class="reel" id="r-format">…</span></div>
+        <div id="pitch">"Every adventure starts with a spin! And ends with a… well, we'll find out!" — Caine</div>
+        <div class="actions">
+          <button class="btn" id="copy" disabled>📋 Copy prompt for Claude</button>
+          <button class="btn blue" id="reroll" disabled>🎲 Reroll the twist</button>
+        </div>
+      </div>
+    </div>
+    <div id="history"><h3>Past pitches</h3><ol id="hist"><li>None yet. The night is young! (It is always night.)</li></ol></div>
+  </section>
+</main>
+<a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
+<div id="caine"></div>
+<div id="toast">Copied! Paste it to Claude 🎪</div>
+
+<script src="../../assets/cast.js"></script>
+<script>
+(() => {
+  'use strict';
+  const { CAST, confetti, sfx, wireCaine, pick } = window.TADC;
+  const caineEl = document.getElementById('caine');
+  caineEl.innerHTML = CAST.caine;
+  const caine = wireCaine(caineEl);
+
+  // ═══ ingredients (all original) ═══
+  const SETTINGS = [
+    { e: '👻', short: 'Haunted', full: 'a haunted spreadsheet mansion where every cell whispers', noun: 'Spreadsheet Mansion' },
+    { e: '🎳', short: 'Bowling', full: 'an underwater bowling alley run by polite eels', noun: 'Underwater Lanes' },
+    { e: '🍬', short: 'Candy', full: 'a candy-coated tax office with sticky filing cabinets', noun: 'Sugar Bureau' },
+    { e: '🌨️', short: 'Snowglobe', full: 'the inside of a giant snow globe someone keeps shaking', noun: 'Shaken Globe' },
+    { e: '🤠', short: 'Saloon', full: 'a wild-west saloon staffed entirely by sentient teacups', noun: 'Teacup Saloon' },
+    { e: '🌙', short: 'Moon', full: 'a carnival on the moon where the rides are slightly too slow', noun: 'Lunar Midway' },
+    { e: '📚', short: 'Library', full: 'a library where the books read YOU', noun: 'Reading Room' },
+    { e: '🍕', short: 'Pizza', full: 'a pizza-delivery dimension with infinite toppings and zero addresses', noun: 'Pizza Dimension' },
+    { e: '🏰', short: 'Castle', full: 'a medieval castle made entirely of foam', noun: 'Foam Fortress' },
+    { e: '🚂', short: 'Train', full: 'a train that only travels in very small circles', noun: 'Loop Express' },
+    { e: '🔌', short: 'Jungle', full: 'a jungle of tangled extension cords and suspicious outlets', noun: 'Cable Jungle' },
+    { e: '📺', short: 'Game Show', full: 'a game show hosted by an overconfident toaster', noun: 'Toaster Showdown' },
+  ];
+  const ADJ = ['Haunted', 'Spectacular', 'Unspeakable', 'Bouncy', 'Mysterious', 'Absolutely Normal', 'Gloriously Sticky', 'Infinite', 'Tremendous', 'Wobbly'];
+  const TITLE_SHAPES = [
+    (a, n) => `The ${a} ${n}`,
+    (a, n) => `Escape from the ${n}`,
+    (a, n) => `${n}: ${a} Edition`,
+    (a, n) => `A Very ${a} Night at the ${n}`,
+    (a, n) => `Return of the ${a} ${n}`,
+  ];
+  const STARS = ['Pomni', 'Jax', 'Ragatha', 'Gangle', 'Zooble', 'Kinger', 'Bubble', 'Caine himself'];
+  const NPCS = [
+    'Sir Gloopington, a gelatin knight with a wobbly sense of honor',
+    'a gumball machine who insists on being called "The Oracle"',
+    'the Mildly Haunted Mime (he is only a little haunted)',
+    'Captain Mustard, admiral of the Condiment Navy',
+    'two sentient bowling pins who are terrified of everything',
+    'Grandma Gears, a clockwork fortune teller who is always five minutes late',
+    'an extremely polite bear in a three-piece suit',
+    'a vending machine that only dispenses compliments',
+    'a cloud that rains confetti whenever it gets nervous',
+    'the Duke of Doorknobs, collector of exits (he has none)',
+  ];
+  const TWISTS = [
+    "Gangle's mask is replaced by a pivot table",
+    'Jax is magically forced to be nice for the entire episode',
+    'Kinger becomes temporarily, alarmingly brilliant',
+    "Zooble's parts get shuffled with the scenery",
+    'Ragatha must say one honest complaint out loud',
+    'Pomni is accidentally elected mayor',
+    'Bubble eats the map, the compass, and then the plot',
+    'gravity switches off every time someone laughs',
+    "everyone swaps voices and nobody's allowed to mention it",
+    "Caine forgets how the adventure ends and has to improvise",
+    'the floor stops being checkered and everyone panics',
+    'there is, briefly, a real exit (there is not)',
+  ];
+  const FORMATS = [
+    'a clicker game', 'a tiny platformer', 'a choose-your-own-adventure story', 'a generative art toy', 'a rhythm game',
+    'a physics sandbox', 'a little puzzle game', 'a fake retro-OS desktop', 'a dating-sim parody', 'an idle game', 'a text adventure', 'a soundboard',
+  ];
+  const PITCHES = [
+    "It's going to be TREMENDOUS! Minimal existential dread! Probably!",
+    "I've been saving this one! Since about four seconds ago!",
+    "No one has ever done this adventure before! Mostly because I just made it up!",
+    "Everyone will LOVE it! It's mandatory to love it!",
+    "Bring snacks! The snacks are also part of the adventure! Don't eat the snacks!",
+    "A true masterpiece! I'm getting chills! I don't have a spine!",
+  ];
+
+  // ═══ wheel drawing ═══
+  const cv = document.getElementById('wheel'), ctx = cv.getContext('2d');
+  const N = SETTINGS.length, SIZE = 1040, R = SIZE / 2 - 30;
+  const COLORS = ['#e3243b', '#2f5bd8', '#ffd34d', '#5fd38d', '#ff7eb6', '#b07cff'];
+  let angle = 0;
+  function drawWheel() {
+    ctx.clearRect(0, 0, SIZE, SIZE);
+    ctx.save(); ctx.translate(SIZE / 2, SIZE / 2);
+    // outer bulb ring
+    ctx.beginPath(); ctx.arc(0, 0, R + 24, 0, Math.PI * 2); ctx.fillStyle = '#8a0c1a'; ctx.fill();
+    ctx.lineWidth = 8; ctx.strokeStyle = '#1b1b2f'; ctx.stroke();
+    const now = performance.now() / 1000;
+    for (let i = 0; i < 36; i++) {
+      const a = (i / 36) * Math.PI * 2;
+      const on = (Math.floor(now * 6) + i) % 2 === 0;
+      ctx.beginPath(); ctx.arc(Math.cos(a) * (R + 12), Math.sin(a) * (R + 12), 9, 0, Math.PI * 2);
+      ctx.fillStyle = on ? '#fff7b0' : '#8a6a2a'; ctx.fill();
+    }
+    ctx.rotate(angle);
+    for (let i = 0; i < N; i++) {
+      const a0 = (i / N) * Math.PI * 2 - Math.PI / 2 - Math.PI / N, a1 = a0 + (Math.PI * 2) / N;
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R, a0, a1); ctx.closePath();
+      ctx.fillStyle = COLORS[i % COLORS.length]; ctx.fill();
+      ctx.lineWidth = 5; ctx.strokeStyle = '#1b1b2f'; ctx.stroke();
+      ctx.save();
+      ctx.rotate((a0 + a1) / 2);
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.font = '700 38px Fredoka, sans-serif';
+      ctx.fillStyle = i % COLORS.length === 2 ? '#1b1b2f' : '#fff';
+      ctx.fillText(SETTINGS[i].short, R - 92, 2);
+      ctx.font = '62px serif';
+      ctx.fillText(SETTINGS[i].e, R - 18, 4);
+      ctx.restore();
+    }
+    ctx.restore();
+    requestAnimationFrame(drawWheel);
+  }
+  requestAnimationFrame(drawWheel);
+
+  // ═══ spin ═══
+  const spinBtn = document.getElementById('spin'), pointer = document.getElementById('pointer');
+  let current = null, episode = 0;
+  try { episode = parseInt(localStorage.getItem('tadc-episode') || '0', 10) || 0; } catch (e) { /* storage blocked */ }
+  const history = [];
+
+  const copyBtn = document.getElementById('copy'), rerollBtn = document.getElementById('reroll'), wheelBox = document.getElementById('wheelBox');
+  let spinning = false;
+  function spin() {
+    if (spinning) return;
+    spinning = true;
+    spinBtn.disabled = true;
+    // The card is about to change: don't let copy/reroll act on the old one mid-spin.
+    copyBtn.disabled = true; rerollBtn.disabled = true;
+    wheelBox.classList.add('busy');
+    sfx('boing');
+    caine.talk(pick(["Round and round she goes!", "SPIN, SPIN, SPIN!", "Ooh, I can feel it! A good one!", "Wheeeee! I'm not on it, but WHEEE!"]), 2200);
+    const target = Math.floor(Math.random() * N);
+    // Segment i sits under the top pointer when angle ≡ -i·step (mod 2π). Spin backwards several turns and land there.
+    const TAU = Math.PI * 2, step = TAU / N;
+    const turns = 5 + Math.floor(Math.random() * 3);
+    const start = angle, k = start - turns * TAU;
+    const dest = k - ((((k + target * step) % TAU) + TAU) % TAU);
+    const t0 = performance.now(), dur = 4200;
+    let lastSeg = -1;
+    rollReels(dur);
+    (function step(now) {
+      const p = Math.min(1, (now - t0) / dur);
+      const e = 1 - Math.pow(1 - p, 4);
+      angle = start + (dest - start) * e;
+      const seg = Math.floor(((-angle / ((Math.PI * 2) / N)) % N + N + 0.5)) % N;
+      if (seg !== lastSeg) { lastSeg = seg; pointer.classList.remove('tick'); void pointer.offsetWidth; pointer.classList.add('tick'); sfx('tick'); }
+      if (p < 1) requestAnimationFrame(step);
+      else land(target);
+    })(t0);
+  }
+
+  const reelIds = ['r-setting', 'r-star', 'r-npc', 'r-twist', 'r-format'];
+  const reelPools = [SETTINGS.map((s) => s.e + ' ' + s.full), STARS, NPCS, TWISTS, FORMATS];
+  let rolling = null;
+  function rollReels(dur) {
+    reelIds.forEach((id) => document.getElementById(id).classList.add('rolling'));
+    rolling = setInterval(() => reelIds.forEach((id, i) => { document.getElementById(id).textContent = pick(reelPools[i]); }), 70);
+    setTimeout(() => clearInterval(rolling), dur - 50);
+  }
+
+  function land(segIdx) {
+    const setting = SETTINGS[segIdx];
+    episode++;
+    try { localStorage.setItem('tadc-episode', String(episode)); } catch (e) { /* storage blocked */ }
+    current = {
+      ep: episode, setting, title: pick(TITLE_SHAPES)(pick(ADJ), setting.noun),
+      star: pick(STARS), npc: pick(NPCS), twist: pick(TWISTS), format: pick(FORMATS), pitch: pick(PITCHES),
+    };
+    renderCard();
+    history.unshift(`Ep. ${current.ep}: ${current.title}`);
+    document.getElementById('hist').innerHTML = history.slice(0, 6).map((h) => `<li>${h}</li>`).join('');
+    sfx('fanfare');
+    const r = document.getElementById('card').getBoundingClientRect();
+    confetti(r.left + r.width / 2, r.top + 40, 140, 1.2);
+    caine.talk(`Tonight's adventure: <b>${current.title}</b>! ${current.pitch}`, 5600);
+    spinning = false;
+    wheelBox.classList.remove('busy');
+    spinBtn.disabled = false;
+    copyBtn.disabled = false;
+    rerollBtn.disabled = false;
+  }
+
+  function renderCard() {
+    const c = current;
+    const card = document.getElementById('card');
+    card.classList.remove('flip'); void card.offsetWidth; card.classList.add('flip');
+    document.getElementById('ep').textContent = `EPISODE ${String(c.ep).padStart(3, '0')}`;
+    document.getElementById('title').textContent = c.title;
+    const vals = [c.setting.e + ' ' + c.setting.full, c.star, c.npc, c.twist, c.format];
+    reelIds.forEach((id, i) => { const el = document.getElementById(id); el.classList.remove('rolling'); el.textContent = vals[i]; });
+    document.getElementById('pitch').textContent = `"${c.pitch}" — Caine`;
+  }
+
+  function promptText(c) {
+    return [
+      `Build a new adventure for the circus: "${c.title}" (Episode ${c.ep}).`,
+      `Format: ${c.format}.`,
+      `Setting: ${c.setting.full}.`,
+      `Starring: ${c.star}. Guest NPC: ${c.npc}.`,
+      `Twist: ${c.twist}.`,
+      `Put it in acts/ with the next number, add it to the Big Top poster board, and sign the ledger.`,
+    ].join('\n');
+  }
+
+  spinBtn.addEventListener('click', spin);
+  // The wheel itself is the biggest thing on the page; clicking it should spin too.
+  cv.addEventListener('click', spin);
+  // Space / S spins from anywhere (unless a button already has focus and will handle it).
+  addEventListener('keydown', (e) => {
+    if (e.repeat || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.target instanceof Element && e.target.closest('button,a,input,textarea')) return;
+    if (e.key === ' ' || e.key.toLowerCase() === 's') { e.preventDefault(); spin(); }
+  });
+  // Poke the ringmaster for a bonus pitch.
+  const CAINE_POKES = [
+    "Ooh! Ooh! Pick the one with the eels! No pressure! All the pressure!",
+    "Every slice is my favorite! Except the one you land on. That one is my MOST favorite!",
+    "Did you know the wheel is load-bearing? Spin carefully! Or wildly! Wildly is better!",
+    "I'm not allowed to spin it myself anymore. There was an incident. With the moon.",
+  ];
+  let pokeIdx = 0;
+  caineEl.setAttribute('role', 'button'); caineEl.tabIndex = 0; caineEl.setAttribute('aria-label', 'Caine');
+  const pokeCaine = () => { sfx('honk'); caine.talk(CAINE_POKES[pokeIdx++ % CAINE_POKES.length], 3400); };
+  caineEl.addEventListener('click', pokeCaine);
+  caineEl.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); pokeCaine(); } });
+  document.getElementById('reroll').addEventListener('click', () => {
+    if (!current) return;
+    current.twist = pick(TWISTS.filter((t) => t !== current.twist));
+    renderCard(); sfx('pop');
+    caine.talk("A NEW twist! Even twistier! I love it when things twist!", 3000);
+  });
+  const toast = document.getElementById('toast');
+  document.getElementById('copy').addEventListener('click', async () => {
+    if (!current) return;
+    const text = promptText(current);
+    let ok = false;
+    try { await navigator.clipboard.writeText(text); ok = true; }
+    catch (e) {
+      // Fallback for file:// pages where the async clipboard API is blocked.
+      const ta = document.createElement('textarea'); ta.value = text; document.body.appendChild(ta); ta.select();
+      try { ok = document.execCommand('copy'); } catch (err) { ok = false; }
+      ta.remove();
+    }
+    if (!ok) {
+      // Don't claim success when nothing was copied: show the prompt so it can be copied by hand.
+      window.prompt('Your browser blocked copying. Here is the prompt to copy by hand:', text);
+    }
+    sfx(ok ? 'ding' : 'honk');
+    toast.textContent = ok ? 'Copied! Paste it to Claude 🎪' : 'Copy blocked, so here it is to copy by hand 📋';
+    clearTimeout(toast._t);
+    toast.classList.add('show'); toast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+  });
+
+  setTimeout(() => caine.talk("Step right up! Step right UP! Spin my magnificent wheel! Every spin is a brand-new adventure!", 4600), 500);
+})();
+</script>
+</body>
+</html>
