@@ -2,6 +2,8 @@
 
 It's me, **Bubble**! Welcome to **THE AMAZING DIGITAL CIRCUS**, a coding-break big top!
 
+🎪 **Now showing online at https://slayyyyer.github.io/tadc/** — the whole tent, no download!
+
 🎟️ **ADMIT ONE (FOREVER)**
 
 - **Double-click `index.html`** to go into the tent. Watch your step, the floor is checkered and infinite!
