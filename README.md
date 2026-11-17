@@ -2,7 +2,7 @@
 
 It's me, **Bubble**! Welcome to **THE AMAZING DIGITAL CIRCUS**, a coding-break big top!
 
-🎪 **Now showing online at https://slayyyyer.github.io/tadc/** — the whole tent, no download!
+The tent is open online at **https://slayyyyer.github.io/tadc/** — no download, no ticket, no exit. 🎪
 
 🎟️ **ADMIT ONE (FOREVER)**
 
