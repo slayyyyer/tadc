@@ -100,3 +100,10 @@ The first continuation warm-starts a fresh Adam optimizer because the original r
 weights. Later promoted checkpoints also save exact optimizer state; a fingerprint check prevents
 reusing it with unrelated weights or a changed corpus. The active release stays unchanged during
 training. Experimental improv remains opt-in regardless of the outcome.
+
+## License and fan-project notice
+
+This is an unofficial, non-commercial *The Amazing Digital Circus* fan project — not affiliated with
+or endorsed by Glitch Productions, and the characters belong to their respective owners. The source
+code is MIT licensed; see `LICENSE`. The fan content, generated model output and third-party material
+are covered by the terms in `NOTICE`.

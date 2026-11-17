@@ -1,0 +1,39 @@
+# Fan-project notice
+
+This repository is an **unofficial, non-commercial fan project** built around
+*The Amazing Digital Circus*. It is a fan tribute made for fun, on personal
+time, and is not affiliated with, sponsored by, or endorsed by Glitch
+Productions or the creators of the series.
+
+*The Amazing Digital Circus*, its characters (Caine, Pomni, Jax, Ragatha,
+Gangle, Zooble, Kinger, Bubble), its setting and related names are the
+trademarks and copyrights of their respective owners. Nothing in this
+repository grants any right to that material, and nothing here should be read
+as a claim to it.
+
+## What the MIT license in `LICENSE` covers
+
+`LICENSE` applies to the **source code**: the HTML, CSS, JavaScript, Node
+tooling and tests written for this project. You may reuse and adapt that code
+under the MIT terms.
+
+It does **not** apply to the fan content itself — the act pages' artwork,
+dialogue, character writing, story text and generated model output — or to any
+third-party material. Those remain for personal, non-commercial fan use.
+
+## Non-commercial use
+
+The fan content here is shared so people can play the circus and learn from the
+code. Please do not sell it, paywall it, or use it to promote a commercial
+product, and do not present it as official *The Amazing Digital Circus* media.
+
+## Third-party material
+
+- The dialogue sample in `datasets/openassistant-oasst1/` is derived from
+  OpenAssistant OASST1 and carries its own terms; see the `LICENSE` file in
+  that directory.
+- Google Fonts (Rye, Fredoka, VT323) load from Google's CDN at runtime under
+  their own license terms and are not bundled here.
+
+If you are a rights holder and would like something here changed or removed,
+please open an issue and it will be handled promptly.
