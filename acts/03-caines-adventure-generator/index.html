@@ -68,7 +68,7 @@
 <body>
 <header>
   <h1>Caine's Adventure Generator</h1>
-  <p class="sub">Spin the wheel! Caine pitches tonight's adventure. Hand the card to Claude and it'll build it into a new act.</p>
+  <p class="sub">Spin the wheel! Caine pitches tonight's adventure. Copy the card and turn it into a new act.</p>
 </header>
 <main>
   <section>
@@ -91,7 +91,7 @@
         <div class="row"><b>BUILD IT AS</b><span class="reel" id="r-format">…</span></div>
         <div id="pitch">"Every adventure starts with a spin! And ends with a… well, we'll find out!" — Caine</div>
         <div class="actions">
-          <button class="btn" id="copy" disabled>📋 Copy prompt for Claude</button>
+          <button class="btn" id="copy" disabled>📋 Copy the prompt</button>
           <button class="btn blue" id="reroll" disabled>🎲 Reroll the twist</button>
         </div>
       </div>
@@ -101,7 +101,7 @@
 </main>
 <a class="btn" id="back" href="../../index.html">← back to the Big Top</a>
 <div id="caine"></div>
-<div id="toast">Copied! Paste it to Claude 🎪</div>
+<div id="toast">Copied! Ready for your next act 🎪</div>
 
 <script src="../../assets/cast.js"></script>
 <script>
@@ -348,7 +348,7 @@
       window.prompt('Your browser blocked copying. Here is the prompt to copy by hand:', text);
     }
     sfx(ok ? 'ding' : 'honk');
-    toast.textContent = ok ? 'Copied! Paste it to Claude 🎪' : 'Copy blocked, so here it is to copy by hand 📋';
+    toast.textContent = ok ? 'Copied! Ready for your next act 🎪' : 'Copy blocked, so here it is to copy by hand 📋';
     clearTimeout(toast._t);
     toast.classList.add('show'); toast._t = setTimeout(() => toast.classList.remove('show'), 1800);
   });
