@@ -761,6 +761,25 @@
     } catch (e) { /* storage blocked: no stamp, no problem */ }
   })();
 
+  // ───────────────────────── PER-ACT RECORDS ─────────────────────────
+  // Small progress notes the Big Top's Trophy Case (assets/trophies.js) reads back.
+  // Acts call these once, at the moment something actually happens; nothing is sent anywhere.
+  const records = {
+    read(key) { try { return JSON.parse(localStorage.getItem(key) || 'null') || {}; } catch (e) { return {}; } },
+    write(key, value) { try { localStorage.setItem(key, JSON.stringify(value)); } catch (e) { /* storage blocked: this visit only */ } return value; },
+    count(key, field, by = 1) { const r = records.read(key); r[field] = (Number(r[field]) || 0) + by; return records.write(key, r); },
+    best(key, field, value, mode = 'max') {
+      const r = records.read(key), n = Number(value);
+      if (Number.isFinite(n) && (r[field] == null || (mode === 'max' ? n > r[field] : n < r[field]))) r[field] = n;
+      return records.write(key, r);
+    },
+    add(key, field, value) {
+      const r = records.read(key), list = Array.isArray(r[field]) ? r[field] : [];
+      if (!list.includes(value)) { list.push(value); r[field] = list; }
+      return records.write(key, r);
+    },
+  };
+
   // ───────────────────────── IN-ACT NAVIGATION ─────────────────────────
   // On act pages, add "Next ▸" and "🎲" (random, unvisited first) pills beside the page's own back link.
   // The list comes from assets/adventures.js, loaded lazily so acts don't need to include it themselves.
@@ -955,5 +974,5 @@
     },
   };
 
-  window.TADC = { CAST, LINES, pick, nextLine, say, confetti, toggleCalliope, sfx, wireCaine, clickable, passport, quiet, babble, testVoice, VOICES, mystery };
+  window.TADC = { CAST, LINES, pick, nextLine, say, confetti, toggleCalliope, sfx, wireCaine, clickable, passport, quiet, records, babble, testVoice, VOICES, mystery };
 })();

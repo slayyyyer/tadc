@@ -1,13 +1,9 @@
 /* The big top's ticket desk. No network, storage, or dependencies. */
 (function (root) {
   'use strict';
-  const categories = {
-    '01': 'Play', '02': 'Unwind', '03': 'Create', '04': 'Play', '05': 'Play',
-    '06': 'Stories', '07': 'Create', '08': 'Unwind', '09': 'Play', '10': 'Play',
-    '11': 'Create', '12': 'Create', '13': 'Stories', '14': 'Unwind', '15': 'Unwind',
-    '16': 'Play', '17': 'Unwind', '18': 'Play', '19': 'Play', '20': 'Play', '21': 'Play'
-  };
-  const category = act => act.category || categories[act.num] || 'Other';
+  // Each act declares its own mood in the poster manifest (assets/adventures.js); anything
+  // without one stays browsable under 'Other'.
+  const category = act => act.category || 'Other';
   const normalize = text => String(text).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   function select(acts, query = '', mood = 'All', order = 'original') {
     const words = normalize(query).trim().split(/\s+/).filter(Boolean);

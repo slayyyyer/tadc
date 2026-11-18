@@ -21,6 +21,16 @@
     { num: '17', key: 'tadc-bubblegotchi-v1', show: (v) => (v && v.born ? `${stageName(v.care)} · ${fmt(Math.floor(v.care || 0))} care points` : null) },
     { num: '19', key: 'tadc-pinball-best', show: (v) => (num(v) ? `High score: ${fmt(v)}` : null) },
     { num: '20', key: 'tadc-whackadoor-best', show: (v) => (num(v) ? `Best round: ${fmt(v)}` : null) },
+    { num: '22', key: 'tadc-ribbons-v1', show: (v) => (num(v && v.repaired) ? `${fmt(v.repaired)} ribbon${num(v.repaired) === 1 ? '' : 's'} repaired${v.best != null ? ` · fewest turns: ${fmt(v.best)}` : ''}` : null) },
+    { num: '23', key: 'tadc-beetles-v1', show: (v) => (num(v && v.filed) ? `All eight pairs filed ${fmt(v.filed)}×${v.best != null ? ` · best: ${fmt(v.best)} guesses` : ''}` : null) },
+    { num: '24', key: 'tadc-kitchen-v1', show: (v) => (num(v && v.notebooks) ? `${fmt(v.notebooks)} full recipe notebook${num(v.notebooks) === 1 ? '' : 's'}${v.best != null ? ` · fewest batches: ${fmt(v.best)}` : ''}` : null) },
+    { num: '25', key: 'tadc-doors-v1', show: (v) => (v && Array.isArray(v.endings) && v.endings.length ? `${fmt(v.endings.length)} / 4 endings found` : null) },
+    { num: '26', key: 'tadc-shadow-v1', show: (v) => (num(v && v.saved) ? `${fmt(v.saved)} shadow play${num(v.saved) === 1 ? '' : 's'} saved` : null) },
+    { num: '27', key: 'tadc-crates-v1', show: (v) => (num(v && v.cleared) ? `${fmt(Math.min(4, v.cleared))} / 4 rooms cleared${v.best != null ? ` · best: ${fmt(v.best)} pushes` : ''}` : null) },
+    { num: '28', key: 'tadc-bowling-v1', show: (v) => (num(v && v.games) ? `${fmt(v.games)} game${num(v.games) === 1 ? '' : 's'} · best: ${fmt(Math.min(50, num(v.best)))} / 50 pins` : null) },
+    { num: '29', key: 'tadc-tea-v1', show: (v) => (num(v && v.services) ? `${fmt(v.services)} tea service${num(v.services) === 1 ? '' : 's'} · best: ${fmt(Math.min(24, num(v.best)))} / 24 hearts` : null) },
+    { num: '30', key: 'tadc-colors-v1', show: (v) => (num(v && v.matched) ? `${fmt(v.matched)} sample${num(v.matched) === 1 ? '' : 's'} approved${v.best != null ? ` · fewest submissions: ${fmt(v.best)}` : ''}` : null) },
+    { num: '31', key: 'tadc-garden-v1', show: (v) => (num(v && v.saved) ? `${fmt(v.saved)} garden${num(v.saved) === 1 ? '' : 's'} saved${v.best ? ` · fullest bloom: ${fmt(v.best)} plants` : ''}` : null) },
     { num: '32', key: 'tadc-pillowfort-best', show: (v) => (num(v) ? `Tallest fort: ${num(v).toFixed(1)} m` : null) },
     { num: '21', key: 'tadc-wordsnack-v1', show: (v) => (v && v.played ? `${fmt(v.wins)}/${fmt(v.played)} solved · streak ${fmt(v.streak)} · best streak ${fmt(v.bestStreak)}` : null) },
   ];
@@ -42,7 +52,7 @@
   // Medals: [icon, name, how-to-earn, test(snapshot)]
   const MEDALS = [
     ['🎟️', 'First Stamp', 'Visit any adventure', (s) => s.visited >= 1],
-    ['🗺️', 'Half the Tent', 'Visit half of the adventures', (s) => s.visited >= Math.ceil(s.acts.length / 2)],
+    ['🗺️', 'Half the Tent', 'Visit half of the adventures', (s) => s.acts.length > 0 && s.visited >= Math.ceil(s.acts.length / 2)],
     ['🏆', 'Seen It All', 'Stamp every adventure', (s) => s.acts.length && s.visited >= s.acts.length],
     ['🎬', 'Regular Audience', 'Hear 12 cast scenes', (s) => s.scenes >= 12],
     ['🎭', 'Season Pass', 'Hear every cast scene', (s) => s.scenes >= s.sceneTotal],
@@ -57,6 +67,16 @@
     ['🎟️', 'Ticket Collector', 'Find 4 torn ticket stubs', () => { const m = window.TADC && window.TADC.mystery; return !!m && m.count() >= 4; }],
     ['🔍', 'Case Closed', 'Solve the mystery of the painted exit', () => { const m = window.TADC && window.TADC.mystery; return !!m && m.solved(); }],
     ['🔤', 'Word Glutton', 'Reach a 3-day Word Snack streak', (s) => num(s.raw['21'] && s.raw['21'].bestStreak) >= 3],
+    ['🎀', 'Ribbon Wrangler', 'Repair all three ribbons in one set', (s) => num(s.raw['22'] && s.raw['22'].repaired) >= 3],
+    ['🐞', 'Filed Properly', 'File all eight pairs in 30 guesses or fewer', (s) => num(s.raw['23'] && s.raw['23'].best) > 0 && num(s.raw['23'].best) <= 30],
+    ['🥣', 'Cloud Chef', 'Fill a notebook with all six recipes', (s) => num(s.raw['24'] && s.raw['24'].notebooks) >= 1],
+    ['🗂️', 'Paper Trail', 'Find all four Department of Doors endings', (s) => (s.raw['25'] && Array.isArray(s.raw['25'].endings) ? s.raw['25'].endings.length : 0) >= 4],
+    ['🎭', 'Shadow Auteur', 'Save three shadow plays', (s) => num(s.raw['26'] && s.raw['26'].saved) >= 3],
+    ['📦', 'Stage Manager', 'Clear all four crate rooms', (s) => num(s.raw['27'] && s.raw['27'].cleared) >= 4],
+    ['🎳', 'House Champion', 'Score 40 pins in Backwards Bowling', (s) => num(s.raw['28'] && s.raw['28'].best) >= 40],
+    ['🫖', 'Perfect Service', 'Serve all eight guests with 24 hearts', (s) => num(s.raw['29'] && s.raw['29'].best) >= 24],
+    ['🎨', 'Approved Sample', 'Match all six colors', (s) => num(s.raw['30'] && s.raw['30'].matched) >= 6],
+    ['🌱', 'In Full Bloom', 'Save a garden with 12 fully grown plants', (s) => num(s.raw['31'] && s.raw['31'].best) >= 12],
   ];
 
   const CSS = `
