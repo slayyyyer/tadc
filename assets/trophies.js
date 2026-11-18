@@ -32,6 +32,7 @@
     { num: '30', key: 'tadc-colors-v1', show: (v) => (num(v && v.matched) ? `${fmt(v.matched)} sample${num(v.matched) === 1 ? '' : 's'} approved${v.best != null ? ` · fewest submissions: ${fmt(v.best)}` : ''}` : null) },
     { num: '31', key: 'tadc-garden-v1', show: (v) => (num(v && v.saved) ? `${fmt(v.saved)} garden${num(v.saved) === 1 ? '' : 's'} saved${v.best ? ` · fullest bloom: ${fmt(v.best)} plants` : ''}` : null) },
     { num: '32', key: 'tadc-pillowfort-best', show: (v) => (num(v) ? `Tallest fort: ${num(v).toFixed(1)} m` : null) },
+    { num: '33', key: 'tadc-audition-v1', show: (v) => (num(v && v.shows) ? `${fmt(v.shows)} audition${num(v.shows) === 1 ? '' : 's'} · best: ${fmt(Math.min(16, num(v.best)))} / 16 hearts` : null) },
     { num: '21', key: 'tadc-wordsnack-v1', show: (v) => (v && v.played ? `${fmt(v.wins)}/${fmt(v.played)} solved · streak ${fmt(v.streak)} · best streak ${fmt(v.bestStreak)}` : null) },
   ];
   function stageName(care) {
@@ -77,6 +78,7 @@
     ['🫖', 'Perfect Service', 'Serve all eight guests with 24 hearts', (s) => num(s.raw['29'] && s.raw['29'].best) >= 24],
     ['🎨', 'Approved Sample', 'Match all six colors', (s) => num(s.raw['30'] && s.raw['30'].matched) >= 6],
     ['🌱', 'In Full Bloom', 'Save a garden with 12 fully grown plants', (s) => num(s.raw['31'] && s.raw['31'].best) >= 12],
+    ['👏', 'Standing Ovation', 'Score 16 hearts in the understudy audition', (s) => num(s.raw['33'] && s.raw['33'].best) >= 16],
   ];
 
   const CSS = `

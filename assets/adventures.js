@@ -55,5 +55,7 @@ window.CIRCUS_ADVENTURES = [
   {"num": "30", "href": "acts/30-zoobles-color-bureau/index.html", "icon": "🎨", "title": "Zooble's Color Bureau", "category": "Create", "blurb": "Mix red, green and blue light to match six colors. Numeric clues and optional exact hints included."},
   {"num": "31", "href": "acts/31-kingers-rain-garden/index.html", "icon": "🌱", "title": "Kinger's Rain Garden", "category": "Unwind", "blurb": "Plant moonbells and mushrooms, invite the rain, and save a little garden that never withers."},
   {"num": "32", "href": "acts/32-kingers-pillow-fort/index.html", "icon": "🏰", "title": "Kinger's Pillow Fort Stacker", "category": "Play", "blurb": "Drop swinging pillows, chickens and teacups to build Kinger the tallest, coziest fort in the void."},
+  { num: '33', href: 'acts/33-gangles-understudy-audition/index.html', icon: '🎭', title: "Gangle's Understudy Audition", category: 'Stories',
+    blurb: "Read eight monologues and call the mask each one wants: comedy, tragedy, or both at once. Gangle directs, and nobody is graded." },
   { num: '??', href: '#', icon: '🎁', title: 'Coming Soon!', blurb: 'A brand-new adventure is always being rigged. The tent always has room.', soon: true },
 ];

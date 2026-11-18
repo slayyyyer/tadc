@@ -44,6 +44,7 @@
     '30': 8,  // Color Bureau
     '31': 6,  // Rain Garden
     '32': 5,  // Pillow Fort
+    '33': 6,  // Understudy Audition
   };
   const DEFAULT_MINUTES = 5;
 

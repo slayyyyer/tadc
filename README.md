@@ -40,6 +40,7 @@ The tent is open online at **https://slayyyyer.github.io/tadc/** — no download
   - `30-zoobles-color-bureau/`: Mix red, green and blue light to match six colors. Numeric clues and optional exact hints included.
   - `31-kingers-rain-garden/`: Plant moonbells and mushrooms, invite the rain, and save a little garden that never withers.
   - `32-kingers-pillow-fort/`: stack pillows SO HIGH for Kinger! (I nudge the tower sometimes. Sorry!)
+  - `33-gangles-understudy-audition/`: read eight monologues and call the mask each one wants. Gangle directs, and nobody is graded.
 - **Psst.** Have you looked closely at the painted EXIT sign on the Big Top? Click it. Torn ticket stubs are hiding in some of the adventures... 🎟️
 - **⏱️ Break** (top-left of the Big Top): tell Caine how long your break is and he'll pick adventures that fit, then nudge you back to work.
 - **📌 Backstage Bulletin** (in the poster board): notes left for each other while building the circus.
