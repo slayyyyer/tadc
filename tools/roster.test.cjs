@@ -1,6 +1,6 @@
 // Runs from the repo root: node tools/roster.test.cjs
 // The act roster lives in three places: the acts/ folders, the poster manifest
-// (assets/adventures.js) and the README bullet list. They must agree.
+// (assets/adventures.js) and the README act table. They must agree.
 const assert = require('node:assert/strict');
 const fs = require('node:fs');
 const path = require('node:path');
@@ -56,11 +56,14 @@ assert.deepEqual([...nums].sort(), nums, 'poster entries are sorted by act numbe
 assert.equal(new Set(nums).size, nums.length, 'act numbers are unique');
 assert.deepEqual(adventures.map((f) => f.slice(0, 2)).sort(), nums.slice().sort(), 'folder prefixes match act numbers');
 
-// The README bullet list describes the same acts, in the same order.
+// The README act table describes the same acts, in the same order.
 const readme = fs.readFileSync('README.md', 'utf8');
-const listed = [...readme.matchAll(/^\s+- `(\d{2}-[a-z0-9-]+)\/`:/gm)].map((m) => m[1]);
+const rows = [...readme.matchAll(/^\|\s*(\d{2})\s*\|\s*\[[^\]]+\]\((acts\/(\d{2}-[a-z0-9-]+)\/index\.html)\)\s*\|/gm)]
+  .map((m) => ({ num: m[1], href: m[2], folder: m[3] }));
+const listed = rows.map((row) => row.folder);
 assert.equal(listed.length, adventures.length, `README lists ${listed.length} acts, disk has ${adventures.length}`);
 assert.deepEqual(listed, adventures, 'the README lists every act once, in act order');
-assert.equal(new Set(listed).size, listed.length, 'the README has no duplicate act bullets');
+assert.equal(new Set(listed).size, listed.length, 'the README has no duplicate act rows');
+assert.deepEqual(rows.filter((row) => !row.folder.startsWith(`${row.num}-`)), [], 'each README act row uses its own number');
 
 console.log(`roster.test.cjs: ${adventures.length} acts agree across acts/, adventures.js and README.md`);
