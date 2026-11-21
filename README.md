@@ -192,8 +192,10 @@ sampling, and fallback behavior.
 
 The site is published to GitHub Pages by `.github/workflows/deploy.yml` on every push to `main` (or
 manually via **Run workflow**). The workflow runs the Node and Python test suites, stages the
-repository as static files, deploys it, and then verifies that the hub, an act page, and shared CSS
-and JavaScript assets return HTTP 200 with the expected content types.
+playable site (`index.html`, `acts/`, `assets/`, `LICENSE`, `NOTICE`) as static files, deploys it, and
+then verifies that the hub, an act page, and shared CSS and JavaScript assets return HTTP 200 with the
+expected content types. Training runs, corpora, the OASST1 sample and the trainer tooling stay in the
+repository and are not uploaded.
 
 Because the project is static, it can also be hosted on any file server or CDN with no configuration.
 

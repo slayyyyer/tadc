@@ -20,6 +20,7 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -41,12 +42,12 @@ jobs:
       - name: Stage static site
         run: |
           mkdir -p _site
+          # Only the playable site is published. Training runs, the OASST1 sample,
+          # the trainer/import tooling and the brain playground stay in the repo.
           rsync -a \
-            --exclude '.git' \
-            --exclude '.github' \
-            --exclude '.freebuff' \
-            --exclude '_site' \
-            ./ _site/
+            --exclude '*.test.cjs' \
+            index.html acts assets LICENSE NOTICE \
+            _site/
 
       - name: Configure Pages
         uses: actions/configure-pages@v5
@@ -92,4 +93,25 @@ jobs:
               failed=1
             fi
           done <<< "$probes"
+
+          # Repo-only material must not be reachable on the published site.
+          private_paths="
+          tools/train_tinylm.cjs
+          tools/brain-playground.html
+          tools/training-runs/continuation-1791169082003/last-optimizer.json
+          datasets/openassistant-oasst1/train.jsonl
+          corpus-src
+          README.md
+          "
+          while IFS= read -r path; do
+            [ -z "$path" ] && continue
+            url="$base/$path"
+            code=$(curl -s -o /dev/null -w '%{http_code}' --max-time 20 --retry 2 --retry-all-errors "$url")
+            echo "Private probe: $url -> $code"
+            if [ "$code" != "404" ]; then
+              echo "::error::$url is published (HTTP $code); it is not a site file"
+              failed=1
+            fi
+          done <<< "$private_paths"
+
           exit $failed
