@@ -1,0 +1,35 @@
+name: Test
+
+on:
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Same gate the deploy runs on main, so a red suite is caught before merge.
+      - name: Run test suites
+        run: |
+          status=0
+          for test in $(find . -name '*.test.cjs' -not -path './tools/training-runs/*' | sort); do
+            echo "::group::$test"
+            node "$test" || status=1
+            echo "::endgroup::"
+          done
+          exit $status
+
+      - name: Run Python tests
+        working-directory: tools
+        run: python3 -m unittest -v import_public_dialogue_test
