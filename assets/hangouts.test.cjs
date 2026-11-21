@@ -31,11 +31,27 @@ class Element {
 const html=fs.readFileSync('index.html','utf8');
 const elements=Object.fromEntries([...html.matchAll(/id="([^"]+)"/g)].map(m=>[m[1],new Element()]));
 const $=id=>elements[id];
-global.document={getElementById:$,createElement:()=>new Element()};
+// Script loads are requested through document.head; nothing executes here.
+const requested=[];
+function flush(){
+  for(let i=0;i<requested.length;i++){
+    const el=requested[i];
+    if(!el.flushed){el.flushed=true;el.onload?.();}
+  }
+}
+global.document={getElementById:$,createElement:()=>new Element(),head:{appendChild(el){requested.push(el);}}};
 global.TADC={CAST:Object.fromEntries(Object.keys(cast).map(id=>[id,'<svg><defs><linearGradient id="paint"/></defs><path fill="url(#paint)"/></svg>']))};
 mount(acts);
 assert.equal($('hangoutCast').children.length,8);
+assert.deepEqual(requested,[]);
+for(const src of ['assets/corpus.js','assets/tinylm-weights.js','assets/tinylm.js','assets/castbrain.js'])
+  assert.ok(!html.includes(`src="${src}"`),`${src} is not preloaded by the hub`);
 $('hangoutLaunch').click();assert.ok($('hangout').open);assert.equal($('hangoutName').textContent,'Pomni');
+// Opening the lounge starts the chat stack only; the tiny model waits for its opt-in.
+assert.deepEqual(requested.map(el=>el.src),['assets/corpus.js']);
+flush();
+assert.deepEqual(requested.map(el=>el.src),['assets/corpus.js','assets/castbrain.js']);
+assert.ok(!requested.some(el=>/tinylm/.test(el.src)),'the tiny model is not part of the chat stack');
 assert.equal(document.activeElement,$('hangoutClose'));
 assert.ok($('hangoutPortrait').innerHTML.includes('url(#hangout-paint)'));
 $('hangoutTalk').click();assert.equal($('hangoutLine').textContent,cast.pomni.lines[1]);
@@ -102,9 +118,23 @@ $('hangoutForget').click();assert.equal(forgot,1);assert.equal(chatDestroys,1);a
 $('hangoutClose').click();assert.equal(chatDestroys,2);
 $('hangoutLaunch').click();assert.equal(chatMounts,3);assert.equal(chatWho.at(-1),'jax');
 console.log('PASS: lazy chat mount, character routing, improv, forget and close/reopen lifecycle.');
-global.CircusTinyLM={ready:true};let neural=false;
+let neural=false;
 global.CircusBrain.setNeuralEnabled=value=>{neural=value;};
 $('hangoutClose').click();$('hangoutLaunch').click();assert.equal($('hangoutNeural').disabled,false);
-$('hangoutNeural').checked=true;$('hangoutNeural').events.change();assert.equal(neural,true);
-$('hangoutNeural').checked=false;$('hangoutNeural').events.change();assert.equal(neural,false);
-console.log('PASS: lounge neural checkbox routes explicit opt-in and opt-out.');
+// Ticking the box is what fetches the weights and the runtime.
+$('hangoutNeural').checked=true;$('hangoutNeural').events.change();
+assert.equal(requested.at(-1).src,'assets/tinylm-weights.js','the first opt-in fetches the weights');
+flush();
+assert.deepEqual(requested.slice(-2).map(el=>el.src),['assets/tinylm-weights.js','assets/tinylm.js'],'weights load before the runtime');
+assert.equal(neural,false,'no neural opt-in without a working model');
+
+(async () => {
+  await Promise.resolve(); // let the change handler resume after the load attempt
+  assert.equal($('hangoutNeural').disabled,false);
+  assert.equal($('hangoutNeural').checked,false,'a model that cannot load unchecks the box');
+  assert.match($('hangoutImprovLine').textContent,/could not load/);
+  global.CircusTinyLM={ready:true};
+  $('hangoutNeural').checked=true;$('hangoutNeural').events.change();assert.equal(neural,true);
+  $('hangoutNeural').checked=false;$('hangoutNeural').events.change();assert.equal(neural,false);
+  console.log('PASS: chat stack and tiny model load on first use, with fallback and explicit opt-in/opt-out.');
+})().catch((err) => { console.error(err); process.exitCode = 1; });

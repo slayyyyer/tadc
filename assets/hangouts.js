@@ -44,13 +44,51 @@
     const $ = id => document.getElementById(id);
     const dialog = $('hangout');
     let current = 'pomni', opener, chat;
+
+    // The chat stack is ~570 KB. The corpus and the brain power the default
+    // word-chain improv, so they load when the lounge opens; the weights and the
+    // runtime only matter for Experimental improv, so they wait for that opt-in.
+    const CHAT_SCRIPTS = ['assets/corpus.js', 'assets/castbrain.js'];
+    const MODEL_SCRIPTS = ['assets/tinylm-weights.js', 'assets/tinylm.js'];
+    const loaded = {};
+    let chatLoad = null, modelLoad = null;
+    function loadStack(paths) {
+      return new Promise((resolve) => {
+        const host = document.head || document.body || document.documentElement;
+        if (!host) { resolve(false); return; }
+        let failed = false;
+        const next = () => {
+          const src = paths.shift();
+          if (!src) { resolve(!failed); return; }
+          if (loaded[src]) { next(); return; }
+          const el = document.createElement('script');
+          el.src = src;
+          el.async = false;
+          el.onload = () => { loaded[src] = true; next(); };
+          el.onerror = () => { failed = true; next(); };
+          host.appendChild(el);
+        };
+        next();
+      });
+    }
+    const ensureChat = () => (chatLoad ||= loadStack([...CHAT_SCRIPTS]));
+    const ensureModel = () => (modelLoad ||= loadStack([...MODEL_SCRIPTS]));
+
     function mountChat() {
       const available = typeof root.CircusBrain?.mountChat === 'function';
-      $('hangoutImprov').disabled = $('hangoutForget').disabled = !available;
-      $('hangoutNeural').disabled = !available || !root.CircusTinyLM?.ready;
-      $('hangoutNeural').checked = root.CircusBrain?.neuralEnabled === true;
-      if (available) chat = root.CircusBrain.mountChat($('hangoutChat'), current);
-      else $('hangoutChat').textContent = 'The chat is resting. You can still use Keep chatting and the activities.';
+      if (available) {
+        $('hangoutImprov').disabled = $('hangoutForget').disabled = false;
+        $('hangoutNeural').disabled = false;
+        $('hangoutNeural').checked = root.CircusBrain.neuralEnabled === true;
+        chat = root.CircusBrain.mountChat($('hangoutChat'), current);
+        return;
+      }
+      $('hangoutImprov').disabled = $('hangoutForget').disabled = $('hangoutNeural').disabled = true;
+      $('hangoutChat').textContent = 'Waking the cast up…';
+      ensureChat().then(() => {
+        if (typeof root.CircusBrain?.mountChat === 'function') mountChat();
+        else $('hangoutChat').textContent = 'The chat is resting. You can still use Keep chatting and the activities.';
+      });
     }
     const state = Object.fromEntries(Object.keys(cast).map(id => [id,{talk:0,action:0}]));
     const tabs = [];
@@ -132,8 +170,21 @@
       dialog.close();
       if (!root.CircusScenes.active) root.CircusScenes.playNext();
     });
-    $('hangoutNeural').addEventListener('change', () => {
-      root.CircusBrain?.setNeuralEnabled($('hangoutNeural').checked);
+    $('hangoutNeural').addEventListener('change', async () => {
+      const box = $('hangoutNeural');
+      if (!box.checked) { root.CircusBrain?.setNeuralEnabled(false); return; }
+      if (root.CircusTinyLM?.ready === true) { root.CircusBrain?.setNeuralEnabled(true); return; }
+      box.disabled = true;
+      $('hangoutImprovLine').textContent = 'Loading the tiny model…';
+      await ensureModel();
+      box.disabled = false;
+      if (root.CircusTinyLM?.ready !== true) {
+        box.checked = false;
+        root.CircusBrain?.setNeuralEnabled(false);
+        $('hangoutImprovLine').textContent = 'The tiny model could not load here, so improv falls back to the word-chain voice.';
+        return;
+      }
+      root.CircusBrain?.setNeuralEnabled(true);
     });
     $('hangoutImprov').addEventListener('click', () => {
       if (!root.CircusBrain) return;

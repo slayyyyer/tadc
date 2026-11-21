@@ -116,8 +116,10 @@ playful local toys, not general-purpose assistants.
 
 The model is a speaker-conditioned character GRU trained with pure Node, without packages, external
 APIs, or user chat logs. Weights are generated as a normal script so the page also works from a local
-file. Runtime checks require every generated word to appear in the original corpus, reject blocked or
-copied lines, and fall back to word-chain improv. Training and validation losses are recorded in
+file; because they are around 360 KB, the chat stack loads when the lounge opens and the weights and
+runtime load only when Experimental improv is first enabled. Runtime checks require every generated
+word to appear in the original corpus, reject blocked or copied lines, and fall back to word-chain
+improv. Training and validation losses are recorded in
 `assets/tinylm-training.json`; the corpus is small enough to overfit, so lower loss is not a claim of
 fluent conversation.
 
